@@ -75,7 +75,7 @@ rom = run_llm_postprocess(
 
 print(rom)  # 直接得到 Tailo 數字調
 ```
-
+```
 uv run - <<'PY'
 from pipeline import run_llm_postprocess
 
@@ -83,6 +83,7 @@ text = "請往裡面走，不要擠在門口，不然別人的行李會放不下
 out = run_llm_postprocess(text, taibun_repo_path=".vendor/taibun")
 print(out)
 PY
+```
 
 ### Taibun 缺字補丁（內建）
 
