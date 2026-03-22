@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "generated_at": "2026-03-22T05:22:11.286037+00:00",
+  "entry_count": 23036,
+  "runtime_entry_count": 22938,
+  "runtime_excluded_entry_count": 98,
+  "runtime_excluded_reasons": {
+    "definition_like_low_trust_phrase": 96,
+    "non_hanji_target": 2
+  },
+  "core_entry_count": 162,
+  "active_entry_count": 18159,
+  "rule_count": 135,
+  "active_rule_count": 132,
+  "mask_warning_count": 0
+}

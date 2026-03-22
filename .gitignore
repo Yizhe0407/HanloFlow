@@ -1,0 +1,28 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+
+data/moedict-data-twblg
+
+# Generated runtime / audit outputs
+data/itaigi_audit_summary*.json
+data/itaigi_recommendations*.jsonl
+data/itaigi_decisions*.jsonl
+data/itaigi_backscan_*.json*
+data/itaigi_full_run.log
+data/quality_report.json
+data/global_quality_report.json
+data/global_review_candidates.jsonl
+data/quality_progress*.json
+data/curation_round*_report.json
+data/quarantine/
+data/manual_override_candidates.jsonl
+data/candidate_corpus.txt
+data/review_batch1_records.jsonl

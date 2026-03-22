@@ -1,0 +1,1346 @@
+{
+  "version": 1,
+  "pass_order": [
+    "normalization",
+    "grammar",
+    "fluency",
+    "punctuation"
+  ],
+  "rules": {
+    "normalization": [
+      {
+        "rule_id": "rl_cd81972d28af",
+        "pass_name": "normalization",
+        "type": "regex",
+        "pattern": "\\s+",
+        "replacement": "",
+        "priority": 90,
+        "enabled": true,
+        "note": "移除多餘空白"
+      }
+    ],
+    "grammar": [
+      {
+        "rule_id": "rl_de202aec69c3",
+        "pass_name": "grammar",
+        "type": "regex",
+        "pattern": "食飽了沒",
+        "replacement": "食飽未",
+        "priority": 100,
+        "enabled": true,
+        "note": "固定句型"
+      },
+      {
+        "rule_id": "rl_5199f261fccf",
+        "pass_name": "grammar",
+        "type": "regex",
+        "pattern": "欲莫([^，。！？!?]+)",
+        "replacement": "欲\\1無",
+        "priority": 96,
+        "enabled": true,
+        "note": "VP-neg 問句重排"
+      },
+      {
+        "rule_id": "rl_qtone_ask_responsibility_keep_q",
+        "pass_name": "grammar",
+        "type": "regex",
+        "pattern": "敢講恁(?:不用|免)負責嗎([？?])",
+        "replacement": "敢講恁免負責\\1",
+        "priority": 96,
+        "enabled": true,
+        "note": "反詰語氣保留問號，兼容不用/免"
+      },
+      {
+        "rule_id": "rl_qtone_bully_keep_q",
+        "pass_name": "grammar",
+        "type": "regex",
+        "pattern": "這毋是存辦咧欺負人嗎([？?])",
+        "replacement": "這毋是存辦咧欺負人\\1",
+        "priority": 96,
+        "enabled": true,
+        "note": "反詰語氣保留問號，避免自動加『無』"
+      },
+      {
+        "rule_id": "rl_7448ebed4b57",
+        "pass_name": "grammar",
+        "type": "literal",
+        "pattern": "從來袂曉",
+        "replacement": "毋捌",
+        "priority": 95,
+        "enabled": true,
+        "note": "頻率否定（後詞典型）：從來袂曉 -> 毋捌"
+      },
+      {
+        "rule_id": "rl_ab66d012b474",
+        "pass_name": "grammar",
+        "type": "regex",
+        "pattern": "了沒",
+        "replacement": "未",
+        "priority": 95,
+        "enabled": true,
+        "note": "了沒句型"
+      },
+      {
+        "rule_id": "rl_f38d5e2ef119",
+        "pass_name": "grammar",
+        "type": "literal",
+        "pattern": "欲毋是",
+        "replacement": "若毋是",
+        "priority": 95,
+        "enabled": true,
+        "note": "條件句型收斂：欲毋是 -> 若毋是"
+      },
+      {
+        "rule_id": "rl_1fa8674f2f2b",
+        "pass_name": "grammar",
+        "type": "regex",
+        "pattern": "從來不會",
+        "replacement": "毋捌",
+        "priority": 94,
+        "enabled": true,
+        "note": "頻率否定：從來不會 -> 毋捌"
+      },
+      {
+        "rule_id": "rl_bd89b63e7048",
+        "pass_name": "grammar",
+        "type": "literal",
+        "pattern": "袂曉這麼",
+        "replacement": "袂遐爾",
+        "priority": 94,
+        "enabled": true,
+        "note": "程度否定（後詞典型）：袂曉這麼 -> 袂遐爾"
+      },
+      {
+        "rule_id": "rl_f0c1318f3c05",
+        "pass_name": "grammar",
+        "type": "literal",
+        "pattern": "從來袂",
+        "replacement": "毋捌",
+        "priority": 94,
+        "enabled": true,
+        "note": "頻率否定（後詞典型）：從來袂 -> 毋捌"
+      },
+      {
+        "rule_id": "rl_fcef0b24b5e8",
+        "pass_name": "grammar",
+        "type": "regex",
+        "pattern": "若(?!是)([^，。！？!?]+?)的話",
+        "replacement": "若是\\1",
+        "priority": 94,
+        "enabled": true,
+        "note": "避免重複套用造成『若是是...』"
+      },
+      {
+        "rule_id": "rl_3d5755eb470f",
+        "pass_name": "grammar",
+        "type": "regex",
+        "pattern": "如果([^，。！？!?]+?)的話",
+        "replacement": "若是\\1",
+        "priority": 93,
+        "enabled": true,
+        "note": "條件句模板：如果...的話 -> 若是..."
+      },
+      {
+        "rule_id": "rl_40e4fa9a7e80",
+        "pass_name": "grammar",
+        "type": "regex",
+        "pattern": "嗎([？?])",
+        "replacement": "無\\1",
+        "priority": 93,
+        "enabled": true,
+        "note": "問句嗎->無（含句中問號）"
+      },
+      {
+        "rule_id": "rl_6a5e0f8226f3",
+        "pass_name": "grammar",
+        "type": "regex",
+        "pattern": "不會這麼",
+        "replacement": "袂遐爾",
+        "priority": 93,
+        "enabled": true,
+        "note": "程度否定：不會這麼 -> 袂遐爾"
+      },
+      {
+        "rule_id": "rl_8e0870074a53",
+        "pass_name": "grammar",
+        "type": "literal",
+        "pattern": "袂這麼",
+        "replacement": "袂遐爾",
+        "priority": 93,
+        "enabled": true,
+        "note": "程度否定（後詞典型）：袂這麼 -> 袂遐爾"
+      },
+      {
+        "rule_id": "rl_226f965f8bd3",
+        "pass_name": "grammar",
+        "type": "regex",
+        "pattern": "有沒有",
+        "replacement": "敢有",
+        "priority": 92,
+        "enabled": true,
+        "note": "疑問句型優化"
+      },
+      {
+        "rule_id": "rl_a401a79cb49b",
+        "pass_name": "grammar",
+        "type": "literal",
+        "pattern": "不共",
+        "replacement": "無共",
+        "priority": 92,
+        "enabled": true,
+        "note": "否定結構修正"
+      },
+      {
+        "rule_id": "rl_e01cffdb38fa",
+        "pass_name": "grammar",
+        "type": "regex",
+        "pattern": "若是([^，。！？!?]+?)的話",
+        "replacement": "若是\\1",
+        "priority": 92,
+        "enabled": true,
+        "note": "條件句模板：若是...的話 -> 若是..."
+      },
+      {
+        "rule_id": "rl_649e352d10e5",
+        "pass_name": "grammar",
+        "type": "literal",
+        "pattern": "了後才",
+        "replacement": "才",
+        "priority": 91,
+        "enabled": true,
+        "note": "時序精簡：了後才 -> 才"
+      },
+      {
+        "rule_id": "rl_c4e00d4bdb0b",
+        "pass_name": "grammar",
+        "type": "regex",
+        "pattern": "會不會",
+        "replacement": "會袂",
+        "priority": 91,
+        "enabled": true,
+        "note": "疑問句型優化"
+      },
+      {
+        "rule_id": "rl_797871b99e16",
+        "pass_name": "grammar",
+        "type": "literal",
+        "pattern": "欲開會無",
+        "replacement": "敢欲開會",
+        "priority": 90,
+        "enabled": true,
+        "note": "問句收斂：欲開會無 -> 敢欲開會"
+      },
+      {
+        "rule_id": "rl_91c8b6efe34f",
+        "pass_name": "grammar",
+        "type": "regex",
+        "pattern": "能不能",
+        "replacement": "會使袂",
+        "priority": 90,
+        "enabled": true,
+        "note": "疑問句型優化"
+      },
+      {
+        "rule_id": "rl_9645d5ef40fb",
+        "pass_name": "grammar",
+        "type": "literal",
+        "pattern": "若有",
+        "replacement": "若是有",
+        "priority": 90,
+        "enabled": true,
+        "note": "條件句補全：若有 -> 若是有"
+      },
+      {
+        "rule_id": "rl_876ff634eb5a",
+        "pass_name": "grammar",
+        "type": "regex",
+        "pattern": "昨昏共(我|你|伊|恁|怹|咱|阮)講",
+        "replacement": "昨昏有共\\1講",
+        "priority": 89,
+        "enabled": true,
+        "note": "過去完成式補足：昨昏共X講 -> 昨昏有共X講"
+      },
+      {
+        "rule_id": "rl_c7e9aaafd1d8",
+        "pass_name": "grammar",
+        "type": "regex",
+        "pattern": "^不要",
+        "replacement": "莫",
+        "priority": 89,
+        "enabled": true,
+        "note": "可控模板：句首命令否定"
+      },
+      {
+        "rule_id": "rl_c834f155a347",
+        "pass_name": "grammar",
+        "type": "regex",
+        "pattern": "([0-9一二三四五六七八九十百千兩幾]+年)([，。！？!?])",
+        "replacement": "\\1矣\\2",
+        "priority": 89,
+        "enabled": true,
+        "note": "年數狀態補足：X年， -> X年矣，"
+      },
+      {
+        "rule_id": "rl_caa151863bbe",
+        "pass_name": "grammar",
+        "type": "regex",
+        "pattern": "告訴(我們|你們|他們|我|你|他|她|伊|恁|怹|咱|阮)",
+        "replacement": "共\\1講",
+        "priority": 89,
+        "enabled": true,
+        "note": "述說對象：告訴X -> 共X講（含複數代名詞，避免『我講們』）"
+      },
+      {
+        "rule_id": "rl_f43a542dc503",
+        "pass_name": "grammar",
+        "type": "literal",
+        "pattern": "若是當初我有",
+        "replacement": "我當初若有",
+        "priority": 89,
+        "enabled": true,
+        "note": "條件句語序收斂"
+      },
+      {
+        "rule_id": "rl_g_vbu_result_core",
+        "pass_name": "grammar",
+        "type": "regex",
+        "pattern": "(發動|聽|看|記|想|認|分|搬|打|放|提|推|開|關|坐|行)不(起來|清楚|懂|動|開|下|上|進|過)",
+        "replacement": "\\1袂\\2",
+        "priority": 89,
+        "enabled": true,
+        "note": "潛能補語：擴充 V-不-Result -> V-袂-Result"
+      },
+      {
+        "rule_id": "rl_r30_conditional_yushi",
+        "pass_name": "grammar",
+        "type": "literal",
+        "pattern": "欲是",
+        "replacement": "若是",
+        "priority": 89,
+        "enabled": true,
+        "note": "條件句修正：欲是 -> 若是"
+      },
+      {
+        "rule_id": "rl_r32_slow_delay_particle",
+        "pass_name": "grammar",
+        "type": "literal",
+        "pattern": "慢分了",
+        "replacement": "慢分矣",
+        "priority": 89,
+        "enabled": true,
+        "note": "誤點句語尾統一：慢分了 -> 慢分矣"
+      },
+      {
+        "rule_id": "rl_27c0260c5d8c",
+        "pass_name": "grammar",
+        "type": "literal",
+        "pattern": "幫我把",
+        "replacement": "共",
+        "priority": 88,
+        "enabled": true,
+        "note": "把字句模板：幫我把 X -> 共 X"
+      },
+      {
+        "rule_id": "rl_29fdb36a999b",
+        "pass_name": "grammar",
+        "type": "regex",
+        "pattern": "(頭家|逐家|我|你|伊|咱|阮|恁|怹|司機|司機大兄|司機大哥|廣播|站長|站務員|工作人員|服務人員|旅客|乘客|老師|醫生|朋友|先生|小姐|警察|車長)說",
+        "replacement": "\\1講",
+        "priority": 88,
+        "enabled": true,
+        "note": "高頻主語搭配：說 -> 講（再擴充）"
+      },
+      {
+        "rule_id": "rl_53ff09fa7892",
+        "pass_name": "grammar",
+        "type": "literal",
+        "pattern": "不然",
+        "replacement": "若無",
+        "priority": 88,
+        "enabled": true,
+        "note": "轉折條件：不然 -> 若無"
+      },
+      {
+        "rule_id": "rl_dd7740b962aa",
+        "pass_name": "grammar",
+        "type": "literal",
+        "pattern": "是不是",
+        "replacement": "敢是",
+        "priority": 88,
+        "enabled": true,
+        "note": "疑問句型優化"
+      },
+      {
+        "rule_id": "rl_r30_find_neg_result",
+        "pass_name": "grammar",
+        "type": "literal",
+        "pattern": "揣不到",
+        "replacement": "揣無",
+        "priority": 88,
+        "enabled": true,
+        "note": "否定結果：揣不到 -> 揣無"
+      },
+      {
+        "rule_id": "rl_a1ff6db12675",
+        "pass_name": "grammar",
+        "type": "literal",
+        "pattern": "不可以",
+        "replacement": "袂使",
+        "priority": 87,
+        "enabled": true,
+        "note": "否定句型優化"
+      },
+      {
+        "rule_id": "rl_r30_find_duration_trim",
+        "pass_name": "grammar",
+        "type": "regex",
+        "pattern": "揣了(半日|半工|半天|老半工|真久)",
+        "replacement": "揣\\1",
+        "priority": 87,
+        "enabled": true,
+        "note": "動作持續：揣了X -> 揣X"
+      },
+      {
+        "rule_id": "rl_r31_find_duration_direct",
+        "pass_name": "grammar",
+        "type": "regex",
+        "pattern": "找了(半日|半工|半天|老半工|真久)",
+        "replacement": "揣\\1",
+        "priority": 87,
+        "enabled": true,
+        "note": "找了X -> 揣X（時長語境）"
+      },
+      {
+        "rule_id": "rl_8e1efdd23816",
+        "pass_name": "grammar",
+        "type": "literal",
+        "pattern": "不行",
+        "replacement": "袂使",
+        "priority": 86,
+        "enabled": true,
+        "note": "否定句型優化"
+      },
+      {
+        "rule_id": "rl_g_zai_locative_places",
+        "pass_name": "grammar",
+        "type": "regex",
+        "pattern": "在(站牌|門口|車上|車內|月台|辦公室|市中心|路口|同一個站牌|同一个站牌)",
+        "replacement": "佇\\1",
+        "priority": 86,
+        "enabled": true,
+        "note": "介系詞分流：位置在 -> 佇"
+      },
+      {
+        "rule_id": "rl_g_zai_progressive_action",
+        "pass_name": "grammar",
+        "type": "regex",
+        "pattern": "在(施工|維修|保養)",
+        "replacement": "咧\\1",
+        "priority": 86,
+        "enabled": true,
+        "note": "介系詞分流：進行中的動作在 -> 咧"
+      },
+      {
+        "rule_id": "rl_r30_progressive_waiting",
+        "pass_name": "grammar",
+        "type": "regex",
+        "pattern": "(有人|無人|逐家|旅客|乘客)在(等車|等候|等|排隊)",
+        "replacement": "\\1咧\\2",
+        "priority": 86,
+        "enabled": true,
+        "note": "進行式補強：名詞主語 + 在 + 動作"
+      },
+      {
+        "rule_id": "rl_r31_zai_progressive_general",
+        "pass_name": "grammar",
+        "type": "regex",
+        "pattern": "在(等車|等候|等待|排隊|行駛|運轉|施工|維修|保養|處理|廣播|運作|營業|開會|上班|下班|運動|休息|睡|睡覺|做事|做)",
+        "replacement": "咧\\1",
+        "priority": 86,
+        "enabled": true,
+        "note": "在+動作/狀態：在 -> 咧"
+      },
+      {
+        "rule_id": "rl_18e4789511a2",
+        "pass_name": "grammar",
+        "type": "regex",
+        "pattern": "在([^，。！？!?]+)裡面",
+        "replacement": "佇\\1內底",
+        "priority": 85,
+        "enabled": true,
+        "note": "空間：在...裡面"
+      },
+      {
+        "rule_id": "rl_9b7d99d455b1",
+        "pass_name": "grammar",
+        "type": "literal",
+        "pattern": "不要",
+        "replacement": "毋通",
+        "priority": 85,
+        "enabled": true,
+        "note": "否定句型優化"
+      },
+      {
+        "rule_id": "rl_786bcc9aec64",
+        "pass_name": "grammar",
+        "type": "literal",
+        "pattern": "不用",
+        "replacement": "免",
+        "priority": 84,
+        "enabled": true,
+        "note": "否定句型優化"
+      },
+      {
+        "rule_id": "rl_g_space_in_li_no_mian",
+        "pass_name": "grammar",
+        "type": "regex",
+        "pattern": "在([^，。！？!?]+)裡(?!面)",
+        "replacement": "佇\\1內底",
+        "priority": 84,
+        "enabled": true,
+        "note": "空間：在...裡 -> 佇...內底（避免吃到『裡面』）"
+      },
+      {
+        "rule_id": "rl_817e6efe2ce1",
+        "pass_name": "grammar",
+        "type": "regex",
+        "pattern": "(我|你|伊|咱|阮|恁|怹)在(起|發|做|講|看|食|啉|行|睏|寫|創|想|揣|洗|開|坐|騎)",
+        "replacement": "\\1佇咧\\2",
+        "priority": 83,
+        "enabled": true,
+        "note": "進行式補強：含『起』動詞"
+      },
+      {
+        "rule_id": "rl_f7e03eaa422e",
+        "pass_name": "grammar",
+        "type": "literal",
+        "pattern": "把",
+        "replacement": "共",
+        "priority": 83,
+        "enabled": true,
+        "note": "把字句轉寫：把 -> 共"
+      },
+      {
+        "rule_id": "rl_b7b6b98d74b0",
+        "pass_name": "grammar",
+        "type": "literal",
+        "pattern": "正在",
+        "replacement": "咧",
+        "priority": 82,
+        "enabled": true,
+        "note": "時態：進行式"
+      },
+      {
+        "rule_id": "rl_8b5d26e458c1",
+        "pass_name": "grammar",
+        "type": "regex",
+        "pattern": "給(我|你|他|她|你們|他們|咱|阮|恁|怹|伊)",
+        "replacement": "予\\1",
+        "priority": 81,
+        "enabled": true,
+        "note": "可控模板：給 + 人稱代名詞"
+      },
+      {
+        "rule_id": "rl_e35594fa6ca5",
+        "pass_name": "grammar",
+        "type": "regex",
+        "pattern": "嗎\\??$",
+        "replacement": "無",
+        "priority": 80,
+        "enabled": true,
+        "note": "疑問語氣"
+      }
+    ],
+    "fluency": [
+      {
+        "rule_id": "rl_536428d641a6",
+        "pass_name": "fluency",
+        "type": "literal",
+        "pattern": "真鬧熱",
+        "replacement": "鬧熱",
+        "priority": 92,
+        "enabled": true,
+        "note": "程度詞收斂"
+      },
+      {
+        "rule_id": "rl_a4144a37b4c1",
+        "pass_name": "fluency",
+        "type": "regex",
+        "pattern": "真好吃",
+        "replacement": "真好食",
+        "priority": 90,
+        "enabled": true,
+        "note": "口語優化"
+      },
+      {
+        "rule_id": "rl_96d11a3f1e42",
+        "pass_name": "fluency",
+        "type": "regex",
+        "pattern": "這馬咧做啥",
+        "replacement": "這馬咧創啥",
+        "priority": 85,
+        "enabled": true,
+        "note": "固定句型"
+      },
+      {
+        "rule_id": "rl_19e0420f72ce",
+        "pass_name": "fluency",
+        "type": "literal",
+        "pattern": "上車才補票",
+        "replacement": "上車了後才補票",
+        "priority": 83,
+        "enabled": true,
+        "note": "round14：還原時序語意（避免 grammar 的 了後才->才 過度簡化）"
+      },
+      {
+        "rule_id": "rl_03d9792d6dcc",
+        "pass_name": "fluency",
+        "type": "literal",
+        "pattern": "練習了真久",
+        "replacement": "練習真久矣",
+        "priority": 82,
+        "enabled": true,
+        "note": "完成體補足"
+      },
+      {
+        "rule_id": "rl_0d2e54d239db",
+        "pass_name": "fluency",
+        "type": "literal",
+        "pattern": "路上大窒車",
+        "replacement": "路裡窒車窒真重",
+        "priority": 82,
+        "enabled": true,
+        "note": "塞車語塊收斂"
+      },
+      {
+        "rule_id": "rl_52dc98c0cbb9",
+        "pass_name": "fluency",
+        "type": "literal",
+        "pattern": "以前常共",
+        "replacement": "以前定定共",
+        "priority": 82,
+        "enabled": true,
+        "note": "頻率副詞收斂：常 -> 定定"
+      },
+      {
+        "rule_id": "rl_0983591e9943",
+        "pass_name": "fluency",
+        "type": "literal",
+        "pattern": "上台的時陣",
+        "replacement": "上台的時",
+        "priority": 81,
+        "enabled": true,
+        "note": "時態名詞收斂"
+      },
+      {
+        "rule_id": "rl_11fc281a81ab",
+        "pass_name": "fluency",
+        "type": "literal",
+        "pattern": "總有一日定著",
+        "replacement": "有一日絕對",
+        "priority": 81,
+        "enabled": true,
+        "note": "語氣副詞收斂"
+      },
+      {
+        "rule_id": "rl_5cd09cf205ac",
+        "pass_name": "fluency",
+        "type": "literal",
+        "pattern": "小時陣住在",
+        "replacement": "細漢蹛佇",
+        "priority": 81,
+        "enabled": true,
+        "note": "童年住居語塊收斂"
+      },
+      {
+        "rule_id": "rl_851078c8a68a",
+        "pass_name": "fluency",
+        "type": "literal",
+        "pattern": "的事了",
+        "replacement": "的代誌了",
+        "priority": 81,
+        "enabled": true,
+        "note": "改在標點 pass 前命中，後續由了->矣收尾"
+      },
+      {
+        "rule_id": "rl_15eb9880e813",
+        "pass_name": "fluency",
+        "type": "literal",
+        "pattern": "若無等一下",
+        "replacement": "無等一下",
+        "priority": 80,
+        "enabled": true,
+        "note": "轉折連詞收斂"
+      },
+      {
+        "rule_id": "rl_7cfcbaa597f8",
+        "pass_name": "fluency",
+        "type": "regex",
+        "pattern": "咧做啥",
+        "replacement": "咧創啥",
+        "priority": 80,
+        "enabled": true,
+        "note": "動詞口語化"
+      },
+      {
+        "rule_id": "rl_9dc0aee87147",
+        "pass_name": "fluency",
+        "type": "literal",
+        "pattern": "而去",
+        "replacement": "去",
+        "priority": 80,
+        "enabled": true,
+        "note": "贅詞清理：而去 -> 去"
+      },
+      {
+        "rule_id": "rl_9eeea27ea628",
+        "pass_name": "fluency",
+        "type": "literal",
+        "pattern": "這馬就",
+        "replacement": "現此時就",
+        "priority": 80,
+        "enabled": true,
+        "note": "時間副詞收斂"
+      },
+      {
+        "rule_id": "rl_3f417b72d041",
+        "pass_name": "fluency",
+        "type": "literal",
+        "pattern": "說不出來",
+        "replacement": "講袂出來",
+        "priority": 79,
+        "enabled": true,
+        "note": "補語模板：說不出來 -> 講袂出來"
+      },
+      {
+        "rule_id": "rl_b5f40be34fc4",
+        "pass_name": "fluency",
+        "type": "literal",
+        "pattern": "代誌情",
+        "replacement": "代誌",
+        "priority": 79,
+        "enabled": true,
+        "note": "冗詞清理：代誌情 -> 代誌"
+      },
+      {
+        "rule_id": "rl_1aaa52ab11c5",
+        "pass_name": "fluency",
+        "type": "literal",
+        "pattern": "小孩",
+        "replacement": "囡仔",
+        "priority": 78,
+        "enabled": true,
+        "note": "名詞口語化：小孩 -> 囡仔"
+      },
+      {
+        "rule_id": "rl_1e696d2a6c09",
+        "pass_name": "fluency",
+        "type": "literal",
+        "pattern": "孩子",
+        "replacement": "囡仔",
+        "priority": 78,
+        "enabled": true,
+        "note": "名詞口語化：孩子 -> 囡仔"
+      },
+      {
+        "rule_id": "rl_58fd6304ddec",
+        "pass_name": "fluency",
+        "type": "literal",
+        "pattern": "猶無",
+        "replacement": "猶未",
+        "priority": 78,
+        "enabled": true,
+        "note": "否定體收斂：猶無 -> 猶未"
+      },
+      {
+        "rule_id": "rl_734533e02854",
+        "pass_name": "fluency",
+        "type": "literal",
+        "pattern": "猶沒",
+        "replacement": "猶未",
+        "priority": 78,
+        "enabled": true,
+        "note": "否定體收斂：猶沒 -> 猶未"
+      },
+      {
+        "rule_id": "rl_r35_no_way_to_fat_to",
+        "pass_name": "fluency",
+        "type": "literal",
+        "pattern": "無辦法",
+        "replacement": "無法度",
+        "priority": 78,
+        "enabled": true,
+        "note": "運輸語域：無辦法 -> 無法度"
+      },
+      {
+        "rule_id": "rl_r35_not_way_to_fat_to",
+        "pass_name": "fluency",
+        "type": "literal",
+        "pattern": "沒辦法",
+        "replacement": "無法度",
+        "priority": 78,
+        "enabled": true,
+        "note": "運輸語域：沒辦法 -> 無法度"
+      },
+      {
+        "rule_id": "rl_r35_u_turn_to_she_thau",
+        "pass_name": "fluency",
+        "type": "literal",
+        "pattern": "迴轉",
+        "replacement": "踅頭",
+        "priority": 78,
+        "enabled": true,
+        "note": "運輸語域：迴轉 -> 踅頭"
+      },
+      {
+        "rule_id": "rl_4714d2f82f90",
+        "pass_name": "fluency",
+        "type": "literal",
+        "pattern": "等了一个",
+        "replacement": "等一个",
+        "priority": 76,
+        "enabled": true,
+        "note": "完成體精簡：等了一个 -> 等一个"
+      },
+      {
+        "rule_id": "rl_69a4b45fca5e",
+        "pass_name": "fluency",
+        "type": "literal",
+        "pattern": "老婆",
+        "replacement": "查某人",
+        "priority": 76,
+        "enabled": true,
+        "note": "名詞口語化：老婆 -> 查某人"
+      },
+      {
+        "rule_id": "rl_9d84a62dafc8",
+        "pass_name": "fluency",
+        "type": "literal",
+        "pattern": "無有",
+        "replacement": "無",
+        "priority": 76,
+        "enabled": true,
+        "note": "否定冗餘清理：無有 -> 無"
+      },
+      {
+        "rule_id": "rl_1d4801a8dbb7",
+        "pass_name": "fluency",
+        "type": "literal",
+        "pattern": "要不是",
+        "replacement": "若毋是",
+        "priority": 75,
+        "enabled": true,
+        "note": "條件句型：要不是 -> 若毋是"
+      },
+      {
+        "rule_id": "rl_63c3134f063a",
+        "pass_name": "fluency",
+        "type": "literal",
+        "pattern": "為什麼",
+        "replacement": "按怎",
+        "priority": 75,
+        "enabled": true,
+        "note": "華語殘留修正"
+      },
+      {
+        "rule_id": "rl_979111ecae76",
+        "pass_name": "fluency",
+        "type": "literal",
+        "pattern": "伊們",
+        "replacement": "怹",
+        "priority": 75,
+        "enabled": true,
+        "note": "收斂：先轉伊們再轉怹"
+      },
+      {
+        "rule_id": "rl_a282c7cf2afa",
+        "pass_name": "fluency",
+        "type": "literal",
+        "pattern": "為何",
+        "replacement": "按怎",
+        "priority": 75,
+        "enabled": true,
+        "note": "華語殘留修正"
+      },
+      {
+        "rule_id": "rl_d64402d04663",
+        "pass_name": "fluency",
+        "type": "literal",
+        "pattern": "他們",
+        "replacement": "怹",
+        "priority": 75,
+        "enabled": true,
+        "note": "代名詞：他們"
+      },
+      {
+        "rule_id": "rl_f9f752ccec7a",
+        "pass_name": "fluency",
+        "type": "literal",
+        "pattern": "你們",
+        "replacement": "恁",
+        "priority": 75,
+        "enabled": true,
+        "note": "代名詞：你們"
+      },
+      {
+        "rule_id": "rl_0676c4d7eec6",
+        "pass_name": "fluency",
+        "type": "literal",
+        "pattern": "怎麼",
+        "replacement": "按怎",
+        "priority": 74,
+        "enabled": true,
+        "note": "華語殘留修正"
+      },
+      {
+        "rule_id": "rl_1adf62a279d5",
+        "pass_name": "fluency",
+        "type": "literal",
+        "pattern": "超市",
+        "replacement": "超級市場",
+        "priority": 74,
+        "enabled": true,
+        "note": "名詞擴寫：超市 -> 超級市場"
+      },
+      {
+        "rule_id": "rl_1f2683c4dbfc",
+        "pass_name": "fluency",
+        "type": "literal",
+        "pattern": "幫查某人",
+        "replacement": "幫家己的查某人",
+        "priority": 74,
+        "enabled": true,
+        "note": "降優先序，確保在『老婆->查某人』後才命中"
+      },
+      {
+        "rule_id": "rl_7c3f8cd506e6",
+        "pass_name": "fluency",
+        "type": "literal",
+        "pattern": "馬上",
+        "replacement": "隨",
+        "priority": 74,
+        "enabled": true,
+        "note": "時間副詞：馬上 -> 隨"
+      },
+      {
+        "rule_id": "rl_a72f466946a9",
+        "pass_name": "fluency",
+        "type": "literal",
+        "pattern": "錯誤",
+        "replacement": "毋著",
+        "priority": 74,
+        "enabled": true,
+        "note": "常用詞：錯誤 -> 毋著"
+      },
+      {
+        "rule_id": "rl_ef844b38bd8d",
+        "pass_name": "fluency",
+        "type": "literal",
+        "pattern": "隨便",
+        "replacement": "烏白",
+        "priority": 74,
+        "enabled": true,
+        "note": "副詞口語化：隨便 -> 烏白"
+      },
+      {
+        "rule_id": "rl_2e821dbea6bc",
+        "pass_name": "fluency",
+        "type": "literal",
+        "pattern": "發放",
+        "replacement": "發",
+        "priority": 73,
+        "enabled": true,
+        "note": "動詞簡化：發放 -> 發"
+      },
+      {
+        "rule_id": "rl_4cad2974e7fe",
+        "pass_name": "fluency",
+        "type": "literal",
+        "pattern": "怎樣",
+        "replacement": "按怎",
+        "priority": 73,
+        "enabled": true,
+        "note": "華語殘留修正"
+      },
+      {
+        "rule_id": "rl_89bac238f9d2",
+        "pass_name": "fluency",
+        "type": "regex",
+        "pattern": "還是",
+        "replacement": "抑是",
+        "priority": 73,
+        "enabled": true,
+        "note": "選擇連接詞還是->抑是（運輸語域）"
+      },
+      {
+        "rule_id": "rl_916c8a9abab5",
+        "pass_name": "fluency",
+        "type": "literal",
+        "pattern": "給他",
+        "replacement": "予伊",
+        "priority": 73,
+        "enabled": true,
+        "note": "動詞+代名詞：給他"
+      },
+      {
+        "rule_id": "rl_b7d6ce35161e",
+        "pass_name": "fluency",
+        "type": "literal",
+        "pattern": "根據",
+        "replacement": "照",
+        "priority": 73,
+        "enabled": true,
+        "note": "介詞慣用：根據 -> 照"
+      },
+      {
+        "rule_id": "rl_be1c8baefd8e",
+        "pass_name": "fluency",
+        "type": "literal",
+        "pattern": "手邊",
+        "replacement": "手頭",
+        "priority": 73,
+        "enabled": true,
+        "note": "慣用詞：手邊 -> 手頭"
+      },
+      {
+        "rule_id": "rl_cae5f97dc0ed",
+        "pass_name": "fluency",
+        "type": "regex",
+        "pattern": "信不信",
+        "replacement": "信抑不信",
+        "priority": 73,
+        "enabled": true,
+        "note": "選擇疑問：信不信 -> 信抑不信"
+      },
+      {
+        "rule_id": "rl_e2cb31664296",
+        "pass_name": "fluency",
+        "type": "literal",
+        "pattern": "這次",
+        "replacement": "這擺",
+        "priority": 73,
+        "enabled": true,
+        "note": "時間詞：這次 -> 這擺"
+      },
+      {
+        "rule_id": "rl_0da3618643b2",
+        "pass_name": "fluency",
+        "type": "literal",
+        "pattern": "可是",
+        "replacement": "毋過",
+        "priority": 72,
+        "enabled": true,
+        "note": "連接詞：可是"
+      },
+      {
+        "rule_id": "rl_2ab7b26e59d3",
+        "pass_name": "fluency",
+        "type": "literal",
+        "pattern": "還有",
+        "replacement": "閣有",
+        "priority": 72,
+        "enabled": true,
+        "note": "連接詞：還有"
+      },
+      {
+        "rule_id": "rl_7a014d527b19",
+        "pass_name": "fluency",
+        "type": "literal",
+        "pattern": "如果",
+        "replacement": "若是",
+        "priority": 72,
+        "enabled": true,
+        "note": "可控模板：條件連接詞"
+      },
+      {
+        "rule_id": "rl_b58d4397971d",
+        "pass_name": "fluency",
+        "type": "literal",
+        "pattern": "看一看",
+        "replacement": "看覓",
+        "priority": 72,
+        "enabled": true,
+        "note": "動詞：看一看"
+      },
+      {
+        "rule_id": "rl_d2315b09ac84",
+        "pass_name": "fluency",
+        "type": "literal",
+        "pattern": "哪裡",
+        "replacement": "佗位",
+        "priority": 72,
+        "enabled": true,
+        "note": "華語殘留修正"
+      },
+      {
+        "rule_id": "rl_3012d8177a03",
+        "pass_name": "fluency",
+        "type": "literal",
+        "pattern": "那裡",
+        "replacement": "遐",
+        "priority": 71,
+        "enabled": true,
+        "note": "華語殘留修正"
+      },
+      {
+        "rule_id": "rl_fc9bb5f0f215",
+        "pass_name": "fluency",
+        "type": "literal",
+        "pattern": "這裡",
+        "replacement": "遮",
+        "priority": 71,
+        "enabled": true,
+        "note": "華語殘留修正"
+      },
+      {
+        "rule_id": "rl_1c593308392c",
+        "pass_name": "fluency",
+        "type": "literal",
+        "pattern": "走路",
+        "replacement": "行路",
+        "priority": 70,
+        "enabled": true,
+        "note": "動詞：走路"
+      },
+      {
+        "rule_id": "rl_219a696ea5a4",
+        "pass_name": "fluency",
+        "type": "literal",
+        "pattern": "時候",
+        "replacement": "時陣",
+        "priority": 70,
+        "enabled": true,
+        "note": "時間：時候"
+      },
+      {
+        "rule_id": "rl_2ffd035c3efd",
+        "pass_name": "fluency",
+        "type": "literal",
+        "pattern": "漂亮",
+        "replacement": "媠",
+        "priority": 70,
+        "enabled": true,
+        "note": "形容詞：漂亮"
+      },
+      {
+        "rule_id": "rl_5d240d15cbd0",
+        "pass_name": "fluency",
+        "type": "literal",
+        "pattern": "開心",
+        "replacement": "歡喜",
+        "priority": 70,
+        "enabled": true,
+        "note": "形容詞：開心"
+      },
+      {
+        "rule_id": "rl_5fe3ea2a6ecc",
+        "pass_name": "fluency",
+        "type": "literal",
+        "pattern": "喜歡",
+        "replacement": "佮意",
+        "priority": 70,
+        "enabled": true,
+        "note": "動詞：喜歡"
+      },
+      {
+        "rule_id": "rl_6e17bb80e8a6",
+        "pass_name": "fluency",
+        "type": "literal",
+        "pattern": "今天",
+        "replacement": "今仔日",
+        "priority": 70,
+        "enabled": true,
+        "note": "時間詞口語化"
+      },
+      {
+        "rule_id": "rl_7205a3134c86",
+        "pass_name": "fluency",
+        "type": "literal",
+        "pattern": "明天",
+        "replacement": "明仔載",
+        "priority": 70,
+        "enabled": true,
+        "note": "時間詞口語化"
+      },
+      {
+        "rule_id": "rl_8ec415b9dbd5",
+        "pass_name": "fluency",
+        "type": "literal",
+        "pattern": "知道",
+        "replacement": "知影",
+        "priority": 70,
+        "enabled": true,
+        "note": "動詞：知道"
+      },
+      {
+        "rule_id": "rl_d761283d5611",
+        "pass_name": "fluency",
+        "type": "literal",
+        "pattern": "剛才",
+        "replacement": "拄才",
+        "priority": 70,
+        "enabled": true,
+        "note": "時間：剛才"
+      },
+      {
+        "rule_id": "rl_ee73cff8a543",
+        "pass_name": "fluency",
+        "type": "literal",
+        "pattern": "說話",
+        "replacement": "講話",
+        "priority": 70,
+        "enabled": true,
+        "note": "動詞：說話"
+      },
+      {
+        "rule_id": "rl_ff36ebc25e38",
+        "pass_name": "fluency",
+        "type": "literal",
+        "pattern": "昨天",
+        "replacement": "昨昏",
+        "priority": 70,
+        "enabled": true,
+        "note": "時間詞口語化"
+      },
+      {
+        "rule_id": "rl_0d1c181ffb98",
+        "pass_name": "fluency",
+        "type": "literal",
+        "pattern": "沒有",
+        "replacement": "無",
+        "priority": 68,
+        "enabled": true,
+        "note": "華語殘留修正"
+      },
+      {
+        "rule_id": "rl_445b144848db",
+        "pass_name": "fluency",
+        "type": "literal",
+        "pattern": "回家",
+        "replacement": "轉去厝裡",
+        "priority": 68,
+        "enabled": true,
+        "note": "可控模板：動詞詞組"
+      },
+      {
+        "rule_id": "rl_4965a1fc771b",
+        "pass_name": "fluency",
+        "type": "literal",
+        "pattern": "不是",
+        "replacement": "毋是",
+        "priority": 68,
+        "enabled": true,
+        "note": "華語殘留修正"
+      },
+      {
+        "rule_id": "rl_dc6d140a7566",
+        "pass_name": "fluency",
+        "type": "literal",
+        "pattern": "辛苦",
+        "replacement": "艱苦",
+        "priority": 68,
+        "enabled": true,
+        "note": "形容詞：辛苦"
+      },
+      {
+        "rule_id": "rl_e7a1ffaeb17e",
+        "pass_name": "fluency",
+        "type": "literal",
+        "pattern": "不會",
+        "replacement": "袂",
+        "priority": 67,
+        "enabled": true,
+        "note": "華語殘留修正"
+      },
+      {
+        "rule_id": "rl_7d55d31a1b71",
+        "pass_name": "fluency",
+        "type": "regex",
+        "pattern": "很(重要|方便|客氣|熟悉|緊張|硬朗|可愛|熱鬧|開心|辛苦|漂亮|高|冷|熱|慢|快|臭|甜)",
+        "replacement": "真\\1",
+        "priority": 65,
+        "enabled": true,
+        "note": "可控模板：很 + 常見形容詞"
+      },
+      {
+        "rule_id": "rl_95ae24a21eab",
+        "pass_name": "fluency",
+        "type": "literal",
+        "pattern": "可以",
+        "replacement": "會使",
+        "priority": 65,
+        "enabled": true,
+        "note": "華語殘留修正"
+      },
+      {
+        "rule_id": "rl_14cee4673125",
+        "pass_name": "fluency",
+        "type": "literal",
+        "pattern": "現在",
+        "replacement": "這馬",
+        "priority": 64,
+        "enabled": true,
+        "note": "口語化"
+      },
+      {
+        "rule_id": "rl_f4b0c6b98eb3",
+        "pass_name": "fluency",
+        "type": "literal",
+        "pattern": "顯這馬",
+        "replacement": "顯現在",
+        "priority": 63,
+        "enabled": true,
+        "note": "修正：避免 現在->這馬 影響「顯現在」詞組"
+      },
+      {
+        "rule_id": "rl_6fb50e764b05",
+        "pass_name": "fluency",
+        "type": "literal",
+        "pattern": "什麼",
+        "replacement": "啥",
+        "priority": 60,
+        "enabled": true,
+        "note": "華語殘留修正"
+      },
+      {
+        "rule_id": "rl_c477b94afcde",
+        "pass_name": "fluency",
+        "type": "literal",
+        "pattern": "東西",
+        "replacement": "物件",
+        "priority": 60,
+        "enabled": true,
+        "note": "華語殘留修正"
+      }
+    ],
+    "punctuation": [
+      {
+        "rule_id": "rl_e6920257582a",
+        "pass_name": "punctuation",
+        "type": "regex",
+        "pattern": "了([，。！？!?])",
+        "replacement": "矣\\1",
+        "priority": 90,
+        "enabled": true,
+        "note": "句末時態助詞"
+      },
+      {
+        "rule_id": "rl_1435766dfe98",
+        "pass_name": "punctuation",
+        "type": "literal",
+        "pattern": "是A12",
+        "replacement": "是 A12",
+        "priority": 65,
+        "enabled": true,
+        "note": "round14：票號格式保留空白（A12）"
+      }
+    ]
+  },
+  "mask_warnings": [],
+  "residual_terms": [
+    "東西",
+    "什麼",
+    "為什麼",
+    "為何"
+  ]
+}
