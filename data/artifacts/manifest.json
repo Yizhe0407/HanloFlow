@@ -1,16 +1,25 @@
 {
   "version": 1,
-  "generated_at": "2026-03-22T05:22:11.286037+00:00",
-  "entry_count": 23036,
-  "runtime_entry_count": 22938,
-  "runtime_excluded_entry_count": 98,
+  "generated_at": "2026-03-28T13:01:23.352852+00:00",
+  "entry_count": 23163,
+  "runtime_entry_count": 19602,
+  "runtime_excluded_entry_count": 3561,
   "runtime_excluded_reasons": {
-    "definition_like_low_trust_phrase": 96,
-    "non_hanji_target": 2
+    "identity_passthrough_masked": 3493,
+    "single_char_low_trust_phrase": 63,
+    "non_hanji_target": 2,
+    "core_identity_protected_term": 3
   },
-  "core_entry_count": 162,
-  "active_entry_count": 18159,
-  "rule_count": 135,
-  "active_rule_count": 132,
-  "mask_warning_count": 0
+  "core_entry_count": 188,
+  "active_entry_count": 14766,
+  "rule_count": 154,
+  "active_rule_count": 135,
+  "mask_warning_count": 0,
+  "regex_hazard_count": 0,
+  "pipeline_conflict_count": 0,
+  "protected_term_count": 3394,
+  "residual_core_term_count": 4,
+  "lexicon_stage": "split_char_after_rules",
+  "core_identity_protected_entry_count": 3,
+  "identity_passthrough_protected_entry_count": 3493
 }

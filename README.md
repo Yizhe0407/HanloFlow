@@ -91,3 +91,17 @@ PY
 
 - `tone_format=number`：`妳->li2`, `您->lin2`, `她->i1`, `嗎->ma0`, `嘸->bo5`, `呣->m7`
 - `tone_format=mark`：`妳->lí`, `您->lín`, `她->i`, `嗎->ma`, `嘸->bô`, `呣->m̄`
+
+
+## DOM TextNode Integration
+
+If you run this converter in a browser extension, do not rely on cross-node regex over individual TextNodes.
+
+See: docs/dom_textnode_strategy.md
+
+
+## Production Artifact Notes
+
+- Build now emits compact runtime rule schema (`compact_v2`).
+- Only enabled rules are emitted to runtime artifacts.
+- Runtime payload strips dev-only fields (for example `note`, masking diagnostics, residual debug lists).

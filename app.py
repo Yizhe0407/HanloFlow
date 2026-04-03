@@ -15,6 +15,11 @@ def _build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--enqueue-review", action="store_true", help="低信心結果寫入 review_queue")
     parser.add_argument("--owner", default="cli", help="review_queue owner 欄位")
     parser.add_argument("--fail-on-mask", action="store_true", help="遇到 rule masking 直接失敗")
+    parser.add_argument(
+        "--preserve-spacing",
+        action="store_true",
+        help="保留原始空白排版（略過 normalization pass）",
+    )
     return parser
 
 
@@ -79,6 +84,9 @@ def main() -> None:
             "enqueue_review": True,
             "owner": args.owner,
         }
+    if args.preserve_spacing:
+        profile = profile or {}
+        profile["preserve_spacing"] = True
 
     if args.text:
         text = " ".join(args.text).strip()

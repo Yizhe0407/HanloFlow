@@ -14,6 +14,7 @@ LOW_TRUST_LONG_PHRASE_MIN_LEN = 8
 
 RUNTIME_FILTER_NOOP_MANUAL_HOTFIX = "noop_manual_hotfix"
 RUNTIME_FILTER_SINGLE_CHAR_MACHINE = "single_char_machine_override"
+RUNTIME_FILTER_SINGLE_CHAR_LOW_TRUST_PHRASE = "single_char_low_trust_phrase"
 RUNTIME_FILTER_LOW_TRUST_LONG_PHRASE = "low_trust_long_phrase"
 RUNTIME_FILTER_DEFINITION_LIKE_LOW_TRUST = "definition_like_low_trust_phrase"
 RUNTIME_FILTER_NON_HANJI_TARGET = "non_hanji_target"
@@ -113,6 +114,15 @@ def is_single_char_machine_override(entry: Any) -> bool:
     )
 
 
+def is_single_char_low_trust_phrase(entry: Any) -> bool:
+    return (
+        getattr(entry, "tier", None) in {"base", "domain"}
+        and getattr(entry, "trust", None) in {TRUST_SEED, TRUST_MACHINE}
+        and getattr(entry, "level", None) in {"phrase", "sentence"}
+        and len(getattr(entry, "src", "")) == 1
+    )
+
+
 def is_low_trust_long_phrase(entry: Any, min_len: int = LOW_TRUST_LONG_PHRASE_MIN_LEN) -> bool:
     return (
         getattr(entry, "tier", None) in {"base", "domain"}
@@ -162,6 +172,8 @@ def runtime_exclusion_reason(entry: Any) -> str | None:
         return RUNTIME_FILTER_NOOP_MANUAL_HOTFIX
     if is_single_char_machine_override(entry):
         return RUNTIME_FILTER_SINGLE_CHAR_MACHINE
+    if is_single_char_low_trust_phrase(entry):
+        return RUNTIME_FILTER_SINGLE_CHAR_LOW_TRUST_PHRASE
     if is_low_trust_long_phrase(entry):
         return RUNTIME_FILTER_LOW_TRUST_LONG_PHRASE
     if is_definition_like_low_trust_phrase(entry):

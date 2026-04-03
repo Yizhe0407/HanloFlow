@@ -1,812 +1,948 @@
 [
-  {
-    "src": "他",
-    "tgt": "伊",
-    "priority": 900
-  },
-  {
-    "src": "她",
-    "tgt": "伊",
-    "priority": 900
-  },
-  {
-    "src": "它",
-    "tgt": "伊",
-    "priority": 900
-  },
-  {
-    "src": "我們",
-    "tgt": "咱",
-    "priority": 900
-  },
-  {
-    "src": "你們",
-    "tgt": "恁",
-    "priority": 880
-  },
-  {
-    "src": "在哪裡",
-    "tgt": "佇佗位",
-    "priority": 940
-  },
-  {
-    "src": "在這裡",
-    "tgt": "佇遮",
-    "priority": 940
-  },
-  {
-    "src": "在那裡",
-    "tgt": "佇遐",
-    "priority": 940
-  },
-  {
-    "src": "在這搭",
-    "tgt": "佇遮",
-    "priority": 920
-  },
-  {
-    "src": "這裡",
-    "tgt": "遮",
-    "priority": 900
-  },
-  {
-    "src": "那裡",
-    "tgt": "遐",
-    "priority": 900
-  },
-  {
-    "src": "裡面",
-    "tgt": "入面",
-    "priority": 900
-  },
-  {
-    "src": "裡頭",
-    "tgt": "內底",
-    "priority": 880
-  },
-  {
-    "src": "給我",
-    "tgt": "予我",
-    "priority": 920
-  },
-  {
-    "src": "給你",
-    "tgt": "予你",
-    "priority": 920
-  },
-  {
-    "src": "給他",
-    "tgt": "予伊",
-    "priority": 920
-  },
-  {
-    "src": "給",
-    "tgt": "予",
-    "priority": 860
-  },
-  {
-    "src": "告訴我",
-    "tgt": "共我講",
-    "priority": 930
-  },
-  {
-    "src": "告訴他",
-    "tgt": "共伊講",
-    "priority": 930
-  },
-  {
-    "src": "告訴",
-    "tgt": "講",
-    "priority": 880
-  },
-  {
-    "src": "為什麼",
-    "tgt": "是按怎",
-    "priority": 930
-  },
-  {
-    "src": "為何",
-    "tgt": "按怎",
-    "priority": 900
-  },
-  {
-    "src": "怎麼",
-    "tgt": "按怎",
-    "priority": 900
-  },
-  {
-    "src": "什麼",
-    "tgt": "啥物",
-    "priority": 880
-  },
-  {
-    "src": "誰",
-    "tgt": "啥人",
-    "priority": 900
-  },
-  {
-    "src": "東西",
-    "tgt": "物件",
-    "priority": 900
-  },
-  {
-    "src": "弟弟",
-    "tgt": "阿弟仔",
-    "priority": 900
-  },
-  {
-    "src": "哥哥",
-    "tgt": "阿兄",
-    "priority": 880
-  },
-  {
-    "src": "姐姐",
-    "tgt": "阿姊",
-    "priority": 880
-  },
-  {
-    "src": "妹妹",
-    "tgt": "小妹仔",
-    "priority": 880
-  },
-  {
-    "src": "大家",
-    "tgt": "逐家",
-    "priority": 900
-  },
-  {
-    "src": "知道",
-    "tgt": "知影",
-    "priority": 900
-  },
-  {
-    "src": "事情",
-    "tgt": "代誌",
-    "priority": 900
-  },
-  {
-    "src": "客人",
-    "tgt": "人客",
-    "priority": 900
-  },
-  {
-    "src": "公雞",
-    "tgt": "雞角",
-    "priority": 920
-  },
-  {
-    "src": "老闆",
-    "tgt": "頭家",
-    "priority": 900
-  },
-  {
-    "src": "沒關係",
-    "tgt": "無要緊",
-    "priority": 950
-  },
-  {
-    "src": "不要",
-    "tgt": "莫",
-    "priority": 930
-  },
-  {
-    "src": "沒想到",
-    "tgt": "煞無想到",
-    "priority": 920
-  },
-  {
-    "src": "沒",
-    "tgt": "無",
-    "priority": 920
-  },
-  {
-    "src": "不知道",
-    "tgt": "毋知",
-    "priority": 930
-  },
-  {
-    "src": "不認識",
-    "tgt": "毋捌",
-    "priority": 930
-  },
-  {
-    "src": "不理",
-    "tgt": "無愛睬",
-    "priority": 920
-  },
-  {
-    "src": "不能",
-    "tgt": "袂使",
-    "priority": 920
-  },
-  {
-    "src": "不會",
-    "tgt": "袂",
-    "priority": 900
-  },
-  {
-    "src": "不會寫字",
-    "tgt": "袂曉寫字",
-    "priority": 950
-  },
-  {
-    "src": "不會講",
-    "tgt": "袂曉講",
-    "priority": 940
-  },
-  {
-    "src": "不會用",
-    "tgt": "袂曉用",
-    "priority": 940
-  },
-  {
-    "src": "會不會",
-    "tgt": "敢會",
-    "priority": 940
-  },
-  {
-    "src": "沒空",
-    "tgt": "無閒",
-    "priority": 920
-  },
-  {
-    "src": "沒錢",
-    "tgt": "無錢",
-    "priority": 900
-  },
-  {
-    "src": "買不到",
-    "tgt": "買無",
-    "priority": 930
-  },
-  {
-    "src": "慢慢來",
-    "tgt": "慢慢仔來",
-    "priority": 930
-  },
-  {
-    "src": "一起",
-    "tgt": "鬥陣",
-    "priority": 910
-  },
-  {
-    "src": "趕快",
-    "tgt": "緊",
-    "priority": 900
-  },
-  {
-    "src": "比較",
-    "tgt": "較",
-    "priority": 880
-  },
-  {
-    "src": "都",
-    "tgt": "攏",
-    "priority": 880
-  },
-  {
-    "src": "要",
-    "tgt": "欲",
-    "priority": 870
-  },
-  {
-    "src": "很",
-    "tgt": "真",
-    "priority": 860
-  },
-  {
-    "src": "非常",
-    "tgt": "真",
-    "priority": 900
-  },
-  {
-    "src": "熱鬧",
-    "tgt": "鬧熱",
-    "priority": 920
-  },
-  {
-    "src": "颱風",
-    "tgt": "風颱",
-    "priority": 920
-  },
-  {
-    "src": "可愛",
-    "tgt": "古錐",
-    "priority": 900
-  },
-  {
-    "src": "臭屁",
-    "tgt": "囂排",
-    "priority": 900
-  },
-  {
-    "src": "固執",
-    "tgt": "死忠",
-    "priority": 880
-  },
-  {
-    "src": "想要",
-    "tgt": "想欲",
-    "priority": 900
-  },
-  {
-    "src": "想喝水",
-    "tgt": "想欲啉水",
-    "priority": 920
-  },
-  {
-    "src": "喝",
-    "tgt": "啉",
-    "priority": 860
-  },
-  {
-    "src": "睡覺",
-    "tgt": "睏",
-    "priority": 900
-  },
-  {
-    "src": "做什麼",
-    "tgt": "創啥",
-    "priority": 930
-  },
-  {
-    "src": "打不贏",
-    "tgt": "拍袂贏",
-    "priority": 920
-  },
-  {
-    "src": "差一點",
-    "tgt": "爭差一滴仔",
-    "priority": 900
-  },
-  {
-    "src": "臉",
-    "tgt": "面",
-    "priority": 900
-  },
-  {
-    "src": "肚子餓",
-    "tgt": "肚睏",
-    "priority": 930
-  },
-  {
-    "src": "洗澡",
-    "tgt": "洗身軀",
-    "priority": 930
-  },
-  {
-    "src": "打噴嚏",
-    "tgt": "哈啾",
-    "priority": 900
-  },
-  {
-    "src": "嚇一跳",
-    "tgt": "驚一趒",
-    "priority": 900
-  },
-  {
-    "src": "衣服",
-    "tgt": "衫",
-    "priority": 900
-  },
-  {
-    "src": "書",
-    "tgt": "冊",
-    "priority": 900
-  },
-  {
-    "src": "腳踏車",
-    "tgt": "跤踏車",
-    "priority": 930
-  },
-  {
-    "src": "坐公車",
-    "tgt": "搭公車",
-    "priority": 930
-  },
-  {
-    "src": "錢包",
-    "tgt": "錢袋仔",
-    "priority": 920
-  },
-  {
-    "src": "垃圾",
-    "tgt": "糞埽",
-    "priority": 900
-  },
-  {
-    "src": "垃圾桶",
-    "tgt": "糞埽桶",
-    "priority": 940
-  },
-  {
-    "src": "太陽",
-    "tgt": "日頭",
-    "priority": 920
-  },
-  {
-    "src": "冷",
-    "tgt": "寒",
-    "priority": 880
-  },
-  {
-    "src": "走",
-    "tgt": "行",
-    "priority": 860
-  },
-  {
-    "src": "吃",
-    "tgt": "食",
-    "priority": 860
-  },
-  {
-    "src": "天亮",
-    "tgt": "天光",
-    "priority": 920
-  },
-  {
-    "src": "昨天晚上",
-    "tgt": "昨昏暗",
-    "priority": 940
-  },
-  {
-    "src": "昨天",
-    "tgt": "昨昏",
-    "priority": 900
-  },
-  {
-    "src": "今天",
-    "tgt": "今仔日",
-    "priority": 900
-  },
-  {
-    "src": "明天",
-    "tgt": "明仔載",
-    "priority": 900
-  },
-  {
-    "src": "早上",
-    "tgt": "早起",
-    "priority": 900
-  },
-  {
-    "src": "下午",
-    "tgt": "下晝",
-    "priority": 900
-  },
-  {
-    "src": "晚上",
-    "tgt": "暗時",
-    "priority": 880
-  },
-  {
-    "src": "小時",
-    "tgt": "點鐘",
-    "priority": 900
-  },
-  {
-    "src": "一個",
-    "tgt": "一个",
-    "priority": 920
-  },
-  {
-    "src": "一雙",
-    "tgt": "一跤",
-    "priority": 920
-  },
-  {
-    "src": "一頭",
-    "tgt": "一隻",
-    "priority": 920
-  },
-  {
-    "src": "一次",
-    "tgt": "一擺",
-    "priority": 900
-  },
-  {
-    "src": "一點點",
-    "tgt": "一滴仔",
-    "priority": 920
-  },
-  {
-    "src": "一台車",
-    "tgt": "一部車",
-    "priority": 920
-  },
-  {
-    "src": "一間公司",
-    "tgt": "一間公司",
-    "priority": 940
-  },
-  {
-    "src": "智慧型手機",
-    "tgt": "智慧型手機",
-    "priority": 940
-  },
-  {
-    "src": "看電視",
-    "tgt": "看電視",
-    "priority": 940
-  },
-  {
-    "src": "影印文件",
-    "tgt": "影印文件",
-    "priority": 940
-  },
-  {
-    "src": "下班",
-    "tgt": "下班",
-    "priority": 930
-  },
-  {
-    "src": "互聯網",
-    "tgt": "網際網路",
-    "priority": 900
-  },
-  {
-    "src": "方便",
-    "tgt": "利便",
-    "priority": 900
-  },
-  {
-    "src": "番茄",
-    "tgt": "柑仔蜜",
-    "priority": 900
-  },
-  {
-    "src": "壞了",
-    "tgt": "歹去矣",
-    "priority": 900
-  },
-  {
-    "src": "如果",
-    "tgt": "若是",
-    "priority": 900
-  },
-  {
-    "src": "都還沒",
-    "tgt": "攏猶未",
-    "priority": 920
-  },
-  {
-    "src": "還是",
-    "tgt": "猶是",
-    "priority": 900
-  },
-  {
-    "src": "常常",
-    "tgt": "定定",
-    "priority": 900
-  },
-  {
-    "src": "給經理",
-    "tgt": "予經理",
-    "priority": 900
-  },
-  {
-    "src": "再見",
-    "tgt": "再會",
-    "priority": 930
-  },
-  {
-    "src": "先走",
-    "tgt": "行先",
-    "priority": 920
-  },
-  {
-    "src": "紅了",
-    "tgt": "紅矣",
-    "priority": 920
-  },
-  {
-    "src": "好了",
-    "tgt": "好矣",
-    "priority": 920
-  },
-  {
-    "src": "來了",
-    "tgt": "來矣",
-    "priority": 920
-  },
-  {
-    "src": "出來了",
-    "tgt": "出來矣",
-    "priority": 920
-  },
-  {
-    "src": "但是",
-    "tgt": "毋過",
-    "priority": 900
-  },
-  {
-    "src": "然後",
-    "tgt": "了後",
-    "priority": 880
-  },
-  {
-    "src": "不管",
-    "tgt": "無論",
-    "priority": 900
-  },
-  {
-    "src": "還沒",
-    "tgt": "猶未",
-    "priority": 900
-  },
-  {
-    "src": "拿去給",
-    "tgt": "提去予",
-    "priority": 920
-  },
-  {
-    "src": "到處",
-    "tgt": "四界",
-    "priority": 900
-  },
-  {
-    "src": "賺錢",
-    "tgt": "趁錢",
-    "priority": 900
-  },
-  {
-    "src": "打拼",
-    "tgt": "拍拚",
-    "priority": 900
-  },
-  {
-    "src": "出人頭地",
-    "tgt": "出頭天",
-    "priority": 900
-  },
-  {
-    "src": "熟悉",
-    "tgt": "熟似",
-    "priority": 900
-  },
-  {
-    "src": "整齊",
-    "tgt": "齊整",
-    "priority": 900
-  },
-  {
-    "src": "硬朗",
-    "tgt": "勇健",
-    "priority": 900
-  },
-  {
-    "src": "這種",
-    "tgt": "這款",
-    "priority": 900
-  },
-  {
-    "src": "沒法度",
-    "tgt": "無法度",
-    "priority": 900
-  },
-  {
-    "src": "在睡覺",
-    "tgt": "佇咧睏",
-    "priority": 950
-  },
-  {
-    "src": "在做什麼",
-    "tgt": "佇咧創啥",
-    "priority": 950
-  },
-  {
-    "src": "在做啥",
-    "tgt": "佇咧創啥",
-    "priority": 940
-  },
-  {
-    "src": "在叫",
-    "tgt": "佇咧鳴",
-    "priority": 930
-  },
-  {
-    "src": "不要吵",
-    "tgt": "莫噪",
-    "priority": 930
-  },
-  {
-    "src": "走不動",
-    "tgt": "行袂行",
-    "priority": 930
-  },
-  {
-    "src": "心情不好",
-    "tgt": "心情袂爽",
-    "priority": 930
-  },
-  {
-    "src": "鞋子",
-    "tgt": "鞋仔",
-    "priority": 900
-  },
-  {
-    "src": "蘋果",
-    "tgt": "林檎",
-    "priority": 900
-  },
-  {
-    "src": "一個小時",
-    "tgt": "一點鐘",
-    "priority": 940
-  },
-  {
-    "src": "第一名",
-    "tgt": "第一名",
-    "priority": 950
-  },
-  {
-    "src": "吹冷氣",
-    "tgt": "吹冷氣",
-    "priority": 950
-  },
-  {
-    "src": "不見了",
-    "tgt": "毋見去矣",
-    "priority": 940
-  },
-  {
-    "src": "真是莫名其妙",
-    "tgt": "真正是無端莫",
-    "priority": 940
-  },
-  {
-    "src": "亂七八糟",
-    "tgt": "烏白馬",
-    "priority": 930
-  },
-  {
-    "src": "緣分",
-    "tgt": "緣份",
-    "priority": 920
-  },
-  {
-    "src": "差得遠",
-    "tgt": "爭差遠",
-    "priority": 920
-  },
-  {
-    "src": "隨便說說",
-    "tgt": "烏白講",
-    "priority": 930
-  },
-  {
-    "src": "看情況",
-    "tgt": "看情形",
-    "priority": 920
-  },
-  {
-    "src": "多喝一點水",
-    "tgt": "水加啉寡",
-    "priority": 940
-  },
-  {
-    "src": "打不贏他",
-    "tgt": "拍伊袂贏",
-    "priority": 940
-  },
-  {
-    "src": "這個",
-    "tgt": "這个",
-    "priority": 900
-  },
-  {
-    "src": "比我高",
-    "tgt": "比我較懸",
-    "priority": 940
-  },
-  {
-    "src": "這回事",
-    "tgt": "這代誌",
-    "priority": 930
-  },
-  {
-    "src": "一雙鞋子",
-    "tgt": "一跤鞋仔",
-    "priority": 950
-  }
+    {
+        "src": "他們",
+        "tgt": "怹",
+        "priority": 950
+    },
+    {
+        "src": "他",
+        "tgt": "伊",
+        "priority": 900
+    },
+    {
+        "src": "她",
+        "tgt": "伊",
+        "priority": 900
+    },
+    {
+        "src": "我們",
+        "tgt": "咱",
+        "priority": 900,
+        "status": "active",
+        "note": "Enabled fallback for non-contextual plural first-person pronoun usage."
+    },
+    {
+        "src": "你們",
+        "tgt": "恁",
+        "priority": 880
+    },
+    {
+        "src": "在哪裡",
+        "tgt": "佇佗位",
+        "priority": 940
+    },
+    {
+        "src": "哪一",
+        "tgt": "佗一",
+        "priority": 950
+    },
+    {
+        "src": "哪台",
+        "tgt": "佗一台",
+        "priority": 950
+    },
+    {
+        "src": "哪台車",
+        "tgt": "佗一台車",
+        "priority": 960
+    },
+    {
+        "src": "在這裡",
+        "tgt": "佇遮",
+        "priority": 940
+    },
+    {
+        "src": "在這裡面",
+        "tgt": "佇遮內底",
+        "priority": 950
+    },
+    {
+        "src": "在这里面",
+        "tgt": "佇遮內底",
+        "priority": 950
+    },
+    {
+        "src": "在那裡",
+        "tgt": "佇遐",
+        "priority": 940
+    },
+    {
+        "src": "在這搭",
+        "tgt": "佇遮",
+        "priority": 920
+    },
+    {
+        "src": "這裡",
+        "tgt": "遮",
+        "priority": 900
+    },
+    {
+        "src": "那裡",
+        "tgt": "遐",
+        "priority": 900
+    },
+    {
+        "src": "裡面",
+        "tgt": "內底",
+        "priority": 900
+    },
+    {
+        "src": "裡頭",
+        "tgt": "內底",
+        "priority": 880
+    },
+    {
+        "src": "給我",
+        "tgt": "予我",
+        "priority": 920
+    },
+    {
+        "src": "給你",
+        "tgt": "予你",
+        "priority": 920
+    },
+    {
+        "src": "給他",
+        "tgt": "予伊",
+        "priority": 950
+    },
+    {
+        "src": "為你",
+        "tgt": "替你",
+        "priority": 950
+    },
+    {
+        "src": "為您",
+        "tgt": "替你",
+        "priority": 960
+    },
+    {
+        "src": "為什麼",
+        "tgt": "是按怎",
+        "priority": 930
+    },
+    {
+        "src": "為何",
+        "tgt": "按怎",
+        "priority": 900
+    },
+    {
+        "src": "怎麼",
+        "tgt": "按怎",
+        "priority": 900
+    },
+    {
+        "src": "不怎麼",
+        "tgt": "無偌",
+        "priority": 950
+    },
+    {
+        "src": "誰",
+        "tgt": "啥人",
+        "priority": 900
+    },
+    {
+        "src": "什麼東西",
+        "tgt": "啥物",
+        "priority": 950
+    },
+    {
+        "src": "這是什麼東西",
+        "tgt": "這是啥物",
+        "priority": 960
+    },
+    {
+        "src": "弟弟",
+        "tgt": "阿弟仔",
+        "priority": 900
+    },
+    {
+        "src": "哥哥",
+        "tgt": "阿兄",
+        "priority": 880
+    },
+    {
+        "src": "姐姐",
+        "tgt": "阿姊",
+        "priority": 880
+    },
+    {
+        "src": "妹妹",
+        "tgt": "小妹仔",
+        "priority": 880
+    },
+    {
+        "src": "大家",
+        "tgt": "逐家",
+        "priority": 900
+    },
+    {
+        "src": "知道",
+        "tgt": "知影",
+        "priority": 900
+    },
+    {
+        "src": "事情",
+        "tgt": "代誌",
+        "priority": 900
+    },
+    {
+        "src": "這件事情",
+        "tgt": "這層代誌",
+        "priority": 950
+    },
+    {
+        "src": "客人",
+        "tgt": "人客",
+        "priority": 900
+    },
+    {
+        "src": "公雞",
+        "tgt": "雞角",
+        "priority": 920
+    },
+    {
+        "src": "老闆",
+        "tgt": "頭家",
+        "priority": 900
+    },
+    {
+        "src": "被小偷",
+        "tgt": "予賊仔",
+        "priority": 960
+    },
+    {
+        "src": "沒關係",
+        "tgt": "無要緊",
+        "priority": 950
+    },
+    {
+        "src": "沒想到",
+        "tgt": "煞無想到",
+        "priority": 920
+    },
+    {
+        "src": "沒",
+        "tgt": "無",
+        "priority": 920
+    },
+    {
+        "src": "不知道",
+        "tgt": "毋知",
+        "priority": 930
+    },
+    {
+        "src": "不認識",
+        "tgt": "毋捌",
+        "priority": 930
+    },
+    {
+        "src": "不理",
+        "tgt": "無愛睬",
+        "priority": 920
+    },
+    {
+        "src": "不可能不",
+        "tgt": "不可能無",
+        "priority": 950
+    },
+    {
+        "src": "會不會",
+        "tgt": "敢會",
+        "priority": 940
+    },
+    {
+        "src": "沒空",
+        "tgt": "無閒",
+        "priority": 920
+    },
+    {
+        "src": "沒錢",
+        "tgt": "無錢",
+        "priority": 900
+    },
+    {
+        "src": "買不到",
+        "tgt": "買無",
+        "priority": 930
+    },
+    {
+        "src": "慢慢來",
+        "tgt": "慢慢仔來",
+        "priority": 930
+    },
+    {
+        "src": "一起",
+        "tgt": "鬥陣",
+        "priority": 910
+    },
+    {
+        "src": "趕快",
+        "tgt": "緊",
+        "priority": 900
+    },
+    {
+        "src": "非常",
+        "tgt": "真",
+        "priority": 900
+    },
+    {
+        "src": "熱鬧",
+        "tgt": "鬧熱",
+        "priority": 920
+    },
+    {
+        "src": "颱風",
+        "tgt": "風颱",
+        "priority": 920
+    },
+    {
+        "src": "可愛",
+        "tgt": "古錐",
+        "priority": 900
+    },
+    {
+        "src": "臭屁",
+        "tgt": "囂排",
+        "priority": 900
+    },
+    {
+        "src": "固執",
+        "tgt": "鐵齒",
+        "priority": 880
+    },
+    {
+        "src": "想要",
+        "tgt": "想欲",
+        "priority": 900
+    },
+    {
+        "src": "是要",
+        "tgt": "是欲",
+        "priority": 950
+    },
+    {
+        "src": "想喝水",
+        "tgt": "想欲啉水",
+        "priority": 920
+    },
+    {
+        "src": "喝",
+        "tgt": "啉",
+        "priority": 860
+    },
+    {
+        "src": "睡覺時間",
+        "tgt": "睏眠時間",
+        "priority": 940
+    },
+    {
+        "src": "睡覺",
+        "tgt": "睏",
+        "priority": 900
+    },
+    {
+        "src": "做什麼",
+        "tgt": "做啥物",
+        "priority": 930
+    },
+    {
+        "src": "打不贏",
+        "tgt": "拍袂贏",
+        "priority": 920
+    },
+    {
+        "src": "差一點",
+        "tgt": "差一滴仔",
+        "priority": 900
+    },
+    {
+        "src": "臉",
+        "tgt": "面",
+        "priority": 900
+    },
+    {
+        "src": "肚子餓",
+        "tgt": "腹肚枵",
+        "priority": 930
+    },
+    {
+        "src": "洗澡",
+        "tgt": "洗身軀",
+        "priority": 930
+    },
+    {
+        "src": "洗完澡",
+        "tgt": "洗完身軀",
+        "priority": 950
+    },
+    {
+        "src": "打噴嚏",
+        "tgt": "拍咳啾",
+        "priority": 900
+    },
+    {
+        "src": "嚇一跳",
+        "tgt": "驚一趒",
+        "priority": 900
+    },
+    {
+        "src": "衣服",
+        "tgt": "衫",
+        "priority": 900
+    },
+    {
+        "src": "書",
+        "tgt": "冊",
+        "priority": 900
+    },
+    {
+        "src": "腳踏車",
+        "tgt": "跤踏車",
+        "priority": 930
+    },
+    {
+        "src": "坐公車",
+        "tgt": "搭公車",
+        "priority": 930
+    },
+    {
+        "src": "錢包",
+        "tgt": "錢袋仔",
+        "priority": 920
+    },
+    {
+        "src": "垃圾",
+        "tgt": "糞埽",
+        "priority": 900
+    },
+    {
+        "src": "垃圾桶",
+        "tgt": "糞埽桶",
+        "priority": 940
+    },
+    {
+        "src": "太陽",
+        "tgt": "日頭",
+        "priority": 920
+    },
+    {
+        "src": "冷",
+        "tgt": "寒",
+        "priority": 880
+    },
+    {
+        "src": "高",
+        "tgt": "懸",
+        "priority": 850
+    },
+    {
+        "src": "走",
+        "tgt": "行",
+        "priority": 860,
+        "status": "disabled",
+        "note": "Disable generic char-like replacement to avoid directional complement errors (帶走/偷走/騎走)."
+    },
+    {
+        "src": "走路",
+        "tgt": "行路",
+        "priority": 920
+    },
+    {
+        "src": "偷走",
+        "tgt": "偷走",
+        "priority": 950
+    },
+    {
+        "src": "騎走",
+        "tgt": "騎走",
+        "priority": 950
+    },
+    {
+        "src": "吃",
+        "tgt": "食",
+        "priority": 860
+    },
+    {
+        "src": "天亮",
+        "tgt": "天光",
+        "priority": 920
+    },
+    {
+        "src": "剛",
+        "tgt": "拄才",
+        "priority": 900
+    },
+    {
+        "src": "昨天晚上",
+        "tgt": "昨昏暗",
+        "priority": 940
+    },
+    {
+        "src": "昨天",
+        "tgt": "昨昏",
+        "priority": 900
+    },
+    {
+        "src": "今天",
+        "tgt": "今仔日",
+        "priority": 900
+    },
+    {
+        "src": "明天",
+        "tgt": "明仔載",
+        "priority": 900
+    },
+    {
+        "src": "早上",
+        "tgt": "早起",
+        "priority": 900
+    },
+    {
+        "src": "下午",
+        "tgt": "下晝",
+        "priority": 900
+    },
+    {
+        "src": "晚上",
+        "tgt": "暗時",
+        "priority": 880
+    },
+    {
+        "src": "小時",
+        "tgt": "點鐘",
+        "priority": 900
+    },
+    {
+        "src": "一頭",
+        "tgt": "一隻",
+        "priority": 920
+    },
+    {
+        "src": "一次",
+        "tgt": "一擺",
+        "priority": 900
+    },
+    {
+        "src": "一點點",
+        "tgt": "一滴仔",
+        "priority": 920
+    },
+    {
+        "src": "一台車",
+        "tgt": "一部車",
+        "priority": 920
+    },
+    {
+        "src": "互聯網",
+        "tgt": "網際網路",
+        "priority": 900
+    },
+    {
+        "src": "方便",
+        "tgt": "利便",
+        "priority": 900
+    },
+    {
+        "src": "番茄",
+        "tgt": "柑仔蜜",
+        "priority": 900
+    },
+    {
+        "src": "壞了",
+        "tgt": "歹去矣",
+        "priority": 900
+    },
+    {
+        "src": "如果",
+        "tgt": "若是",
+        "priority": 900
+    },
+    {
+        "src": "聽不懂",
+        "tgt": "聽無",
+        "priority": 950
+    },
+    {
+        "src": "看不懂",
+        "tgt": "看無",
+        "priority": 950
+    },
+    {
+        "src": "都還沒",
+        "tgt": "攏猶未",
+        "priority": 920
+    },
+    {
+        "src": "還要高",
+        "tgt": "閣較懸",
+        "priority": 950
+    },
+    {
+        "src": "還是",
+        "tgt": "猶是",
+        "priority": 900
+    },
+    {
+        "src": "常常",
+        "tgt": "定定",
+        "priority": 900
+    },
+    {
+        "src": "給經理",
+        "tgt": "予經理",
+        "priority": 900
+    },
+    {
+        "src": "再見",
+        "tgt": "再會",
+        "priority": 930
+    },
+    {
+        "src": "先走",
+        "tgt": "行先",
+        "priority": 920
+    },
+    {
+        "src": "紅了",
+        "tgt": "紅矣",
+        "priority": 920
+    },
+    {
+        "src": "好了",
+        "tgt": "好矣",
+        "priority": 920
+    },
+    {
+        "src": "呢。",
+        "tgt": "咧。",
+        "priority": 850
+    },
+    {
+        "src": "呢？",
+        "tgt": "咧？",
+        "priority": 850
+    },
+    {
+        "src": "來了",
+        "tgt": "來矣",
+        "priority": 920
+    },
+    {
+        "src": "出來了",
+        "tgt": "出來矣",
+        "priority": 920
+    },
+    {
+        "src": "但是",
+        "tgt": "毋過",
+        "priority": 900
+    },
+    {
+        "src": "然後",
+        "tgt": "了後",
+        "priority": 880
+    },
+    {
+        "src": "不管",
+        "tgt": "無論",
+        "priority": 900
+    },
+    {
+        "src": "還沒",
+        "tgt": "猶未",
+        "priority": 900
+    },
+    {
+        "src": "拿去給",
+        "tgt": "提去予",
+        "priority": 920
+    },
+    {
+        "src": "到處",
+        "tgt": "四界",
+        "priority": 900
+    },
+    {
+        "src": "賺錢",
+        "tgt": "趁錢",
+        "priority": 900
+    },
+    {
+        "src": "打拼",
+        "tgt": "拍拚",
+        "priority": 900
+    },
+    {
+        "src": "出人頭地",
+        "tgt": "出頭天",
+        "priority": 900
+    },
+    {
+        "src": "熟悉",
+        "tgt": "熟似",
+        "priority": 900
+    },
+    {
+        "src": "整齊",
+        "tgt": "齊整",
+        "priority": 900
+    },
+    {
+        "src": "硬朗",
+        "tgt": "勇健",
+        "priority": 900
+    },
+    {
+        "src": "這種",
+        "tgt": "這款",
+        "priority": 900
+    },
+    {
+        "src": "沒法度",
+        "tgt": "無法度",
+        "priority": 900
+    },
+    {
+        "src": "在睡覺",
+        "tgt": "佇咧睏",
+        "priority": 950
+    },
+    {
+        "src": "佇咧睡覺",
+        "tgt": "佇咧睏",
+        "priority": 950
+    },
+    {
+        "src": "在做什麼",
+        "tgt": "佇咧做啥物",
+        "priority": 950
+    },
+    {
+        "src": "在做啥",
+        "tgt": "佇咧做啥物",
+        "priority": 940
+    },
+    {
+        "src": "在叫",
+        "tgt": "佇咧叫",
+        "priority": 930
+    },
+    {
+        "src": "不要吵",
+        "tgt": "莫吵",
+        "priority": 930
+    },
+    {
+        "src": "走不動",
+        "tgt": "行袂去",
+        "priority": 930
+    },
+    {
+        "src": "心情不好",
+        "tgt": "心情無好",
+        "priority": 930
+    },
+    {
+        "src": "鞋子",
+        "tgt": "鞋仔",
+        "priority": 900
+    },
+    {
+        "src": "一個小時",
+        "tgt": "一點鐘",
+        "priority": 940
+    },
+    {
+        "src": "不見了",
+        "tgt": "毋見去矣",
+        "priority": 940
+    },
+    {
+        "src": "真是莫名其妙",
+        "tgt": "有夠奇怪",
+        "priority": 940
+    },
+    {
+        "src": "亂七八糟",
+        "tgt": "亂操操",
+        "priority": 930
+    },
+    {
+        "src": "緣分",
+        "tgt": "緣份",
+        "priority": 920
+    },
+    {
+        "src": "差得遠",
+        "tgt": "爭差遠",
+        "priority": 920
+    },
+    {
+        "src": "隨便說說",
+        "tgt": "烏白講",
+        "priority": 930
+    },
+    {
+        "src": "看情況",
+        "tgt": "看情形",
+        "priority": 920
+    },
+    {
+        "src": "多喝一點水",
+        "tgt": "水加啉寡",
+        "priority": 940
+    },
+    {
+        "src": "打不贏他",
+        "tgt": "拍伊袂贏",
+        "priority": 940
+    },
+    {
+        "src": "這個",
+        "tgt": "這个",
+        "priority": 900
+    },
+    {
+        "src": "比我高",
+        "tgt": "比我較懸",
+        "priority": 940
+    },
+    {
+        "src": "這回事",
+        "tgt": "這代誌",
+        "priority": 930
+    },
+    {
+        "src": "一雙鞋子",
+        "tgt": "一雙鞋仔",
+        "priority": 950
+    }
+,
+    {
+        "src": "\u60a8",
+        "tgt": "\u4f60",
+        "priority": 900
+    },
+    {
+        "src": "\u8acb\u554f",
+        "tgt": "\u501f\u554f",
+        "priority": 920
+    },
+    {
+        "src": "\u4e0d\u597d\u610f\u601d",
+        "tgt": "\u6b79\u52e2",
+        "priority": 940
+    },
+    {
+        "src": "\u5c0d\u4e0d\u8d77",
+        "tgt": "\u6b79\u52e2",
+        "priority": 930
+    },
+    {
+        "src": "\u8b1d\u8b1d",
+        "tgt": "\u591a\u8b1d",
+        "priority": 900
+    },
+    {
+        "src": "\u4e0d\u5ba2\u6c23",
+        "tgt": "\u514d\u5ba2\u6c23",
+        "priority": 920
+    },
+    {
+        "src": "\u524d\u5f80",
+        "tgt": "\u53bb",
+        "priority": 900
+    },
+    {
+        "src": "\u4ee5\u70ba",
+        "tgt": "\u63a0\u6e96",
+        "priority": 930
+    },
+    {
+        "src": "\u804a\u5929",
+        "tgt": "\u958b\u8b1b",
+        "priority": 920
+    },
+    {
+        "src": "\u5e6b\u5fd9",
+        "tgt": "\u9b25\u76f8\u5171",
+        "priority": 930
+    },
+    {
+        "src": "\u9047\u5230",
+        "tgt": "\u62c4\u8457",
+        "priority": 920
+    },
+    {
+        "src": "\u770b\u898b",
+        "tgt": "\u770b\u8457",
+        "priority": 900
+    },
+    {
+        "src": "\u525b\u525b",
+        "tgt": "\u62c4\u624d",
+        "priority": 920
+    },
+    {
+        "src": "\u7b49\u4e00\u4e0b",
+        "tgt": "\u7b49\u5497",
+        "priority": 940
+    },
+    {
+        "src": "\u6709\u6642\u5019",
+        "tgt": "\u6709\u6642\u9663",
+        "priority": 920
+    },
+    {
+        "src": "\u4e00\u76f4",
+        "tgt": "\u4e00\u76f4",
+        "priority": 900,
+        "note": "\u4f54\u4f4d\u4fdd\u8b77\uff1a\u907f\u514d\u88ab\u5176\u4ed6\u898f\u5247\u8aa4\u62c6"
+    },
+    {
+        "src": "\u7a81\u7136",
+        "tgt": "\u5ffd\u7136\u9593",
+        "priority": 900
+    },
+    {
+        "src": "生氣",
+        "tgt": "受氣",
+        "priority": 950
+    },
+    {
+        "src": "帶走",
+        "tgt": "紮走",
+        "priority": 950
+    },
+    {
+        "src": "沒用",
+        "tgt": "無路用",
+        "priority": 900
+    },
+    {
+        "src": "請勿",
+        "tgt": "請毋通",
+        "priority": 920
+    },
+    {
+        "src": "聽不進去",
+        "tgt": "聽袂入去",
+        "priority": 950
+    },
+    {
+        "src": "還要大",
+        "tgt": "閣較大",
+        "priority": 950
+    },
+    {
+        "src": "半個小時",
+        "tgt": "半點鐘",
+        "priority": 950
+    },
+    {
+        "src": "好多了",
+        "tgt": "較好矣",
+        "priority": 950
+    }
 ]

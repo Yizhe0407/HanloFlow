@@ -1,3 +1,14 @@
-# 一行一個字元。
-# 未列在這份白名單的 char-level 詞條，在 migration 期間會被標記為 disabled。
-# 請只放經人工驗證安全的單字映射。
+# 一行一個項目，可同時放：
+# 1) 單字（char-level）驗證白名單：migration 時決定 char 詞條是否 active。
+# 2) 多字保護詞（token protect）：runtime 轉換前先做 masking，避免被短詞或 regex 拆解。
+# 空行與 # 開頭註解會被忽略。
+
+智慧型手機
+看電視
+影印文件
+吹冷氣
+下班
+蘋果
+第一名
+一雙
+一間公司
