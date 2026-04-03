@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import json
 import re
 import time
@@ -9,7 +10,7 @@ from typing import Any
 
 from artifact_compiler import ensure_runtime_ready
 from lexicon_policy import is_machine_generated_override, is_sentence_manual_override, is_trusted_manual_entry
-from models import ConversionResult, LexiconEntry, MatchTrace, RuleEntry, RuleTrace
+from models import PASS_ORDER, ConversionResult, LexiconEntry, MatchTrace, RuleEntry, RuleTrace
 from normalize import normalize_text
 from review_queue import append_review_item
 
@@ -19,6 +20,14 @@ DATA_DIR = BASE_DIR / "data"
 UNICODE_ESCAPE_IN_REPLACEMENT = re.compile(
     r"(?<!\\)(?:\\u([0-9a-fA-F]{4})|\\U([0-9a-fA-F]{8}))"
 )
+ENTRY_ID_PREFIX = "lx_"
+RULE_ID_PREFIX = "rl_"
+RUNTIME_ID_SUFFIX_LEN = 12
+RUNTIME_LEVELS = ("sentence", "phrase", "char")
+RUNTIME_TIERS = ("blocked", "manual_hotfix", "manual", "core", "domain", "base")
+RUNTIME_TRUSTS = ("human", "machine", "seed")
+RUNTIME_CONTEXT_RIGHT_REGEX = "r"
+RUNTIME_CONTEXT_LEFT_LITERAL = "l"
 
 
 @dataclass
@@ -52,47 +61,25 @@ class TaigiConverter:
         rule_plan = self._read_json(self.artifact_dir / "rule_plan.json")
         override_index = self._read_json(self.artifact_dir / "override_index.json")
 
-        self.entries: dict[str, LexiconEntry] = {
-            entry_id: LexiconEntry.from_dict(row)
-            for entry_id, row in entry_table["entries"].items()
-        }
+        self.entries, self.entries_by_index, self.entry_index_by_id = self._load_entry_table(entry_table)
         self.max_phrase_src_len = max(
             (
                 len(entry.src)
-                for entry in self.entries.values()
+                for entry in self.entries_by_index
                 if entry.level in {"phrase", "sentence"} and entry.status == "active" and not entry.context
             ),
             default=0,
         )
-        self.layer_rank_by_entry_id: dict[str, int] = {
-            entry_id: self._layer_rank(entry)
-            for entry_id, entry in self.entries.items()
-        }
-        self.phrase_trie = phrase_trie_doc["trie"]
-        self.char_map: dict[str, list[str]] = char_map_doc["map"]
+        self.layer_rank_by_index: list[int] = [
+            self._layer_rank(entry)
+            for entry in self.entries_by_index
+        ]
+        self.phrase_trie = self._load_phrase_trie(phrase_trie_doc)
+        self.char_map = self._load_char_map(char_map_doc)
         self.has_char_entries: bool = bool(self.char_map)
-        self.rule_pass_order: list[str] = rule_plan.get("pass_order", [])
-        self.rules_by_pass: dict[str, list[RuleEntry]] = {}
+        self.rule_pass_order, self.rules_by_pass = self._load_rule_plan(rule_plan)
         self.compiled_rules_by_pass: dict[str, list[tuple[RuleEntry, re.Pattern[str] | None]]] = {}
-        for pass_name, rows in rule_plan.get("rules", {}).items():
-            parsed_rules: list[RuleEntry] = []
-            for item in rows:
-                if isinstance(item, dict) and "id" in item and "p" in item:
-                    parsed_rules.append(
-                        RuleEntry(
-                            rule_id=str(item.get("id", "")),
-                            pass_name=pass_name,
-                            type="regex" if item.get("k") == "r" else "literal",
-                            pattern=str(item.get("p", "")),
-                            replacement=str(item.get("r", "")),
-                            priority=int(item.get("priority", 0)),
-                            enabled=bool(item.get("enabled", True)),
-                            note=str(item.get("note", "")),
-                        )
-                    )
-                else:
-                    parsed_rules.append(RuleEntry.from_dict(item))
-            self.rules_by_pass[pass_name] = parsed_rules
+        for pass_name, parsed_rules in self.rules_by_pass.items():
             compiled_rules: list[tuple[RuleEntry, re.Pattern[str] | None]] = []
             for rule in parsed_rules:
                 if rule.type == "regex":
@@ -100,22 +87,34 @@ class TaigiConverter:
                 compiled = re.compile(rule.pattern) if rule.type == "regex" and rule.pattern else None
                 compiled_rules.append((rule, compiled))
             self.compiled_rules_by_pass[pass_name] = compiled_rules
-        pipeline_contract = rule_plan.get("pipeline_contract", {})
-        raw_lexicon_stage = str(pipeline_contract.get("lexicon_stage", "split_char_after_rules"))
+
+        raw_lexicon_stage = str(
+            rule_plan.get(
+                "x",
+                rule_plan.get("pipeline_contract", {}).get("lexicon_stage", "split_char_after_rules"),
+            )
+        )
         if raw_lexicon_stage not in {"before_rules", "split_char_after_rules"}:
             raise ValueError(f"Unsupported lexicon_stage: {raw_lexicon_stage}")
         self.lexicon_stage: str = raw_lexicon_stage
-        self.residual_terms: list[str] = rule_plan.get("residual_terms", [])
+        residual_terms = rule_plan.get("rt", rule_plan.get("residual_terms", []))
+        self.residual_terms: list[str] = (
+            [term for term in residual_terms.splitlines() if term]
+            if isinstance(residual_terms, str)
+            else [term for term in residual_terms if isinstance(term, str) and term]
+        )
         self.residual_core_terms: set[str] = {
             term
-            for term in rule_plan.get("residual_core_terms", [])
+            for term in rule_plan.get("rc", rule_plan.get("residual_core_terms", []))
             if isinstance(term, str) and term
         }
         protected_cfg = rule_plan.get("protected", {})
-        fallback_terms = sorted(
-            {term for term in rule_plan.get("protected_terms", []) if isinstance(term, str) and term},
-            key=lambda item: (-len(item), item),
-        )
+        raw_protected_terms = rule_plan.get("pt", rule_plan.get("protected_terms", []))
+        if isinstance(raw_protected_terms, str):
+            raw_fallback_terms = [term for term in raw_protected_terms.splitlines() if term]
+        else:
+            raw_fallback_terms = [term for term in raw_protected_terms if isinstance(term, str) and term]
+        fallback_terms = sorted(set(raw_fallback_terms), key=lambda item: (-len(item), item))
         self.protected_regex_masks: list[re.Pattern[str]] = []
         if isinstance(protected_cfg, dict):
             trie = protected_cfg.get("trie")
@@ -144,12 +143,11 @@ class TaigiConverter:
             self.protected_terms = fallback_terms
             self.protected_term_trie = self._build_protected_term_trie(self.protected_terms)
 
-        self.sentence_override_map: dict[str, list[str]] = override_index.get("sentence_override_map", {})
-        self.contextual_override_ids: list[str] = override_index.get("contextual_override_ids", [])
+        self.sentence_override_map, self.contextual_override_entry_indexes = self._load_override_index(override_index)
 
-        self.blocked_sentence_entry_ids = [
-            entry_id
-            for entry_id, entry in self.entries.items()
+        self.blocked_sentence_entry_indexes = [
+            entry_index
+            for entry_index, entry in enumerate(self.entries_by_index)
             if entry.status == "active" and entry.tier == "blocked" and entry.level == "sentence"
         ]
 
@@ -171,6 +169,249 @@ class TaigiConverter:
                 return match.group(0)
 
         return UNICODE_ESCAPE_IN_REPLACEMENT.sub(_replace_unicode, replacement)
+
+    @staticmethod
+    def _decode_runtime_context(context: Any) -> dict[str, Any] | None:
+        if context is None:
+            return None
+        if isinstance(context, dict):
+            return context
+        if (
+            isinstance(context, list)
+            and len(context) == 2
+            and isinstance(context[0], str)
+            and isinstance(context[1], str)
+        ):
+            if context[0] == RUNTIME_CONTEXT_RIGHT_REGEX:
+                return {"right_regex": context[1]}
+            if context[0] == RUNTIME_CONTEXT_LEFT_LITERAL:
+                return {"left_literal": context[1]}
+        return None
+
+    @staticmethod
+    def _runtime_rule_id(pass_name: str, pattern: str, replacement: str) -> str:
+        raw = f"{pass_name}|{pattern}|{replacement}".encode("utf-8")
+        return f"{RULE_ID_PREFIX}{hashlib.sha1(raw).hexdigest()[:RUNTIME_ID_SUFFIX_LEN]}"
+
+    def _load_entry_table(
+        self,
+        entry_table: dict[str, Any],
+    ) -> tuple[dict[str, LexiconEntry], list[LexiconEntry], dict[str, int]]:
+        if "entries" in entry_table:
+            entries = {
+                entry_id: LexiconEntry.from_dict(row)
+                for entry_id, row in entry_table["entries"].items()
+            }
+            entries_by_index = list(entries.values())
+            entry_index_by_id = {
+                entry.entry_id: index
+                for index, entry in enumerate(entries_by_index)
+            }
+            return entries, entries_by_index, entry_index_by_id
+
+        entry_ids: list[str]
+        if isinstance(entry_table.get("ih"), str):
+            raw_blob = entry_table["ih"]
+            if len(raw_blob) % RUNTIME_ID_SUFFIX_LEN != 0:
+                raise ValueError("Invalid compact entry id blob")
+            entry_ids = [
+                f"{ENTRY_ID_PREFIX}{raw_blob[index:index + RUNTIME_ID_SUFFIX_LEN]}"
+                for index in range(0, len(raw_blob), RUNTIME_ID_SUFFIX_LEN)
+            ]
+            if isinstance(entry_table.get("ix"), dict):
+                for raw_index, entry_id in entry_table["ix"].items():
+                    try:
+                        index = int(raw_index)
+                    except (TypeError, ValueError):
+                        continue
+                    if 0 <= index < len(entry_ids) and isinstance(entry_id, str) and entry_id:
+                        entry_ids[index] = entry_id
+        elif isinstance(entry_table.get("i"), list):
+            entry_ids = [
+                entry_id if entry_id.startswith(ENTRY_ID_PREFIX) else f"{ENTRY_ID_PREFIX}{entry_id}"
+                for entry_id in entry_table["i"]
+                if isinstance(entry_id, str) and entry_id
+            ]
+        else:
+            raise ValueError("Unsupported entry_table schema")
+
+        kind_defaults = entry_table.get("k", [])
+        raw_rows = entry_table.get("e", [])
+        if len(entry_ids) != len(raw_rows):
+            raise ValueError("Compact entry_table ids/rows length mismatch")
+
+        entries_by_index: list[LexiconEntry] = []
+        entries: dict[str, LexiconEntry] = {}
+        for entry_id, raw_row in zip(entry_ids, raw_rows):
+            if not isinstance(raw_row, list) or len(raw_row) < 3:
+                raise ValueError("Invalid compact entry row")
+            src = str(raw_row[0])
+            tgt = str(raw_row[1])
+            kind_index = int(raw_row[2])
+            if kind_index < 0 or kind_index >= len(kind_defaults):
+                raise ValueError(f"Invalid compact entry kind: {kind_index}")
+            kind_row = kind_defaults[kind_index]
+            level = RUNTIME_LEVELS[int(kind_row[0])]
+            tier = RUNTIME_TIERS[int(kind_row[1])]
+            trust = RUNTIME_TRUSTS[int(kind_row[2])]
+            priority = int(kind_row[3])
+            score = float(kind_row[4])
+            context = None
+            if len(raw_row) >= 4:
+                priority = int(raw_row[3])
+            if len(raw_row) >= 5:
+                score = float(raw_row[4])
+            if len(raw_row) >= 6:
+                context = self._decode_runtime_context(raw_row[5])
+
+            entry = LexiconEntry(
+                entry_id=entry_id,
+                src=src,
+                tgt=tgt,
+                level=level,
+                tier=tier,
+                priority=priority,
+                context=context,
+                score=score,
+                status="active",
+                trust=trust,
+            )
+            entries[entry_id] = entry
+            entries_by_index.append(entry)
+
+        entry_index_by_id = {
+            entry.entry_id: index
+            for index, entry in enumerate(entries_by_index)
+        }
+        return entries, entries_by_index, entry_index_by_id
+
+    def _normalize_entry_refs(self, raw_refs: Any) -> list[int]:
+        if isinstance(raw_refs, int):
+            return [raw_refs] if 0 <= raw_refs < len(self.entries_by_index) else []
+        if isinstance(raw_refs, str):
+            entry_index = self.entry_index_by_id.get(raw_refs)
+            return [entry_index] if entry_index is not None else []
+        if not isinstance(raw_refs, list):
+            return []
+
+        entry_indexes: list[int] = []
+        for raw_ref in raw_refs:
+            if isinstance(raw_ref, int):
+                if 0 <= raw_ref < len(self.entries_by_index):
+                    entry_indexes.append(raw_ref)
+                continue
+            if isinstance(raw_ref, str):
+                entry_index = self.entry_index_by_id.get(raw_ref)
+                if entry_index is not None:
+                    entry_indexes.append(entry_index)
+        return entry_indexes
+
+    def _load_phrase_trie(self, phrase_trie_doc: dict[str, Any]) -> dict[str, Any]:
+        def decode_legacy(node_doc: dict[str, Any]) -> dict[str, Any]:
+            children: dict[str, tuple[str, dict[str, Any]]] = {}
+            for ch, child_doc in node_doc.get("children", {}).items():
+                if not isinstance(ch, str) or not ch:
+                    continue
+                children[ch] = ("", decode_legacy(child_doc))
+            return {
+                "e": self._normalize_entry_refs(node_doc.get("entry_ids", [])),
+                "c": children,
+            }
+
+        def decode_compact(node_doc: dict[str, Any]) -> dict[str, Any]:
+            children: dict[str, tuple[str, dict[str, Any]]] = {}
+            for label, child_doc in node_doc.items():
+                if not isinstance(label, str) or not label:
+                    continue
+                if label == "":
+                    continue
+                child = decode_compact(child_doc)
+                children[label[0]] = (label[1:], child)
+            return {
+                "e": self._normalize_entry_refs(node_doc.get("", [])),
+                "c": children,
+            }
+
+        if "trie" in phrase_trie_doc:
+            return decode_legacy(phrase_trie_doc["trie"])
+        if "t" in phrase_trie_doc and isinstance(phrase_trie_doc["t"], dict):
+            return decode_compact(phrase_trie_doc["t"])
+        return {"e": [], "c": {}}
+
+    def _load_char_map(self, char_map_doc: dict[str, Any]) -> dict[str, list[int]]:
+        raw_char_map = char_map_doc.get("m", char_map_doc.get("map", {}))
+        if not isinstance(raw_char_map, dict):
+            return {}
+        return {
+            ch: self._normalize_entry_refs(raw_refs)
+            for ch, raw_refs in raw_char_map.items()
+            if isinstance(ch, str) and ch
+        }
+
+    def _load_rule_plan(self, rule_plan: dict[str, Any]) -> tuple[list[str], dict[str, list[RuleEntry]]]:
+        if "r" in rule_plan:
+            grouped_rows = rule_plan.get("r", [])
+            rules_by_pass: dict[str, list[RuleEntry]] = {pass_name: [] for pass_name in PASS_ORDER}
+            for pass_name, rows in zip(PASS_ORDER, grouped_rows):
+                parsed_rules: list[RuleEntry] = []
+                for item in rows:
+                    if not isinstance(item, list) or len(item) < 2:
+                        continue
+                    pattern = str(item[0])
+                    replacement = str(item[1])
+                    rule_type = "regex" if len(item) >= 3 and int(item[2]) == 1 else "literal"
+                    priority = int(item[3]) if len(item) >= 4 else 0
+                    parsed_rules.append(
+                        RuleEntry(
+                            rule_id=self._runtime_rule_id(pass_name, pattern, replacement),
+                            pass_name=pass_name,
+                            type=rule_type,
+                            pattern=pattern,
+                            replacement=replacement,
+                            priority=priority,
+                        )
+                    )
+                rules_by_pass[pass_name] = parsed_rules
+            return list(PASS_ORDER), rules_by_pass
+
+        pass_order = rule_plan.get("pass_order", [])
+        rules_by_pass: dict[str, list[RuleEntry]] = {}
+        for pass_name, rows in rule_plan.get("rules", {}).items():
+            parsed_rules: list[RuleEntry] = []
+            for item in rows:
+                if isinstance(item, dict) and "id" in item and "p" in item:
+                    parsed_rules.append(
+                        RuleEntry(
+                            rule_id=str(item.get("id", "")),
+                            pass_name=pass_name,
+                            type="regex" if item.get("k") == "r" else "literal",
+                            pattern=str(item.get("p", "")),
+                            replacement=str(item.get("r", "")),
+                            priority=int(item.get("priority", 0)),
+                            enabled=bool(item.get("enabled", True)),
+                            note=str(item.get("note", "")),
+                        )
+                    )
+                else:
+                    parsed_rules.append(RuleEntry.from_dict(item))
+            rules_by_pass[pass_name] = parsed_rules
+        return list(pass_order), rules_by_pass
+
+    def _load_override_index(self, override_index: dict[str, Any]) -> tuple[dict[str, list[int]], list[int]]:
+        raw_sentence_override_map = override_index.get("s", override_index.get("sentence_override_map", {}))
+        sentence_override_map: dict[str, list[int]] = {}
+        if isinstance(raw_sentence_override_map, dict):
+            for src, raw_entry_refs in raw_sentence_override_map.items():
+                if not isinstance(src, str) or not src:
+                    continue
+                entry_indexes = self._normalize_entry_refs(raw_entry_refs)
+                if entry_indexes:
+                    sentence_override_map[src] = entry_indexes
+
+        contextual_override_entry_indexes = self._normalize_entry_refs(
+            override_index.get("c", override_index.get("contextual_override_ids", []))
+        )
+        return sentence_override_map, contextual_override_entry_indexes
 
     def _layer_rank(self, entry: LexiconEntry) -> int:
         if entry.tier == "blocked":
@@ -215,29 +456,31 @@ class TaigiConverter:
     def _iter_phrase_candidates(self, text: str) -> list[Candidate]:
         candidates: list[Candidate] = []
         root = self.phrase_trie
-        entries = self.entries
-        layer_rank_by_entry_id = self.layer_rank_by_entry_id
+        entries = self.entries_by_index
+        layer_rank_by_index = self.layer_rank_by_index
 
         for start in range(len(text)):
             node = root
             index = start
             while index < len(text):
-                ch = text[index]
-                child = node["children"].get(ch)
-                if child is None:
+                edge = node["c"].get(text[index])
+                if edge is None:
+                    break
+                suffix, child = edge
+                if suffix and not text.startswith(suffix, index + 1):
                     break
                 node = child
-                index += 1
-                for entry_id in node.get("entry_ids", []):
-                    entry = entries.get(entry_id)
-                    if not entry or entry.status != "active":
+                index += 1 + len(suffix)
+                for entry_index in node["e"]:
+                    entry = entries[entry_index]
+                    if entry.status != "active":
                         continue
                     candidates.append(
                         Candidate(
                             entry=entry,
                             start=start,
                             end=index,
-                            layer_rank=layer_rank_by_entry_id.get(entry_id, 99),
+                            layer_rank=layer_rank_by_index[entry_index],
                         )
                     )
         return candidates
@@ -274,11 +517,11 @@ class TaigiConverter:
 
     def _iter_contextual_candidates(self, text: str) -> list[Candidate]:
         candidates: list[Candidate] = []
-        entries = self.entries
-        layer_rank_by_entry_id = self.layer_rank_by_entry_id
-        for entry_id in self.contextual_override_ids:
-            entry = entries.get(entry_id)
-            if not entry or entry.status != "active":
+        entries = self.entries_by_index
+        layer_rank_by_index = self.layer_rank_by_index
+        for entry_index in self.contextual_override_entry_indexes:
+            entry = entries[entry_index]
+            if entry.status != "active":
                 continue
             if not entry.src:
                 continue
@@ -295,7 +538,7 @@ class TaigiConverter:
                             entry=entry,
                             start=found,
                             end=end,
-                            layer_rank=layer_rank_by_entry_id.get(entry_id, 99),
+                            layer_rank=layer_rank_by_index[entry_index],
                         )
                     )
                 start = found + 1
@@ -305,20 +548,20 @@ class TaigiConverter:
         if not self.has_char_entries:
             return []
         candidates: list[Candidate] = []
-        entries = self.entries
-        layer_rank_by_entry_id = self.layer_rank_by_entry_id
+        entries = self.entries_by_index
+        layer_rank_by_index = self.layer_rank_by_index
         for index, ch in enumerate(text):
-            entry_ids = self.char_map.get(ch, [])
-            for entry_id in entry_ids:
-                entry = entries.get(entry_id)
-                if not entry or entry.status != "active":
+            entry_indexes = self.char_map.get(ch, [])
+            for entry_index in entry_indexes:
+                entry = entries[entry_index]
+                if entry.status != "active":
                     continue
                 candidates.append(
                     Candidate(
                         entry=entry,
                         start=index,
                         end=index + 1,
-                        layer_rank=layer_rank_by_entry_id.get(entry_id, 99),
+                        layer_rank=layer_rank_by_index[entry_index],
                     )
                 )
         return candidates
@@ -368,12 +611,15 @@ class TaigiConverter:
         node = self.phrase_trie
         idx = start
         while idx < len(text):
-            child = node["children"].get(text[idx])
-            if child is None:
+            edge = node["c"].get(text[idx])
+            if edge is None:
+                break
+            suffix, child = edge
+            if suffix and not text.startswith(suffix, idx + 1):
                 break
             node = child
-            idx += 1
-            if idx - start > min_len_exclusive and node.get("entry_ids"):
+            idx += 1 + len(suffix)
+            if idx - start > min_len_exclusive and node["e"]:
                 return True
         return False
 
@@ -391,15 +637,59 @@ class TaigiConverter:
             node = self.phrase_trie
             idx = start
             while idx < len(text):
-                child = node["children"].get(text[idx])
-                if child is None:
+                edge = node["c"].get(text[idx])
+                if edge is None:
+                    break
+                suffix, child = edge
+                if suffix and not text.startswith(suffix, idx + 1):
                     break
                 node = child
-                idx += 1
+                idx += 1 + len(suffix)
                 if idx < span_end:
                     continue
-                if node.get("entry_ids") and (start < span_start or idx > span_end):
+                if node["e"] and (start < span_start or idx > span_end):
                     return True
+        return False
+
+    def _overlaps_runtime_phrase(self, text: str, span_start: int, span_end: int) -> bool:
+        """Return True if a protected span intersects any multi-char runtime phrase.
+
+        This prevents protected terms like "下班" from masking across phrase
+        boundaries inside inputs such as "幫我查一下班次".
+        """
+        if span_end <= span_start:
+            return False
+        if self.max_phrase_src_len <= 1:
+            return False
+
+        lookback = self.max_phrase_src_len - 1
+        start_min = max(0, span_start - lookback)
+        start_max = min(len(text) - 1, span_end - 1)
+
+        for start in range(start_min, start_max + 1):
+            node = self.phrase_trie
+            idx = start
+            while idx < len(text):
+                edge = node["c"].get(text[idx])
+                if edge is None:
+                    break
+                suffix, child = edge
+                if suffix and not text.startswith(suffix, idx + 1):
+                    break
+                node = child
+                idx += 1 + len(suffix)
+                if not node["e"]:
+                    continue
+                if idx <= span_start or start >= span_end:
+                    continue
+                if start == span_start and idx == span_end:
+                    continue
+                # Allow masking a protected proper noun even if smaller runtime
+                # phrases exist entirely inside it; only reject overlaps that
+                # cross the protected span boundary.
+                if start >= span_start and idx <= span_end:
+                    continue
+                return True
         return False
 
     def _mask_protected_regexes(
@@ -435,7 +725,12 @@ class TaigiConverter:
                 masked = "".join(parts)
         return masked, token_map
 
-    def _mask_protected_terms(self, text: str) -> tuple[str, dict[str, str]]:
+    def _mask_protected_terms(
+        self,
+        text: str,
+        *,
+        respect_runtime_phrase_overlap: bool = True,
+    ) -> tuple[str, dict[str, str]]:
         has_regex_masks = bool(self.protected_regex_masks)
         has_trie_masks = bool(self.protected_term_trie.get("children"))
         if not text or (not has_regex_masks and not has_trie_masks):
@@ -472,10 +767,11 @@ class TaigiConverter:
 
             # Keep raw text when the protected span can participate in a longer
             # runtime phrase, so conversion can win over short protected masking.
-            if self._has_longer_runtime_phrase(masked_text, cursor, longest_end - cursor) or self._is_inside_longer_runtime_phrase(
-                masked_text,
-                cursor,
-                longest_end,
+            span_covers_full_text = cursor == 0 and longest_end == text_len
+            if respect_runtime_phrase_overlap and not span_covers_full_text and (
+                self._has_longer_runtime_phrase(masked_text, cursor, longest_end - cursor)
+                or self._is_inside_longer_runtime_phrase(masked_text, cursor, longest_end)
+                or self._overlaps_runtime_phrase(masked_text, cursor, longest_end)
             ):
                 parts.append(masked_text[cursor])
                 cursor += 1
@@ -569,8 +865,8 @@ class TaigiConverter:
     def _collect_blocked_candidates(self, text: str, phrase_candidates: list[Candidate]) -> list[Candidate]:
         blocked = [candidate for candidate in phrase_candidates if candidate.entry.tier == "blocked"]
 
-        for entry_id in self.blocked_sentence_entry_ids:
-            entry = self.entries[entry_id]
+        for entry_index in self.blocked_sentence_entry_indexes:
+            entry = self.entries_by_index[entry_index]
             if text == entry.src:
                 blocked.append(
                     Candidate(
@@ -583,9 +879,9 @@ class TaigiConverter:
 
         if self.has_char_entries:
             for idx, ch in enumerate(text):
-                for entry_id in self.char_map.get(ch, []):
-                    entry = self.entries.get(entry_id)
-                    if not entry or entry.status != "active":
+                for entry_index in self.char_map.get(ch, []):
+                    entry = self.entries_by_index[entry_index]
+                    if entry.status != "active":
                         continue
                     if entry.tier != "blocked":
                         continue
@@ -599,6 +895,47 @@ class TaigiConverter:
                     )
 
         return self._select_leftmost_maximum(blocked, text_length=len(text))
+
+    def _apply_exact_sentence_override(self, text: str) -> tuple[str | None, list[MatchTrace], list[str]]:
+        if not text:
+            return None, [], []
+
+        sentence_override_ids = self.sentence_override_map.get(text, [])
+        if not sentence_override_ids:
+            return None, [], []
+
+        all_phrase_candidates = self._iter_phrase_candidates(text)
+        blocked_candidates = self._collect_blocked_candidates(text, all_phrase_candidates)
+        warnings = [f"blocked:{blocked.entry.entry_id}:{blocked.entry.src}" for blocked in blocked_candidates]
+
+        sentence_candidates = [
+            Candidate(entry=self.entries_by_index[entry_index], start=0, end=len(text), layer_rank=1)
+            for entry_index in sentence_override_ids
+        ]
+        if not sentence_candidates:
+            return None, [], warnings
+
+        sentence_selected = self._select_leftmost_maximum(
+            sentence_candidates,
+            reserved=blocked_candidates,
+            text_length=len(text),
+        )
+        if not sentence_selected:
+            return None, [], warnings
+
+        chosen = sentence_selected[0]
+        trace = MatchTrace(
+            entry_id=chosen.entry.entry_id,
+            src=chosen.entry.src,
+            tgt=chosen.entry.tgt,
+            level=chosen.entry.level,
+            tier=chosen.entry.tier,
+            start=0,
+            end=len(text),
+            priority=chosen.entry.priority,
+            score=chosen.entry.score,
+        )
+        return chosen.entry.tgt, [trace], warnings
 
     def _apply_lexicon_layers(
         self,
@@ -619,9 +956,8 @@ class TaigiConverter:
         if allow_sentence_override and self._length_in_scope(len(text), min_src_len, max_src_len):
             sentence_override_ids = self.sentence_override_map.get(text, [])
             sentence_candidates = [
-                Candidate(entry=self.entries[entry_id], start=0, end=len(text), layer_rank=1)
-                for entry_id in sentence_override_ids
-                if entry_id in self.entries
+                Candidate(entry=self.entries_by_index[entry_index], start=0, end=len(text), layer_rank=1)
+                for entry_index in sentence_override_ids
             ]
             if sentence_candidates:
                 sentence_selected = self._select_leftmost_maximum(
@@ -803,11 +1139,33 @@ class TaigiConverter:
             compress_spaces=not preserve_spacing,
             trim_outer=not preserve_spacing,
         )
+        exact_sentence_output, exact_matches, exact_warnings = self._apply_exact_sentence_override(normalized)
         # Protect allowlisted multi-character tokens before lexicon/rule passes.
         masked_input, protected_token_map = self._mask_protected_terms(normalized)
         skip_passes = {"normalization"} if preserve_spacing else set()
 
-        if self.lexicon_stage == "split_char_after_rules":
+        if exact_matches:
+            # Exact sentence overrides can still contain protected proper nouns
+            # such as official place names, so mask them before char-level passes.
+            exact_masked_output, protected_token_map = self._mask_protected_terms(
+                exact_sentence_output,
+                respect_runtime_phrase_overlap=False,
+            )
+            rule_output, rules_applied = self._apply_rules(
+                exact_masked_output,
+                collect_trace=trace,
+                skip_passes=skip_passes,
+            )
+            lexicon_output, post_matches, post_warnings = self._apply_lexicon_layers(
+                rule_output,
+                min_src_len=1,
+                max_src_len=1,
+                include_char_entries=True,
+                allow_sentence_override=False,
+            )
+            matches = exact_matches + post_matches
+            lexicon_warnings = exact_warnings + post_warnings
+        elif self.lexicon_stage == "split_char_after_rules":
             pre_rule_output, pre_matches, pre_warnings = self._apply_lexicon_layers(
                 masked_input,
                 min_src_len=2,

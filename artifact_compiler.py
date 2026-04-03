@@ -29,6 +29,37 @@ RULE_TOKEN_MAP = {
 }
 REGEX_DOT_GREEDY_RE = re.compile(r"(?<!\\)\.(?:\*|\+)")
 REGEX_UNBOUNDED_NEG_CLASS_RE = re.compile(r"\[\^[^\]]+\]\+")
+ENTRY_ID_PREFIX = "lx_"
+RULE_ID_PREFIX = "rl_"
+RUNTIME_ID_SUFFIX_LEN = 12
+RUNTIME_LEVELS = ("sentence", "phrase", "char")
+RUNTIME_LEVEL_INDEX = {name: idx for idx, name in enumerate(RUNTIME_LEVELS)}
+RUNTIME_TIER_INDEX = {name: idx for idx, name in enumerate(TIER_ORDER)}
+RUNTIME_TRUSTS = ("human", "machine", "seed")
+RUNTIME_TRUST_INDEX = {name: idx for idx, name in enumerate(RUNTIME_TRUSTS)}
+RUNTIME_CONTEXT_RIGHT_REGEX = "r"
+RUNTIME_CONTEXT_LEFT_LITERAL = "l"
+MANIFEST_SHORT_KEYS = {
+    "version": "v",
+    "generated_at": "g",
+    "entry_count": "e",
+    "runtime_entry_count": "re",
+    "runtime_excluded_entry_count": "rx",
+    "runtime_excluded_reasons": "rr",
+    "core_entry_count": "c",
+    "active_entry_count": "a",
+    "rule_count": "r",
+    "active_rule_count": "ar",
+    "mask_warning_count": "mw",
+    "regex_hazard_count": "rh",
+    "pipeline_conflict_count": "pc",
+    "protected_term_count": "pt",
+    "residual_core_term_count": "rc",
+    "lexicon_stage": "ls",
+    "core_identity_protected_entry_count": "ci",
+    "identity_passthrough_protected_entry_count": "ip",
+}
+MANIFEST_LONG_KEYS = {short_key: long_key for long_key, short_key in MANIFEST_SHORT_KEYS.items()}
 
 
 def _now_iso() -> str:
@@ -40,10 +71,13 @@ def _read_json(path: Path) -> Any:
         return json.load(f)
 
 
-def _write_json(path: Path, data: Any) -> None:
+def _write_json(path: Path, data: Any, *, indent: int | None = 2) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", encoding="utf-8") as f:
-        json.dump(data, f, ensure_ascii=False, indent=2)
+        if indent is None:
+            json.dump(data, f, ensure_ascii=False, separators=(",", ":"))
+        else:
+            json.dump(data, f, ensure_ascii=False, indent=indent)
 
 
 def load_jsonl(path: Path) -> list[dict[str, Any]]:
@@ -102,6 +136,181 @@ def _expand_rules_with_tokens(rules: list[RuleEntry]) -> list[RuleEntry]:
             )
         )
     return expanded_rules
+
+
+def _pack_runtime_context(context: dict[str, Any] | None) -> list[str] | dict[str, Any] | None:
+    if not context:
+        return None
+    if set(context.keys()) == {"right_regex"}:
+        return [RUNTIME_CONTEXT_RIGHT_REGEX, str(context["right_regex"])]
+    if set(context.keys()) == {"left_literal"}:
+        return [RUNTIME_CONTEXT_LEFT_LITERAL, str(context["left_literal"])]
+    return context
+
+
+def _serialize_runtime_rule(rule: RuleEntry) -> list[Any]:
+    row: list[Any] = [rule.pattern, rule.replacement]
+    if rule.type == "regex" or rule.priority:
+        row.append(1 if rule.type == "regex" else 0)
+        if rule.priority:
+            row.append(rule.priority)
+    return row
+
+
+def _serialize_runtime_sentence_overrides(
+    sentence_override_map: dict[str, list[str]],
+    *,
+    entry_index_by_id: dict[str, int],
+) -> dict[str, int | list[int]]:
+    runtime_map: dict[str, int | list[int]] = {}
+    for src, entry_ids in sentence_override_map.items():
+        indexes = [entry_index_by_id[entry_id] for entry_id in entry_ids if entry_id in entry_index_by_id]
+        if not indexes:
+            continue
+        if len(indexes) == 1:
+            runtime_map[src] = indexes[0]
+        else:
+            runtime_map[src] = indexes
+    return runtime_map
+
+
+def _serialize_runtime_char_map(
+    char_map: dict[str, list[str]],
+    *,
+    entry_index_by_id: dict[str, int],
+) -> dict[str, list[int]]:
+    return {
+        src: [entry_index_by_id[entry_id] for entry_id in entry_ids if entry_id in entry_index_by_id]
+        for src, entry_ids in char_map.items()
+    }
+
+
+def _serialize_runtime_entry_table(active_entries: list[LexiconEntry]) -> tuple[dict[str, Any], dict[str, int]]:
+    ordered_entries = sorted(active_entries, key=lambda entry: entry.entry_id)
+    entry_ids = [entry.entry_id for entry in ordered_entries]
+    entry_index_by_id = {entry_id: index for index, entry_id in enumerate(entry_ids)}
+
+    combo_entries: dict[tuple[str, str, str], list[LexiconEntry]] = {}
+    for entry in ordered_entries:
+        combo = (entry.level, entry.tier, entry.trust)
+        combo_entries.setdefault(combo, []).append(entry)
+
+    combos = list(combo_entries.keys())
+    combo_index = {combo: index for index, combo in enumerate(combos)}
+    combo_defaults: list[list[Any]] = []
+    for combo in combos:
+        bucket = combo_entries[combo]
+        default_priority = Counter(item.priority for item in bucket).most_common(1)[0][0]
+        default_score = Counter(item.score for item in bucket).most_common(1)[0][0]
+        combo_defaults.append(
+            [
+                RUNTIME_LEVEL_INDEX[combo[0]],
+                RUNTIME_TIER_INDEX[combo[1]],
+                RUNTIME_TRUST_INDEX[combo[2]],
+                default_priority,
+                default_score,
+            ]
+        )
+
+    rows: list[list[Any]] = []
+    for entry in ordered_entries:
+        combo = (entry.level, entry.tier, entry.trust)
+        kind_index = combo_index[combo]
+        default_priority = combo_defaults[kind_index][3]
+        default_score = combo_defaults[kind_index][4]
+        packed_context = _pack_runtime_context(entry.context)
+        row: list[Any] = [entry.src, entry.tgt, kind_index]
+        if entry.priority != default_priority or entry.score != default_score or packed_context is not None:
+            row.append(entry.priority)
+            if entry.score != default_score or packed_context is not None:
+                row.append(entry.score)
+                if packed_context is not None:
+                    row.append(packed_context)
+        rows.append(row)
+
+    table_doc: dict[str, Any] = {
+        "v": 7,
+        "k": combo_defaults,
+        "e": rows,
+    }
+    if all(entry_id.startswith(ENTRY_ID_PREFIX) for entry_id in entry_ids):
+        id_chunks: list[str] = []
+        id_exceptions: dict[str, str] = {}
+        for index, entry_id in enumerate(entry_ids):
+            if len(entry_id) == len(ENTRY_ID_PREFIX) + RUNTIME_ID_SUFFIX_LEN:
+                id_chunks.append(entry_id[len(ENTRY_ID_PREFIX) :])
+            else:
+                id_chunks.append("0" * RUNTIME_ID_SUFFIX_LEN)
+                id_exceptions[str(index)] = entry_id
+        table_doc["ih"] = "".join(id_chunks)
+        if id_exceptions:
+            table_doc["ix"] = id_exceptions
+    else:
+        table_doc["i"] = entry_ids
+    return table_doc, entry_index_by_id
+
+
+def _compress_phrase_trie_node(node: dict[str, Any]) -> dict[str, Any]:
+    out: dict[str, Any] = {}
+    if "" in node:
+        out[""] = node[""]
+    for label in sorted(key for key in node.keys() if key):
+        child = node[label]
+        merged_label = label
+        merged_child = child
+        while "" not in merged_child and len(merged_child) == 1:
+            (next_label, next_child), = merged_child.items()
+            merged_label += next_label
+            merged_child = next_child
+        out[merged_label] = _compress_phrase_trie_node(merged_child)
+    return out
+
+
+def _serialize_runtime_phrase_trie(
+    entries: list[LexiconEntry],
+    *,
+    entry_index_by_id: dict[str, int],
+) -> dict[str, Any]:
+    root: dict[str, Any] = {"children": {}}
+    for entry in entries:
+        if entry.level not in {"phrase", "sentence"}:
+            continue
+        if is_sentence_manual_override(entry):
+            continue
+        if entry.context or entry.status != "active":
+            continue
+        node = root
+        for ch in entry.src:
+            node = node["children"].setdefault(ch, {"children": {}})
+        node.setdefault("entry_indexes", []).append(entry_index_by_id[entry.entry_id])
+
+    def normalize_node(raw_node: dict[str, Any]) -> dict[str, Any]:
+        out: dict[str, Any] = {}
+        if "entry_indexes" in raw_node:
+            out[""] = raw_node["entry_indexes"]
+        for ch in sorted(raw_node.get("children", {}).keys()):
+            out[ch] = normalize_node(raw_node["children"][ch])
+        return out
+
+    return _compress_phrase_trie_node(normalize_node(root))
+
+
+def _serialize_runtime_manifest(manifest: dict[str, Any]) -> dict[str, Any]:
+    return {
+        MANIFEST_SHORT_KEYS.get(key, key): value
+        for key, value in manifest.items()
+    }
+
+
+def _inflate_runtime_manifest(manifest_doc: dict[str, Any]) -> dict[str, Any]:
+    if not manifest_doc:
+        return {}
+    if "version" in manifest_doc:
+        return manifest_doc
+    return {
+        MANIFEST_LONG_KEYS.get(key, key): value
+        for key, value in manifest_doc.items()
+    }
 
 
 def _entry_sort_key(entry: LexiconEntry) -> tuple[int, int, int, float, str]:
@@ -598,15 +807,13 @@ def compile_runtime_artifacts(data_dir: Path = DATA_DIR, fail_on_mask: bool = Fa
     entries = list({entry.entry_id: entry for entry in (source_entries + core_entries)}.values())
     rules = _expand_rules_with_tokens([RuleEntry.from_dict(row) for row in load_jsonl(rule_path)])
 
-    entries_by_id = {entry.entry_id: entry for entry in entries}
-
     runtime_entries: list[LexiconEntry] = []
     runtime_excluded: dict[str, str] = {}
     for entry in entries:
         if entry.entry_id in core_identity_entry_ids:
             runtime_excluded[entry.entry_id] = RUNTIME_FILTER_CORE_IDENTITY_PROTECTED
             continue
-        if entry.entry_id in identity_passthrough_entry_ids:
+        if entry.entry_id in identity_passthrough_entry_ids and not is_sentence_manual_override(entry):
             runtime_excluded[entry.entry_id] = RUNTIME_FILTER_IDENTITY_PASSTHROUGH_MASKED
             continue
         reason = runtime_exclusion_reason(entry)
@@ -623,11 +830,14 @@ def compile_runtime_artifacts(data_dir: Path = DATA_DIR, fail_on_mask: bool = Fa
         active_rules,
     )
 
+    ordered_active_entries = sorted(active_entries, key=_entry_sort_key)
+    entry_table_doc, entry_index_by_id = _serialize_runtime_entry_table(ordered_active_entries)
+
     sentence_override_map: dict[str, list[str]] = {}
     contextual_override_ids: list[str] = []
     char_map: dict[str, list[str]] = {}
 
-    for entry in sorted(active_entries, key=_entry_sort_key):
+    for entry in ordered_active_entries:
         if is_sentence_manual_override(entry):
             sentence_override_map.setdefault(entry.src, []).append(entry.entry_id)
         if is_trusted_manual_entry(entry) and entry.context:
@@ -635,7 +845,10 @@ def compile_runtime_artifacts(data_dir: Path = DATA_DIR, fail_on_mask: bool = Fa
         if entry.level == "char":
             char_map.setdefault(entry.src, []).append(entry.entry_id)
 
-    phrase_trie = _build_phrase_trie(active_entries)
+    phrase_trie = _serialize_runtime_phrase_trie(
+        ordered_active_entries,
+        entry_index_by_id=entry_index_by_id,
+    )
 
     sorted_rules = sorted(
         active_rules,
@@ -660,60 +873,63 @@ def compile_runtime_artifacts(data_dir: Path = DATA_DIR, fail_on_mask: bool = Fa
 
     _write_json(
         artifacts_dir / "entry_table.json",
-        {
-            "version": 1,
-            "entries": {entry_id: entry.to_dict() for entry_id, entry in entries_by_id.items()},
-            "runtime_excluded": runtime_excluded,
-        },
+        entry_table_doc,
+        indent=None,
     )
 
     _write_json(
         artifacts_dir / "phrase_trie.json",
         {
-            "version": 1,
-            "trie": phrase_trie,
+            "v": 5,
+            "t": phrase_trie,
         },
+        indent=None,
     )
 
     _write_json(
         artifacts_dir / "char_map.json",
         {
-            "version": 1,
-            "map": char_map,
+            "v": 2,
+            "m": _serialize_runtime_char_map(char_map, entry_index_by_id=entry_index_by_id),
         },
+        indent=None,
     )
 
-    rules_by_pass: dict[str, list[dict[str, Any]]] = {name: [] for name in PASS_ORDER}
+    rules_by_pass: list[list[list[Any]]] = [[] for _ in PASS_ORDER]
     for rule in sorted_rules:
-        rules_by_pass.setdefault(rule.pass_name, []).append(rule.to_dict())
+        rules_by_pass[PASS_INDEX.get(rule.pass_name, 0)].append(_serialize_runtime_rule(rule))
+
+    rule_plan_doc: dict[str, Any] = {
+        "v": 6,
+        "r": rules_by_pass,
+        "rt": RESIDUAL_MANDARIN_TERMS,
+        "rc": residual_core_terms,
+        "pt": "\n".join(protected_terms),
+    }
+    if mask_warnings:
+        rule_plan_doc["mw"] = mask_warnings
+    if regex_hazards:
+        rule_plan_doc["rh"] = regex_hazards
+    if pipeline_conflicts:
+        rule_plan_doc["pc"] = pipeline_conflicts
 
     _write_json(
         artifacts_dir / "rule_plan.json",
-        {
-            "version": 1,
-            "pass_order": PASS_ORDER,
-            "pipeline_contract": {
-                "lexicon_stage": LEXICON_STAGE,
-                "rule_tokens": RULE_TOKEN_MAP,
-            },
-            "rules": rules_by_pass,
-            "mask_warnings": mask_warnings,
-            "regex_hazards": regex_hazards,
-            "pipeline_conflicts": pipeline_conflicts,
-            "residual_terms": RESIDUAL_MANDARIN_TERMS,
-            "residual_core_terms": residual_core_terms,
-            "protected_terms": protected_terms,
-        },
+        rule_plan_doc,
+        indent=None,
     )
 
     _write_json(
         artifacts_dir / "override_index.json",
         {
-            "version": 1,
-            "tier_order": TIER_ORDER,
-            "sentence_override_map": sentence_override_map,
-            "contextual_override_ids": contextual_override_ids,
+            "v": 3,
+            "s": _serialize_runtime_sentence_overrides(
+                sentence_override_map,
+                entry_index_by_id=entry_index_by_id,
+            ),
+            "c": [entry_index_by_id[entry_id] for entry_id in contextual_override_ids if entry_id in entry_index_by_id],
         },
+        indent=None,
     )
 
     manifest = {
@@ -736,7 +952,11 @@ def compile_runtime_artifacts(data_dir: Path = DATA_DIR, fail_on_mask: bool = Fa
         "core_identity_protected_entry_count": len(core_identity_entry_ids),
         "identity_passthrough_protected_entry_count": len(identity_passthrough_entry_ids),
     }
-    _write_json(artifacts_dir / "manifest.json", manifest)
+    _write_json(
+        artifacts_dir / "manifest.json",
+        _serialize_runtime_manifest(manifest),
+        indent=None,
+    )
 
     return manifest
 
@@ -764,7 +984,7 @@ def ensure_runtime_ready(data_dir: Path = DATA_DIR, fail_on_mask: bool = False) 
         latest_source_mtime = max(source_mtimes)
         must_compile = manifest_path.stat().st_mtime < latest_source_mtime
 
-    manifest = _read_json(manifest_path) if manifest_path.exists() else {}
+    manifest = _inflate_runtime_manifest(_read_json(manifest_path)) if manifest_path.exists() else {}
     if manifest and manifest.get("lexicon_stage") != LEXICON_STAGE:
         must_compile = True
     if must_compile:
