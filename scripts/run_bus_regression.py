@@ -97,6 +97,18 @@ BUS_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("route_transfer", "要去朝天宮的話，你在外圍下車就可以。", "若是欲去朝天宮，你佇外圍落車就會當。"),
     RegressionCase("route_transfer", "你去對面坐回火車站那班。", "你去對面坐回火車頭彼班。"),
     RegressionCase("route_transfer", "往市場的車在這裡排隊。", "欲去市場的車佇遮排線。"),
+    # destination clarification prompts
+    RegressionCase("destination_prompt", "臺北範圍很廣，請問您具體要去哪個地點呢。", "台北真大，借問你欲去佗位？"),
+    RegressionCase("destination_prompt", "請問您具體要去哪個地點呢。", "借問你欲去佗位？"),
+    RegressionCase("destination_prompt", "您好，請問您要去臺北的哪個地方呢。", "你好，借問你欲去台北佗位？"),
+    RegressionCase("destination_prompt", "只要告訴我目的地，我就能為您查詢最近的公車路線", "只要共我講你欲去佗位，我就會當替你查較近的公車路線"),
+    RegressionCase("destination_prompt", "您好，請問您要去臺北的哪個地方呢。只要告訴我目的地，我就能為您查詢最近的公車路線", "你好，借問你欲去台北佗位？只要共我講你欲去佗位，我就會當替你查較近的公車路線"),
+    RegressionCase("destination_prompt", "您好，請問您是指新莊區嗎。", "你好，借問你是指新莊區無？"),
+    RegressionCase("destination_prompt", "請告訴我您想前往的新莊具體地點，我才能為您查詢", "請共我講你欲去新莊佗位，我才會當替你查"),
+    RegressionCase("destination_prompt", "您好，請問您是指新莊區嗎。請告訴我您想前往的新莊具體地點，我才能為您查詢", "你好，借問你是指新莊區無？請共我講你欲去新莊佗位，我才會當替你查"),
+    RegressionCase("destination_prompt", "您要去的是獅崙嗎。", "你欲去的是獅崙無？"),
+    RegressionCase("destination_prompt", "請告訴我您想前往獅崙的哪個地點", "請共我講你欲去獅崙佗位"),
+    RegressionCase("destination_prompt", "您要去的是獅崙嗎。請告訴我您想前往獅崙的哪個地點", "你欲去的是獅崙無？請共我講你欲去獅崙佗位"),
     # station service / lost property / redirect
     RegressionCase("service_redirect", "這個問題要問承辦單位，我這邊只能查公車班次。", "這个問題要問承辦單位，我遮干焦會當查公車班次。"),
     RegressionCase("service_redirect", "這個問題跟公車無關，我沒辦法回答。", "這个問題佮公車無關，我無法度回答。"),
