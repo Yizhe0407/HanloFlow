@@ -1087,6 +1087,9 @@ class TaigiConverter:
         text = text.replace("這馬咧咧", "這馬咧")
         text = text.replace("真正真", "真")
         text = re.sub(r"([,，。！？!?])\1+", r"\1", text)
+        # 高雄、高速公路等地名/複合詞被 char 誤轉「高->懸」之後復原
+        text = text.replace("懸雄", "高雄")
+        text = text.replace("懸速公路", "高速公路")
 
         for term in self.residual_terms:
             if term in text:

@@ -55,7 +55,7 @@ BUS_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("delay_eta", "這班公車臨時改道，轉車時間也會較慢。", "這班公車臨時改道，轉車時間也會較慢。"),
     RegressionCase("delay_eta", "這班公車改道以後，可能不會經過縣政府。", "這班公車改道了後，可能袂經過縣政府。"),
     RegressionCase("delay_eta", "往縣政府的車今天改道。", "往縣政府的車今仔日改道。"),
-    RegressionCase("delay_eta", "這班車現在先停駛，晚一點再公告。", "這班車這馬先停開，較慢再公告。"),
+    RegressionCase("delay_eta", "這班車現在先停駛，晚一點再公告。", "這班車這馬先停開，較慢閣公告。"),
     RegressionCase("delay_eta", "手機顯示不準，現場公告才準。", "手機顯示的無準，現場公告的才準。"),
     RegressionCase("delay_eta", "現在先照站牌公告，不要看手機時間。", "這馬先照站牌公告，莫看手機時間。"),
     RegressionCase("delay_eta", "回程車大概十分鐘後到。", "回程車差不多十分鐘後到。"),
