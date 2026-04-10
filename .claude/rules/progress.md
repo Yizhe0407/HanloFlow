@@ -6,17 +6,23 @@
 
 | 類型 | 數量 |
 |------|------|
-| 總詞條（active） | 18,104 |
-| 人工驗證（trust: human） | 5,563 |
+| 總詞條（active） | ~18,106 |
+| 人工驗證（trust: human） | ~5,568 |
 | base seed（trust: seed，低信任） | ~10,700 |
-| 停用詞條 | 4,919 |
-| 最新 round | round111 |
+| 停用詞條 | ~4,922 |
+| 最新 round | round112 |
 
-所有迴歸測試全部通過：bus 107、medical 30、transport 52
+所有迴歸測試全部通過：bus 107、medical 43、transport 57
 
 ---
 
 ## 近期做了什麼（最新在前）
+
+### 2026-04-10：base seed 修正 + 薄弱迴歸類別補強（round112）
+- 停用 3 條嚴重錯誤的 base seed：`你要注意`→`笑面虎`、`探視`→`探頭`、`住院`→`入院`
+- 新增：`右手邊`→`正手爿`、`左手邊`→`倒手爿`、`住院`→`蹛院`、`住院櫃檯` identity 保護、`探視` identity 保護
+- 迴歸測試補強：medical 30→43（rooms_inpatient 2→8、pharmacy_payment 3→7、redirect 3→6）
+- transport 52→57（destinations 3→8）
 
 ### 2026-04-07：說->講 大規模修正（e5fbd61）
 - 說->講 完整鏈：代名詞/在說/咧說/常見主語/說看
@@ -33,11 +39,9 @@
 ## 覆蓋率仍薄的地方
 
 ### 迴歸測試內（量少、遇新句型容易破）
-- `medical / rooms_inpatient`：只有 2 個案例
-- `medical / pharmacy_payment`：3 個
-- `medical / redirect`：3 個
-- `transport / destinations`：3 個
-- `transport / crowd_safety`：5 個
+- `transport / crowd_safety`：5 個（下次補到 8）
+- `medical / doctor_flow`：6 個（可補）
+- `medical / tests`：6 個（可補）
 
 ### 尚無迴歸測試的情境（已知會踩雷的領域）
 - 一般日常會話（打招呼、確認、表達情緒）← round107–111 正在補，但還缺 regression test
@@ -49,13 +53,13 @@
 
 ## 下一步優先工作
 
-1. **繼續日常會話 round112+**
-   - 目前 round107–111 已補約 50 條，但缺 regression 保護
+1. **繼續日常會話 round113+**
+   - 目前 round107–112 已補，但日常會話仍缺 regression 保護
    - 建議補一支 `run_daily_speech_regression.py`，收入已知通過的句型
 
-2. **把薄的迴歸類別補厚**
-   - `medical / rooms_inpatient`、`pharmacy_payment`、`redirect` 各補到 6–8 條
-   - `transport / destinations`、`crowd_safety` 各補到 8 條
+2. **繼續補薄弱迴歸類別**
+   - `transport / crowd_safety` 補到 8 條
+   - `medical / doctor_flow`、`tests` 各補到 8–10 條
 
 3. **評估新領域 regression**
    - 日常會話領域已有足夠詞條，可以開一支 `run_conversation_regression.py`

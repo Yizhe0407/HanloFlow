@@ -52,13 +52,26 @@ MEDICAL_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("pharmacy_payment", "如果你要領藥，先去批價再過來。", "若是欲領藥，先去算錢才過來。"),
     RegressionCase("pharmacy_payment", "你的健保卡刷不過，先去旁邊櫃檯問一下。", "你的健保卡鑢袂過，先去隔壁櫃檯問一下。"),
     RegressionCase("pharmacy_payment", "這張單子你先拿去批價，再回來給我。", "這張單仔你先提去批價，閣轉來予我。"),
+    RegressionCase("pharmacy_payment", "這些藥一天吃三次，飯後服用。", "遮的藥一工食三改，飯後服用。"),
+    RegressionCase("pharmacy_payment", "這個藥要冷藏，你回家記得放冰箱。", "這个藥要寒藏，你轉去厝裡記著放冰箱。"),
+    RegressionCase("pharmacy_payment", "你的藥袋在這裡，共有三種藥。", "你的藥袋佇遮，共有三種藥。"),
+    RegressionCase("pharmacy_payment", "今天藥局到五點，你早一點來拿。", "今仔日藥局到五點，你早一點來拿。"),
     # rooms / inpatient
     RegressionCase("rooms_inpatient", "請問病房在幾樓？", "借問病房佇第幾樓？"),
     RegressionCase("rooms_inpatient", "如果你要住院，先去住院櫃檯辦手續。", "若是欲蹛院，先去住院櫃檯辦手續。"),
+    RegressionCase("rooms_inpatient", "請問探視時間是幾點開始？", "借問探視時間是幾點開始？"),
+    RegressionCase("rooms_inpatient", "你的床位在三樓，電梯在右手邊。", "你的床位在三樓，電梯在正手爿。"),
+    RegressionCase("rooms_inpatient", "住院需要帶健保卡和身分證。", "蹛院需要帶健保卡和身分證。"),
+    RegressionCase("rooms_inpatient", "家屬可以在外面等，不能進去加護病房。", "家屬會當佇外口等，袂當進去加護病房。"),
+    RegressionCase("rooms_inpatient", "這間病房今天滿了，要換到四樓。", "這間病房今仔日滿矣，要換到四樓。"),
+    RegressionCase("rooms_inpatient", "你先去辦住院手續，再上去找護理站。", "你先去辦蹛院手續，再上去找護理站。"),
     # redirect / service
     RegressionCase("redirect", "如果你只是要問廁所在哪裡，我可以跟你說。", "若是你只是欲問便所佇佗位，我會當共你講。"),
     RegressionCase("redirect", "如果你要申請病歷，請去一樓服務台。", "若是你要申請病歷，請去一樓服務台。"),
     RegressionCase("redirect", "如果你要找失物，我可以幫你轉給總機。", "若是你要找失物，我會當替你轉去總機。"),
+    RegressionCase("redirect", "急診在另外一棟，你先走出去再左轉。", "急診在另外一棟，你先行出去再倒斡。"),
+    RegressionCase("redirect", "投訴要去二樓的服務台，不是我們這裡。", "投訴欲去二樓的服務台，毋是阮遮。"),
+    RegressionCase("redirect", "掛號要去一樓，不是這裡。", "掛號欲去一樓，毋是遮。"),
 ]
 
 
