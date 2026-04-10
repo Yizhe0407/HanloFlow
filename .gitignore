@@ -26,3 +26,7 @@ data/quarantine/
 data/manual_override_candidates.jsonl
 data/candidate_corpus.txt
 data/review_batch1_records.jsonl
+
+# Claude Code 本地設定（個人，不 commit）
+.claude/settings.local.json
+CLAUDE.local.md

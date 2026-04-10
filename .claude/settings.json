@@ -1,0 +1,30 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python3 app.py*)",
+      "Bash(python3 scripts/build_runtime_artifacts.py*)",
+      "Bash(python3 scripts/run_*_regression.py*)",
+      "Bash(python3 -m py_compile*)",
+      "Bash(uv run*)",
+      "Bash(git diff*)",
+      "Bash(git log*)",
+      "Bash(git status*)",
+      "Bash(grep* data/*)",
+      "Bash(wc -l data/*)"
+    ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c 'if echo \"$CLAUDE_TOOL_INPUT\" | python3 -c \"import sys,json; p=json.load(sys.stdin).get(\\\"file_path\\\",\\\"\\\"); exit(0 if (\\\"lexicon_entries\\\" in p or \\\"rule_entries\\\" in p) else 1)\" 2>/dev/null; then echo \"⚠️  記得重跑 artifacts: python3 scripts/build_runtime_artifacts.py --data-dir data\"; fi'",
+            "statusMessage": "檢查是否需要重編 artifacts..."
+          }
+        ]
+      }
+    ]
+  }
+}
