@@ -41,6 +41,10 @@ MEDICAL_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("tests", "這位病人等一下先做心電圖，再回來看診。", "這位病人等咧先做心電圖，閣轉來看診。"),
     RegressionCase("tests", "這個檢查室今天暫停使用，請到對面那間。", "這个檢查室今仔日停用，請到對面彼間。"),
     RegressionCase("tests", "抽血室在右手邊，先走到底再左轉。", "抽血室佇正手爿，先行到底才倒手斡。"),
+    RegressionCase("tests", "超音波要到二樓，先報到再等候。", "超音波要到二樓，先報到再等候。"),
+    RegressionCase("tests", "這個檢查需要家屬陪同。", "這个檢查需要家屬陪同。"),
+    RegressionCase("tests", "今天的採樣結果明天才出來。", "今仔日的採樣結果明仔載才出來。"),
+    RegressionCase("tests", "請先去抽血，回來再做其他檢查。", "請先去抽血，轉來再做其他檢查。"),
     # reports / doctor flow
     RegressionCase("doctor_flow", "我剛剛沒有聽清楚醫生的名字。", "我拄仔無聽清楚醫生的名。"),
     RegressionCase("doctor_flow", "如果有結果我會再通知你。", "若是有結果，我會閣共你講。"),
@@ -48,6 +52,10 @@ MEDICAL_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("doctor_flow", "現在叫號還沒到你，你先坐旁邊等。", "現佇咧叫號猶未到你，你先坐隔壁等。"),
     RegressionCase("doctor_flow", "報告還沒出來，你晚一點再回來拿。", "報告猶未出來，你較慢閣轉來拿。"),
     RegressionCase("doctor_flow", "醫生現在還在看上一位，你再等一下。", "醫生這馬猶在看上一位，你閣等咧。"),
+    RegressionCase("doctor_flow", "請問今天看診的醫生是哪一位？", "借問今仔日看診的醫生是佗一位？"),
+    RegressionCase("doctor_flow", "醫生說你需要再回診一次。", "醫生講你需要再回診一擺。"),
+    RegressionCase("doctor_flow", "這份報告已經轉給主治醫生了。", "這份報告已經轉給主治醫生矣。"),
+    RegressionCase("doctor_flow", "這個科今天沒有門診，請你改天再來。", "這个科今仔日無門診，請你改工閣來。"),
     # pharmacy / payment / cards
     RegressionCase("pharmacy_payment", "如果你要領藥，先去批價再過來。", "若是欲領藥，先去算錢才過來。"),
     RegressionCase("pharmacy_payment", "你的健保卡刷不過，先去旁邊櫃檯問一下。", "你的健保卡鑢袂過，先去隔壁櫃檯問一下。"),

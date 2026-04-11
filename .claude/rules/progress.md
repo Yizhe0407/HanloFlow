@@ -2,21 +2,49 @@
 
 > 每次大規模優化後請更新此檔案。這是讓下一個人快速接手的地圖。
 
-## 目前辭典狀態（2026-04-10）
+## 目前辭典狀態（2026-04-11）
 
 | 類型 | 數量 |
 |------|------|
-| 總詞條（active） | ~18,106 |
-| 人工驗證（trust: human） | ~5,568 |
+| 總詞條（active） | ~18,140 |
+| 人工驗證（trust: human） | ~5,600 |
 | base seed（trust: seed，低信任） | ~10,700 |
-| 停用詞條 | ~4,922 |
-| 最新 round | round112 |
+| 停用詞條 | ~4,930 |
+| 最新 round | round114 |
 
-所有迴歸測試全部通過：bus 107、medical 43、transport 57
+所有迴歸測試全部通過：bus 107、medical 51、transport 60、conversation 30
 
 ---
 
 ## 近期做了什麼（最新在前）
+
+### 2026-04-11：大批 base seed 清查 + 多類別系統修正（round114）
+**停用的惡性 base seed（共 5 條）：**
+- `不見`→`無去`、`下個月`→`後個月`、`很高`→`足懸的`、`跑走`→`逃走`、`完了`→`完結`
+
+**Allowlist 修正：**
+- 移除 `看電視`、`吹冷氣`（不需保護，但遮蓋後阻擋進行式規則）
+
+**Rule 擴充：**
+- 進行式動詞 +6：吹/唱/玩/跑/買/忙（`rl_817e6efe2ce1`）
+- 新增 fluency rule：`欲說` → `欲講`、`咧說` 已有
+
+**新增詞條（28 條）：**
+- `不清楚`/`不明白`/`不記得`/`不確定`/`不太確定` 系列
+- `會說`/`欲說`/`想說` → X講
+- `睡不著`→`睏袂去`、`上週`/`下週`/`這週`→禮拜系列
+- `外面在下雨`/`外面下雨了`、`上個星期`/`下個星期`
+- `牙痛`→`牙疼`、`喉嚨痛`→`嚨喉疼`、`喉嚨`→`嚨喉`
+- `見到`→`見著`、`找到`→`揣著`、`跟著`→`綴`
+- `不願意`→`毋肯`、`不應該`→`毋著`
+- `厲害`→`利害`、`好厲害`→`真利害`、`跑走`→`走去`
+
+### 2026-04-11：日常會話 bug 修正 + 薄弱迴歸補強（round113）
+- 停用惡性 base seed：`不見`→`無去`（修正「好久不見」→「好久無去」的錯誤）
+- 新增 4 條 round113 詞條：`好久不見`→`好久無見`、`你辛苦了`→`你辛苦矣`（修正重複「你」）、`不確定`→`無確定`、`不太確定`→`無啥確定`
+- 新增 `run_conversation_regression.py`（30 筆，5 類：greetings/status_check/daily_chat/daily_response/schedule_plans）
+- medical 補強：doctor_flow 6→10、tests 6→10（共 43→51）
+- transport 補強：crowd_safety 5→8（共 57→60）
 
 ### 2026-04-10：base seed 修正 + 薄弱迴歸類別補強（round112）
 - 停用 3 條嚴重錯誤的 base seed：`你要注意`→`笑面虎`、`探視`→`探頭`、`住院`→`入院`
@@ -53,16 +81,17 @@
 
 ## 下一步優先工作
 
-1. **繼續日常會話 round113+**
-   - 目前 round107–112 已補，但日常會話仍缺 regression 保護
-   - 建議補一支 `run_daily_speech_regression.py`，收入已知通過的句型
+1. **繼續日常會話 round114+**
+   - `run_conversation_regression.py` 已建立（30 筆），可繼續擴充
+   - 待補情境：餐廳/點餐、飯店/住宿、購物/問價
 
 2. **繼續補薄弱迴歸類別**
-   - `transport / crowd_safety` 補到 8 條
-   - `medical / doctor_flow`、`tests` 各補到 8–10 條
+   - `medical / doctor_flow`：已 10 條，持續觀察
+   - `transport / crowd_safety`：已 8 條，可再補到 10
 
-3. **評估新領域 regression**
-   - 日常會話領域已有足夠詞條，可以開一支 `run_conversation_regression.py`
+3. **開新領域 regression**
+   - 餐廳點餐：`run_restaurant_regression.py`（尚未建立）
+   - 購物情境：`run_shopping_regression.py`（尚未建立）
 
 4. **清查高頻錯誤的 base seed 詞條**
    - 還有大量 `trust: seed` 的舊詞條可能輸出奇怪結果
