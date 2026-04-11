@@ -25,7 +25,7 @@ TIER_INDEX = {tier: i for i, tier in enumerate(TIER_ORDER)}
 PASS_INDEX = {name: i for i, name in enumerate(PASS_ORDER)}
 RESIDUAL_MANDARIN_TERMS = ["東西", "什麼", "為什麼", "為何"]
 RULE_TOKEN_MAP = {
-    "{{PRONOUN}}": r"(?:我|你|伊|恁|怹|咱|阮|他|她|你們|他們)",
+    "{{PRONOUN}}": r"(?:我|你|伊|恁|怹|咱|阮|他|她|你們|他們|逐家)",
 }
 REGEX_DOT_GREEDY_RE = re.compile(r"(?<!\\)\.(?:\*|\+)")
 REGEX_UNBOUNDED_NEG_CLASS_RE = re.compile(r"\[\^[^\]]+\]\+")

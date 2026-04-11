@@ -7,17 +7,36 @@
 | 類型 | 數量 |
 |------|------|
 | 總詞條（active） | ~18,170 |
-| 人工驗證（trust: human） | ~5,631 |
-| base seed（trust: seed，低信任） | ~10,680 |
-| 停用詞條 | ~4,959 |
-| 最新 round | round117 |
+| 人工驗證（trust: human） | ~5,634 |
+| base seed（trust: seed，低信任） | ~10,670 |
+| 停用詞條 | ~4,969 |
+| 最新 round | round118 |
 
-所有迴歸測試全部通過（共 342 筆）：
-bus 107、medical 51、transport 60、conversation 30、restaurant 20、shopping 17、hotel 17、taxi 19、bank 21
+所有迴歸測試全部通過（共 362 筆）：
+bus 107、medical 51、transport 60、conversation 30、restaurant 20、shopping 17、hotel 17、taxi 19、bank 21、school 20
 
 ---
 
 ## 近期做了什麼（最新在前）
+
+### 2026-04-11：學校/教育領域開拓 + 進行式規則擴充 + base seed 清查（round118）
+**停用惡性 base seed（共 10 條）：**
+- `視力減退→青光眼`、`椰子蟹→八卦`（語義完全錯誤）
+- `顏色偏紅→紅蔥仔頭`、`行文淺易→童話`（描述→無關詞）
+- `不利農耕→北歐`、`不得疏忽→六月天`（危險定義式）
+- `不接受→拒絕`、`方言詞→詞彙`（語義變形）
+- `一種台灣小吃→蚵仔煎`（定義式）、`袂曉→精通`（台語詞被誤轉）
+
+**Rule 擴充：**
+- 進行式動詞 +3：上(\\u4e0a)/教(\\u6559)/讀(\\u8b80)（`rl_817e6efe2ce1`）
+- PRONOUN 模板加入 `逐家`（大家轉換後可觸發進行式）
+- 新增學校名詞主語進行式規則：`(老師|學生|同學)在V → X佇咧V`（`rl_school_noun_progressive`）
+
+**新增詞條（3 條）：**
+- `不會說→袂曉講`、`不會做→袂曉做`、`不太會→袂啥曉`
+
+**新增迴歸測試：**
+- `run_school_regression.py`（20 筆，6 類：teacher_class/student_class/homework/exam/campus/ability）
 
 ### 2026-04-11：base seed 清查 + 多X詞補完 + 銀行/郵局領域（round117）
 **停用惡性 base seed（共 17 條）：**
@@ -124,16 +143,16 @@ bus 107、medical 51、transport 60、conversation 30、restaurant 20、shopping
 - `medical / tests`：6 個（可補）
 
 ### 尚無迴歸測試的情境（已知會踩雷的領域）
-- 飯店/住宿情境
-- 計程車/叫車情境
+- 診所/掛號情境（擴充版）
+- 親子/家庭情境
 
 ---
 
 ## 下一步優先工作
 
 1. **開新領域 regression**
-   - 學校/教育情境：`run_school_regression.py`（尚未建立）
    - 診所/掛號情境（擴充，非住院）
+   - 親子/家庭情境（尚未建立）
 
 2. **繼續補薄弱迴歸類別**
    - `medical / doctor_flow`：已 10 條，持續觀察
