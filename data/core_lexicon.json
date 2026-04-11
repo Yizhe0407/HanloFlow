@@ -729,6 +729,46 @@
         "priority": 930
     },
     {
+        "src": "在哭",
+        "tgt": "佇咧哭",
+        "priority": 940
+    },
+    {
+        "src": "在玩",
+        "tgt": "佇咧玩",
+        "priority": 940
+    },
+    {
+        "src": "在煮飯",
+        "tgt": "佇咧煮飯",
+        "priority": 950
+    },
+    {
+        "src": "在洗碗",
+        "tgt": "佇咧洗碗",
+        "priority": 950
+    },
+    {
+        "src": "在洗澡",
+        "tgt": "佇咧洗身軀",
+        "priority": 960
+    },
+    {
+        "src": "在睡午覺",
+        "tgt": "佇咧睏晝",
+        "priority": 960
+    },
+    {
+        "src": "在餵奶",
+        "tgt": "佇咧飼奶",
+        "priority": 950
+    },
+    {
+        "src": "在工作",
+        "tgt": "佇咧工作",
+        "priority": 940
+    },
+    {
         "src": "不要吵",
         "tgt": "莫吵",
         "priority": 930

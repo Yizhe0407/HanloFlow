@@ -6,18 +6,33 @@
 
 | 類型 | 數量 |
 |------|------|
-| 總詞條（active） | ~18,170 |
-| 人工驗證（trust: human） | ~5,634 |
+| 總詞條（active） | ~18,174 |
+| 人工驗證（trust: human） | ~5,638 |
 | base seed（trust: seed，低信任） | ~10,670 |
 | 停用詞條 | ~4,969 |
-| 最新 round | round118 |
+| 最新 round | round119 |
 
-所有迴歸測試全部通過（共 362 筆）：
-bus 107、medical 51、transport 60、conversation 30、restaurant 20、shopping 17、hotel 17、taxi 19、bank 21、school 20
+所有迴歸測試全部通過（共 382 筆）：
+bus 107、medical 51、transport 60、conversation 30、restaurant 20、shopping 17、hotel 17、taxi 19、bank 21、school 20、family 20
 
 ---
 
 ## 近期做了什麼（最新在前）
+
+### 2026-04-11：親子/家庭領域開拓 + 進行式大擴充（round119）
+**核心進行式擴充（core_lexicon.json，適用所有主語）：**
+- `在哭→佇咧哭`、`在玩→佇咧玩`、`在煮飯→佇咧煮飯`、`在洗碗→佇咧洗碗`
+- `在洗澡→佇咧洗身軀`、`在睡午覺→佇咧睏晝`、`在餵奶→佇咧飼奶`、`在工作→佇咧工作`
+
+**Rule 擴充：**
+- PRONOUN 進行式動詞 +1：煮(\u716e)（`rl_817e6efe2ce1`）
+- 新增家庭名詞主語進行式規則：`阿母|阿爸|阿公|阿媽|阿弟仔|阿兄|阿姊|小妹仔|後生|老婆|翁婿 在V → X佇咧V`（`rl_b1401111d50e`）
+
+**新增詞條（4 條）：**
+- `女兒→查某囝`、`老公→翁婿`、`寶寶→囡仔`、`不聽話→毋聽喙`
+
+**新增迴歸測試：**
+- `run_family_regression.py`（20 筆，5 類：parent_child/health_care/siblings/grandparents/daily）
 
 ### 2026-04-11：學校/教育領域開拓 + 進行式規則擴充 + base seed 清查（round118）
 **停用惡性 base seed（共 10 條）：**
@@ -152,7 +167,6 @@ bus 107、medical 51、transport 60、conversation 30、restaurant 20、shopping
 
 1. **開新領域 regression**
    - 診所/掛號情境（擴充，非住院）
-   - 親子/家庭情境（尚未建立）
 
 2. **繼續補薄弱迴歸類別**
    - `medical / doctor_flow`：已 10 條，持續觀察
