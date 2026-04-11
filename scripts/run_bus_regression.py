@@ -69,8 +69,8 @@ BUS_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("payment_cards", "如果刷卡還是失敗，就先投現金。", "若是刷袂過，就先投現錢。"),
     RegressionCase("payment_cards", "你先上車，補票到總站再處理。", "你先上車，補票到總站再處理。"),
     RegressionCase("payment_cards", "如果你要去總站補票，先跟司機說一聲。", "若是你欲去總站補票，先佮司機講一聲。"),
-    RegressionCase("payment_cards", "這台刷卡機壞了，你到後門那台刷。", "這台鑢卡機歹去矣，你到後門那台刷。"),
-    RegressionCase("payment_cards", "愛心卡今天可以正常刷卡。", "愛心卡今仔日會當正常鑢卡。"),
+    RegressionCase("payment_cards", "這台刷卡機壞了，你到後門那台刷。", "這台刷卡機歹去矣，你到後門那台刷。"),
+    RegressionCase("payment_cards", "愛心卡今天可以正常刷卡。", "愛心卡今仔日會當正常刷卡。"),
     RegressionCase("payment_cards", "老人卡感應不到的話，請你先跟司機說。", "若是老人卡感應袂著，請你先佮司機講。"),
     RegressionCase("payment_cards", "你沒有零錢的話，可以去便利商店換。", "若是你無零錢，會當去便利商店換。"),
     # accessibility / boarding
