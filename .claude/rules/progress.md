@@ -6,17 +6,52 @@
 
 | 類型 | 數量 |
 |------|------|
-| 總詞條（active） | ~18,160 |
-| 人工驗證（trust: human） | ~5,615 |
-| base seed（trust: seed，低信任） | ~10,695 |
-| 停用詞條 | ~4,940 |
-| 最新 round | round115 |
+| 總詞條（active） | ~18,170 |
+| 人工驗證（trust: human） | ~5,631 |
+| base seed（trust: seed，低信任） | ~10,680 |
+| 停用詞條 | ~4,959 |
+| 最新 round | round117 |
 
-所有迴歸測試全部通過：bus 107、medical 51、transport 60、conversation 30
+所有迴歸測試全部通過（共 342 筆）：
+bus 107、medical 51、transport 60、conversation 30、restaurant 20、shopping 17、hotel 17、taxi 19、bank 21
 
 ---
 
 ## 近期做了什麼（最新在前）
+
+### 2026-04-11：base seed 清查 + 多X詞補完 + 銀行/郵局領域（round117）
+**停用惡性 base seed（共 17 條）：**
+- 定義式詞條（src=定義，tgt=術語）：`報告自己的姓名→報名`、`停戰謀和→韓戰`、`擔頭誠重→查某人`
+- 時間範圍→時辰（8 條）：`下午一點到三點→未時`、`下午三點至五點→申時`、`下午五點到七點→酉時`、`上午七點到九點→辰時`、`凌晨一點到三點→丑時`、`凌晨三點至五點→寅時`、`早上五點至七點→卯時`、`晚上七點至九點→戌時`
+- 其他定義式：`違反法令的行為→犯案`、`以契約的方式→包商`、`屬於北方的區域→北區`、`屬於國家所有的→國有`、`屬於國有的道路→國道`、`屬於認識的主體→主觀`
+
+**新增詞條（6 條）：多X疑問詞**
+- `多重→偌重`、`多長→偌長`、`多遠→偌遠`、`多深→偌深`、`多快→偌緊`、`多大→偌大`
+
+**新增迴歸測試：**
+- `run_bank_regression.py`（21 筆，4 類：bank_account/bank_transaction/bank_service/postal）
+
+### 2026-04-11：飯店/計程車領域開拓 + 位置詞修正（round116 續）
+**新增詞條（4 條）：**
+- `在前面→佇頭前`、`在後面→佇後壁`、`在旁邊→佇旁邊`（位置詞介系詞修正）
+- `幾點要退房→幾點愛退房`（退房義務語境 `要→愛`）
+
+**新增迴歸測試：**
+- `run_hotel_regression.py`（17 筆，5 類：reservation/check_in/check_out/amenities/issues）
+- `run_taxi_regression.py`（19 筆，5 類：hailing/destination/navigation/payment/misc）
+
+### 2026-04-11：餐廳/購物領域開拓 + bug 修正（round116）
+**停用詞條（共 1 條）：**
+- `這件→這層`（round5 舊詞條，誤傷衣物/商品情境，改用更精確的 `這件事`/`這件事情`→`這層代誌`）
+
+**新增詞條（5 條）：**
+- `不辣→無辣`（修正口味偏好句型）
+- `在點菜→佇咧叫菜`（修正進行式 + 點菜合體）
+- `這件事→這層代誌`、`這件事情→這層代誌`（取代過廣的 `這件→這層`）
+
+**新增迴歸測試：**
+- `run_restaurant_regression.py`（20 筆，5 類：ordering/spice_dietary/seating/payment/service）
+- `run_shopping_regression.py`（17 筆，5 類：browsing/bargaining/purchase/payment/after_sales）
 
 ### 2026-04-11：系統性錯誤批次修正（round115）
 **停用的惡性詞條（共 9 條）：**
@@ -89,30 +124,28 @@
 - `medical / tests`：6 個（可補）
 
 ### 尚無迴歸測試的情境（已知會踩雷的領域）
-- 一般日常會話（打招呼、確認、表達情緒）← round107–111 正在補，但還缺 regression test
-- 餐廳/點餐情境
 - 飯店/住宿情境
-- 購物/問價情境
+- 計程車/叫車情境
 
 ---
 
 ## 下一步優先工作
 
-1. **繼續日常會話 round114+**
-   - `run_conversation_regression.py` 已建立（30 筆），可繼續擴充
-   - 待補情境：餐廳/點餐、飯店/住宿、購物/問價
+1. **開新領域 regression**
+   - 學校/教育情境：`run_school_regression.py`（尚未建立）
+   - 診所/掛號情境（擴充，非住院）
 
 2. **繼續補薄弱迴歸類別**
    - `medical / doctor_flow`：已 10 條，持續觀察
    - `transport / crowd_safety`：已 8 條，可再補到 10
 
-3. **開新領域 regression**
-   - 餐廳點餐：`run_restaurant_regression.py`（尚未建立）
-   - 購物情境：`run_shopping_regression.py`（尚未建立）
-
-4. **清查高頻錯誤的 base seed 詞條**
+3. **清查高頻錯誤的 base seed 詞條**
    - 還有大量 `trust: seed` 的舊詞條可能輸出奇怪結果
    - 下次遇到怪輸出，先跑 `/trace` 確認是不是 base seed 在 shadow
+
+4. **已知 edge case（低優先）**
+   - `大一點的`/`小一點的` → 未轉換（台語應為「較大的」/「較細的」）
+   - 無主語句 `要V` → `要` 不轉義務 `愛`（如 `要走高速嗎` → `要走懸速無`）
 
 ---
 
