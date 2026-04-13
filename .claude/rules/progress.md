@@ -2,14 +2,14 @@
 
 > 每次大規模優化後請更新此檔案。這是讓下一個人快速接手的地圖。
 
-## 目前辭典狀態（2026-04-12）
+## 目前辭典狀態（2026-04-13）
 
 | 類型 | 數量 |
 |------|------|
-| 總詞條（active） | 15,713 |
-| 人工驗證（trust: human） | ~6,378 |
-| base seed（trust: seed，低信任） | 減少 5 條（停用惡性 seed） |
-| 最新 round | round134 |
+| 總詞條（active） | 15,732 |
+| 人工驗證（trust: human） | ~6,397 |
+| base seed（trust: seed，低信任） | 全部已停用（0 條 active） |
+| 最新 round | round135 |
 
 所有迴歸測試全部通過（共 400 筆）：
 bus 107、medical 69、transport 60、conversation 30、restaurant 20、shopping 17、hotel 17、taxi 19、bank 21、school 20、family 20
@@ -17,6 +17,29 @@ bus 107、medical 69、transport 60、conversation 30、restaurant 20、shopping
 ---
 
 ## 近期做了什麼（最新在前）
+
+### 2026-04-13：X一點比較詞組 + 說→講篇章語 + 雜項修正（round135）
+**新增詞條（19 條）：**
+
+**X一點比較詞組（12 條）：**
+- `大一點的→較大的`、`小一點的→較細的`（shopping，priority 1300）
+- `大一點→較大`、`小一點→較細`（bare comparative，priority 1200）
+- `多一點→加一寡`、`少一點→少一寡`（quantity）
+- `慢一點→慢一咧`、`早一點→早一咧`（request）
+- `高一點的→較懸的`、`低一點的→較低的`
+- `長一點的→較長的`、`短一點的→較短的`
+
+**說→講篇章語（4 條）：**
+- `說起來→講起來`、`說到底→講到底`
+- `換句話說→換句話講`、`也就是說→也就是講`
+
+**其他（3 條）：**
+- `那樣子→按呢`（修正 `那樣` + 殘字 `子` 問題，priority 1100）
+- `雖然如此→雖然按呢`
+- `說老實話→講實在話`（priority 1300，蓋過 `老實→古意` 干擾）
+
+**迴歸更新：**
+- `run_medical_regression.py` pharmacy_payment 第 55 筆：`早一點` 預期值更新為 `早一咧`
 
 ### 2026-04-12：好X 強化詞 + 在+地點規則擴充 + base seed 清查（round134）
 **停用惡性 base seed（5 條）：**
@@ -237,31 +260,25 @@ bus 107、medical 69、transport 60、conversation 30、restaurant 20、shopping
 ## 覆蓋率仍薄的地方
 
 ### 迴歸測試內（量少、遇新句型容易破）
-- `transport / crowd_safety`：5 個（下次補到 8）
-- `medical / doctor_flow`：6 個（可補）
-- `medical / tests`：6 個（可補）
+- `transport / crowd_safety`：已 8 條，可補到 10
+- `medical / doctor_flow`：已 10 條，持續觀察
 
 ### 尚無迴歸測試的情境（已知會踩雷的領域）
-- 診所/掛號情境（擴充版）
-- 親子/家庭情境
+- 診所/掛號情境（擴充版）—— 已有部分，但購物比較詞組未覆蓋
 
 ---
 
 ## 下一步優先工作
 
-1. **開新領域 regression**
-   - 診所/掛號情境（擴充，非住院）
-
-2. **繼續補薄弱迴歸類別**
-   - `medical / doctor_flow`：已 10 條，持續觀察
+1. **繼續補薄弱迴歸類別**
    - `transport / crowd_safety`：已 8 條，可再補到 10
+   - `medical / doctor_flow`：持續觀察
 
-3. **清查高頻錯誤的 base seed 詞條**
-   - 還有大量 `trust: seed` 的舊詞條可能輸出奇怪結果
-   - 下次遇到怪輸出，先跑 `/trace` 確認是不是 base seed 在 shadow
+2. **X一點 購物情境 regression 補充**
+   - round135 新增的比較詞組（大一點的/小一點的等）尚無迴歸覆蓋
+   - 考慮在 `run_shopping_regression.py` 補 2～3 個測試
 
-4. **已知 edge case（低優先）**
-   - `大一點的`/`小一點的` → 未轉換（台語應為「較大的」/「較細的」）
+3. **已知 edge case（低優先）**
    - 無主語句 `要V` → `要` 不轉義務 `愛`（如 `要走高速嗎` → `要走懸速無`）
 
 ---

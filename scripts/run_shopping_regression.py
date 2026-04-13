@@ -42,6 +42,10 @@ SHOPPING_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("payment", "可以刷卡嗎？", "會當刷卡無？"),
     RegressionCase("payment", "可以用手機支付嗎？", "會當用手機付錢無？"),
     RegressionCase("payment", "我要找零。", "我欲找錢。"),
+    # comparative — 比較詞組
+    RegressionCase("comparative", "有沒有大一點的？", "敢有較大的？"),
+    RegressionCase("comparative", "有小一點的嗎？", "有較細的無？"),
+    RegressionCase("comparative", "可以給我多一點嗎？", "會當予我加一寡無？"),
     # after_sales — 售後
     RegressionCase("after_sales", "我要退貨。", "我欲退貨。"),
     RegressionCase("after_sales", "可以換貨嗎？", "會當換貨無？"),
