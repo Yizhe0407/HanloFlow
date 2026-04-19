@@ -6,6 +6,28 @@ _CJK_PUNCT_CLASS = "，。！？；：、"
 _DIGITS = "零一二三四五六七八九"
 _BIG_UNITS = ["", "萬", "億", "兆", "京"]
 _FULLWIDTH_DIGIT_TRANS = str.maketrans("０１２３４５６７８９", "0123456789")
+_S2T_TRANS = str.maketrans(
+    {
+        "这": "這",
+        "车": "車",
+        "门": "門",
+        "们": "們",
+        "里": "裡",
+        "线": "線",
+        "发": "發",
+        "听": "聽",
+        "说": "說",
+        "点": "點",
+        "时": "時",
+        "问": "問",
+        "会": "會",
+        "过": "過",
+        "后": "後",
+        "让": "讓",
+        "吗": "嗎",
+        "云": "雲",
+    }
+)
 _NUMBER_TOKEN_RE = re.compile(r"(?<![A-Za-z0-9_.])([+-]?\d+(?:\.\d+)?)(?![A-Za-z0-9_.])")
 
 
@@ -90,6 +112,7 @@ def normalize_text(
 
     # 統一常見字形
     text = text.replace("臺", "台")
+    text = text.translate(_S2T_TRANS)
     text = text.translate(_FULLWIDTH_DIGIT_TRANS)
 
     if compress_spaces:
