@@ -5,14 +5,27 @@
 ## 安裝
 
 ```bash
-# 從 GitHub 安裝（推薦）
+# 從 GitHub 安裝
 pip install git+https://github.com/Yizhe0407/HanloFlow.git
 
 # 或用 uv
 uv add "taigi-converter @ git+https://github.com/Yizhe0407/HanloFlow.git"
 
-# 本機開發
-pip install /path/to/HanloFlow
+# 本機開發（editable，改完即時生效）
+pip install -e /path/to/HanloFlow
+uv add --editable /path/to/HanloFlow
+```
+
+## 更新
+
+```bash
+# git URL 安裝的用戶：pull 最新 commit
+pip install --upgrade git+https://github.com/Yizhe0407/HanloFlow.git
+
+# uv 用戶
+uv sync --upgrade-package taigi-converter
+
+# editable 本機安裝的用戶：不需任何指令，改完直接生效
 ```
 
 ## Python API
