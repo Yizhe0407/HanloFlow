@@ -28,6 +28,18 @@ _S2T_TRANS = str.maketrans(
         "云": "雲",
     }
 )
+_VARIANT_TRANS = str.maketrans(
+    {
+        "喺": "在",
+        "睇": "看",
+        "咗": "了",
+        "啲": "的",
+        "啱": "著",
+        "嚟": "來",
+        "攞": "拿",
+        "嗰": "那",
+    }
+)
 _NUMBER_TOKEN_RE = re.compile(r"(?<![A-Za-z0-9_.])([+-]?\d+(?:\.\d+)?)(?![A-Za-z0-9_.])")
 
 
@@ -113,6 +125,7 @@ def normalize_text(
     # 統一常見字形
     text = text.replace("臺", "台")
     text = text.translate(_S2T_TRANS)
+    text = text.translate(_VARIANT_TRANS)
     text = text.translate(_FULLWIDTH_DIGIT_TRANS)
 
     if compress_spaces:
