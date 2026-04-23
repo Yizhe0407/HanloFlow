@@ -27,7 +27,7 @@ MEDICAL_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("registration", "不好意思，我想改掛號時間。", "歹勢，我想欲改掛號時間。"),
     RegressionCase("registration", "請問今天還有現場號碼嗎？", "借問今仔日閣有當場的號碼無？"),
     RegressionCase("registration", "我現在在掛號櫃檯前面。", "我這馬佇掛號櫃檯頭前。"),
-    RegressionCase("registration", "我想問批價櫃檯在哪裡。", "我想問批價櫃檯佇佗位。"),
+    RegressionCase("registration", "我想問批價櫃檯在哪裡。", "我想欲問批價櫃檯佇佗位。"),
     RegressionCase("registration", "這份表單要先填完再去掛號。", "這份表仔愛先填好才去掛號。"),
     RegressionCase("registration", "這裡現在只收文件，不辦批價。", "遮這馬干焦收文件，不辦批價。"),
     RegressionCase("registration", "如果你要取消掛號，先抽號碼牌。", "若是你欲取消掛號，先抽號碼牌。"),

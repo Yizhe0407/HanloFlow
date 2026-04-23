@@ -88,7 +88,7 @@ TRANSPORT_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("destinations", "如果你要去夜市，在圓環那站下車就好。", "若是你欲去夜市，在圓環那站落車就好。"),
     RegressionCase("destinations", "去動物園的車一天只有兩班，你要注意時間。", "去動物園的車一工只有兩班，你欲注意時間。"),
     RegressionCase("destinations", "如果你要去老街，我幫你確認班次。", "若是你欲去老街，我替你確認班次。"),
-    RegressionCase("destinations", "這班車最遠只到海邊，不進市區。", "這班車最遠只到海墘，不進市區。"),
+    RegressionCase("destinations", "這班車最遠只到海邊，不進市區。", "這班車上遠只到海墘，不進市區。"),
     RegressionCase("destinations", "如果你要去文化館，在前一站下車再走進去。", "若是你欲去文化館，在前一站落車才行進去。"),
 ]
 
