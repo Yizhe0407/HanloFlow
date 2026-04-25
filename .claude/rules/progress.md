@@ -2,21 +2,35 @@
 
 > 每次大規模優化後請更新此檔案。這是讓下一個人快速接手的地圖。
 
-## 目前辭典狀態（2026-04-23）
+## 目前辭典狀態（2026-04-25）
 
 | 類型 | 數量 |
 |------|------|
 | 總詞條（active） | ~15,830 |
 | 人工驗證（trust: human） | ~6,490 |
 | base seed（trust: seed，低信任） | 全部已停用（0 條 active） |
-| 最新 round | round137 |
+| 最新 round | round138 |
 
-所有迴歸測試全部通過（共 400 筆）：
-bus 107、medical 69、transport 60、conversation 30、restaurant 20、shopping 17、hotel 17、taxi 19、bank 21、school 20、family 20
+所有迴歸測試全部通過（共 404 筆）：
+bus 107、medical 69、transport 60、conversation 31、restaurant 20、shopping 20、hotel 17、taxi 19、bank 21、school 20、family 20
 
 ---
 
 ## 近期做了什麼（最新在前）
+
+### 2026-04-25：還給+代詞保護 + package data 同步（round138）
+**新增詞條（9 條）：**
+- `還給我`、`還給你`、`還給他`、`還給她`、`還給您`
+- `還給我們`、`還給咱`、`還給你們`、`還給他們`
+- 修正 round137 已知限制：`還給你` 不再被 `給你→予你` overlap 繞過，避免輸出 `猶予你`
+
+**資料同步：**
+- 將根目錄 `data/` 主資料同步到 `taigi_converter/data/`
+- 重編根目錄與 package 內 artifacts，避免 CLI 與安裝套件行為不一致
+
+**迴歸更新：**
+- `run_conversation_regression.py / daily_response` +1：`還給你。→還給你。`
+- 全部 regression 通過（404 筆）
 
 ### 2026-04-23：基本文法大補強（round137）
 **新增詞條（~100 條）：**
