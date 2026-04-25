@@ -53,7 +53,7 @@ print('lx_' + hashlib.sha1(raw).hexdigest()[:12])
 
 ## Round 編號慣例
 
-- 目前最新：`round111`，下一個新增用 `round112`
+- 目前最新：`round139`，下一個新增用 `round140`
 - `source` 格式：`curation:round<N>_<英文描述>`，例如 `curation:round112_daily_speech_refresh`
 - `updated_by` 格式：`curation_round<N>_codex`
 - 每次新增一批相關詞條共用同一個 round 號，不同主題用不同 round

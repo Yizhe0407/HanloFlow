@@ -6,17 +6,39 @@
 
 | 類型 | 數量 |
 |------|------|
-| 總詞條（active） | ~15,830 |
-| 人工驗證（trust: human） | ~6,490 |
-| base seed（trust: seed，低信任） | 全部已停用（0 條 active） |
-| 最新 round | round138 |
+| 總詞條（active runtime） | 15,821 |
+| 人工驗證（trust: human） | ~6,500 |
+| base seed（trust: seed，低信任） | source 仍有短詞 active；runtime 以 policy 過濾高風險 seed |
+| 最新 round | round139 |
 
-所有迴歸測試全部通過（共 404 筆）：
-bus 107、medical 69、transport 60、conversation 31、restaurant 20、shopping 20、hotel 17、taxi 19、bank 21、school 20、family 20
+所有迴歸測試全部通過（共 422 筆）：
+bus 107、medical 69、transport 60、conversation 31、restaurant 20、shopping 20、hotel 17、taxi 19、bank 21、school 20、family 20、workplace 18
 
 ---
 
 ## 近期做了什麼（最新在前）
+
+### 2026-04-25：辦公/會議情境開拓（round139）
+**新增詞條（6 條）：**
+- `要開會→欲開會`
+- `想請→想欲請`
+- `再確認→閣確認`
+- `再討論→閣討論`
+- `會議改到→會議改做`
+- `要簽名→愛簽名`
+
+**Rule 擴充：**
+- `rl_g_zai_locative_places` 加入 `會議室`，修正 `主管在會議室→主管佇會議室`
+- 新增 `rl_2ff8cda43199`：辦公名詞主語進行式，支援 `同事/主管/老闆/助理/客戶/工程師/設計師在V → X佇咧V`
+
+**新增迴歸測試：**
+- `run_workplace_regression.py`（18 筆，5 類：meeting、office_location、progressive、workflow、leave_availability）
+
+**資料同步：**
+- 根目錄 `data/` 與 `taigi_converter/data/` 同步更新並重編 artifacts
+
+**驗證：**
+- 全部 regression 通過（422 筆）
 
 ### 2026-04-25：還給+代詞保護 + package data 同步（round138）
 **新增詞條（9 條）：**

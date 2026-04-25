@@ -25,6 +25,7 @@ python3 -m py_compile artifact_compiler.py converter.py app.py scripts/build_run
 python3 scripts/run_bus_regression.py
 python3 scripts/run_medical_regression.py
 python3 scripts/run_transport_regression.py
+python3 scripts/run_workplace_regression.py
 ```
 
 ## 資料修正優先順序
