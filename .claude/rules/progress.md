@@ -2,21 +2,39 @@
 
 > 每次大規模優化後請更新此檔案。這是讓下一個人快速接手的地圖。
 
-## 目前辭典狀態（2026-04-25）
+## 目前辭典狀態（2026-04-26）
 
 | 類型 | 數量 |
 |------|------|
-| 總詞條（active runtime） | 15,821 |
+| 總詞條（active runtime） | 15,823 |
 | 人工驗證（trust: human） | ~6,500 |
 | base seed（trust: seed，低信任） | source 仍有短詞 active；runtime 以 policy 過濾高風險 seed |
-| 最新 round | round139 |
+| 最新 round | round140 |
 
-所有迴歸測試全部通過（共 422 筆）：
-bus 107、medical 69、transport 60、conversation 31、restaurant 20、shopping 20、hotel 17、taxi 19、bank 21、school 20、family 20、workplace 18
+所有迴歸測試全部通過（共 424 筆）：
+bus 107、medical 69、transport 60、conversation 33、restaurant 20、shopping 20、hotel 17、taxi 19、bank 21、school 20、family 20、workplace 18
 
 ---
 
 ## 近期做了什麼（最新在前）
+
+### 2026-04-26：意圖問句 `打算去...` 修正 + package data 同步（round140）
+**停用錯誤機器詞條（1 條）：**
+- `打算→拍算`（machine review_queue，會污染 `你打算去哪...` 意圖句）
+
+**新增人工詞條（3 條）：**
+- `打算去→欲去`
+- `哪邊→佗位`
+- `哪座→佗一座`
+
+**新增迴歸測試：**
+- `run_conversation_regression.py / schedule_plans` +2
+- 覆蓋 `你打算去哪邊游泳呢？→你欲去佗位泅水咧？`
+- 覆蓋 `你打算去哪座山呢？→你欲去佗一座山咧？`
+
+**資料同步：**
+- 根目錄 `data/` 與 `taigi_converter/data/` 同步更新
+- 重編根目錄與 package 內 artifacts，避免 CLI 與安裝套件行為不一致
 
 ### 2026-04-25：辦公/會議情境開拓（round139）
 **新增詞條（6 條）：**
