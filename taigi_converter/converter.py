@@ -556,6 +556,8 @@ class TaigiConverter:
                 entry = entries[entry_index]
                 if entry.status != "active":
                     continue
+                if entry.context:
+                    continue
                 candidates.append(
                     Candidate(
                         entry=entry,

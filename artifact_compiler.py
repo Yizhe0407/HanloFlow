@@ -842,7 +842,7 @@ def compile_runtime_artifacts(data_dir: Path = DATA_DIR, fail_on_mask: bool = Fa
             sentence_override_map.setdefault(entry.src, []).append(entry.entry_id)
         if is_trusted_manual_entry(entry) and entry.context:
             contextual_override_ids.append(entry.entry_id)
-        if entry.level == "char":
+        if entry.level == "char" and not entry.context:
             char_map.setdefault(entry.src, []).append(entry.entry_id)
 
     phrase_trie = _serialize_runtime_phrase_trie(
