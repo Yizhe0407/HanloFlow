@@ -9,14 +9,29 @@
 | 總詞條（active runtime） | 15,823 |
 | 人工驗證（trust: human） | ~6,500 |
 | base seed（trust: seed，低信任） | source 仍有短詞 active；runtime 以 policy 過濾高風險 seed |
-| 最新 round | round140 |
+| 最新 round | round141 |
 
-所有迴歸測試全部通過（共 424 筆）：
-bus 107、medical 69、transport 60、conversation 33、restaurant 20、shopping 20、hotel 17、taxi 19、bank 21、school 20、family 20、workplace 18
+所有迴歸測試全部通過（共 425 筆）：
+bus 107、medical 69、transport 60、conversation 34、restaurant 20、shopping 20、hotel 17、taxi 19、bank 21、school 20、family 20、workplace 18
 
 ---
 
 ## 近期做了什麼（最新在前）
+
+### 2026-04-26：時間長度 `一個多月` 修正（round141）
+**停用錯誤機器詞條（1 條）：**
+- `一個多月→個捅月`（machine review_queue，輸出缺字且語義不通）
+
+**新增人工詞條（1 條）：**
+- `一個多月→一个外月`
+
+**新增迴歸測試：**
+- `run_conversation_regression.py / schedule_plans` +1
+- 覆蓋 `我等了一個多月。→我等一个外月。`
+
+**資料同步：**
+- 根目錄 `data/` 與 `taigi_converter/data/` 同步更新
+- 重編根目錄與 package 內 artifacts
 
 ### 2026-04-26：意圖問句 `打算去...` 修正 + package data 同步（round140）
 **停用錯誤機器詞條（1 條）：**

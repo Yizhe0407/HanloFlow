@@ -61,6 +61,7 @@ CONVERSATION_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("schedule_plans", "我現在在等車。", "我這馬咧等車。"),
     RegressionCase("schedule_plans", "你打算去哪邊游泳呢？", "你欲去佗位泅水咧？"),
     RegressionCase("schedule_plans", "你打算去哪座山呢？", "你欲去佗一座山咧？"),
+    RegressionCase("schedule_plans", "我等了一個多月。", "我等一个外月。"),
 ]
 
 
