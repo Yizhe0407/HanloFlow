@@ -6,17 +6,39 @@
 
 | 類型 | 數量 |
 |------|------|
-| 總詞條（active runtime） | 15,869 |
+| 總詞條（active runtime） | 15,877 |
 | 人工驗證（trust: human） | ~6,500 |
 | base seed（trust: seed，低信任） | source 仍有短詞 active；runtime 以 policy 過濾高風險 seed |
-| 最新 round | round146 |
+| 最新 round | round147 |
 
-所有迴歸測試全部通過（共 468 筆）：
-bus 150、medical 69、transport 60、conversation 34、restaurant 20、shopping 20、hotel 17、taxi 19、bank 21、school 20、family 20、workplace 18
+所有迴歸測試全部通過（共 475 筆）：
+bus 157、medical 69、transport 60、conversation 34、restaurant 20、shopping 20、hotel 17、taxi 19、bank 21、school 20、family 20、workplace 18
 
 ---
 
 ## 近期做了什麼（最新在前）
+
+### 2026-04-28：斗六古坑線與西螺周邊景點補強（round147）
+**新增人工詞條（19 條 active）：**
+- 北港虎尾線/高鐵雲林站周邊：`聖玫瑰天主堂`、`西螺廣福宮`、`西螺媽廟`、`西螺大橋`、`斗六棒球場`
+- 斗六古坑線雲中街周邊與優惠店家：`凹凸咖啡`、`猿樂作`、`貝歐克尼Balcony乾燥花`、`黑膠音樂故事館`、`Mr. Lobby Coffee Roaster`、`劍湖山世界樂園`
+- Locative/固定片語：`在聖玫瑰天主堂→佇聖玫瑰天主堂`、`在西螺廣福宮→佇西螺廣福宮`、`在西螺大橋→佇西螺大橋`、`在斗六棒球場→佇斗六棒球場`、`在雲中街→佇雲中街`、`在黑膠音樂故事館→佇黑膠音樂故事館`、`都在高鐵雲林站北邊→攏佇高鐵雲林站北爿`、`都在雲中街→攏佇雲中街`
+
+**Rule 擴充：**
+- 新增 `rl_147_yunlin_douliu_xiluo_zai_locative_places`，支援斗六古坑線與北港虎尾線周邊景點/店家作地點時 `在X→佇X`
+
+**修正實測錯誤：**
+- `斗六棒球場` 不再被改成 `斗六野球場`
+- `貝歐克尼Balcony乾燥花` 不再被拆成 `貝歐克尼Balcony焦燥花`
+- `都在高鐵雲林站北邊` 不再輸出 `攏咧高鐵雲林站北爿`
+
+**新增迴歸測試：**
+- `run_bus_regression.py / yunlin_douliu_xiluo_attractions` +7
+- 覆蓋聖玫瑰天主堂、西螺廣福宮/大橋、斗六棒球場、雲中街店家與台灣好行優惠問句
+
+**資料同步：**
+- 根目錄 `data/` 與 `taigi_converter/data/` 同步更新
+- 重編根目錄與 package 內 artifacts
 
 ### 2026-04-28：雲林草嶺線小站名補強（round146）
 **新增人工詞條（20 條 active）：**
