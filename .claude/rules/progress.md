@@ -6,17 +6,37 @@
 
 | 類型 | 數量 |
 |------|------|
-| 總詞條（active runtime） | 15,859 |
+| 總詞條（active runtime） | 15,869 |
 | 人工驗證（trust: human） | ~6,500 |
 | base seed（trust: seed，低信任） | source 仍有短詞 active；runtime 以 policy 過濾高風險 seed |
-| 最新 round | round145 |
+| 最新 round | round146 |
 
-所有迴歸測試全部通過（共 462 筆）：
-bus 144、medical 69、transport 60、conversation 34、restaurant 20、shopping 20、hotel 17、taxi 19、bank 21、school 20、family 20、workplace 18
+所有迴歸測試全部通過（共 468 筆）：
+bus 150、medical 69、transport 60、conversation 34、restaurant 20、shopping 20、hotel 17、taxi 19、bank 21、school 20、family 20、workplace 18
 
 ---
 
 ## 近期做了什麼（最新在前）
+
+### 2026-04-28：雲林草嶺線小站名補強（round146）
+**新增人工詞條（20 條 active）：**
+- 草嶺線小站名：`受天宮`、`東和`、`早寮`、`二坪仔`、`東內寮`、`小旗仔`、`檳榔宅`、`外湖`、`內湖`、`草嶺`
+- 對應 locative 片語：`在受天宮→佇受天宮`、`在東和→佇東和`、`在早寮→佇早寮`、`在二坪仔→佇二坪仔`、`在東內寮→佇東內寮`、`在小旗仔→佇小旗仔`、`在檳榔宅→佇檳榔宅`、`在外湖→佇外湖`、`在內湖→佇內湖`、`在草嶺→佇草嶺`
+
+**Rule 擴充：**
+- 新增 `rl_146_yunlin_caoling_minor_zai_locative_places`，支援草嶺線小站名作地點時 `在X→佇X`
+
+**修正實測錯誤：**
+- `檳榔宅` 不再被一般食物詞彙拆成 `菁仔宅`
+- `站牌在檳榔宅附近嗎？` 可輸出 `站牌佇檳榔宅附近無？`
+
+**新增迴歸測試：**
+- `run_bus_regression.py / yunlin_caoling_minor_stops` +6
+- 覆蓋草嶺線小站名、`檳榔宅` 專名保護、站牌 locative 與 `外湖/內湖` 動線問句
+
+**資料同步：**
+- 根目錄 `data/` 與 `taigi_converter/data/` 同步更新
+- 重編根目錄與 package 內 artifacts
 
 ### 2026-04-28：雲林斗南、沿海與草嶺石壁景點補強（round145）
 **新增/調整人工詞條（21 條 active，1 條 disabled）：**

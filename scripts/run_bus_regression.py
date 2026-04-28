@@ -135,6 +135,12 @@ BUS_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("yunlin_coastal_caoling", "大飛山、杉林步道和遊龍湖步道今天有接駁車嗎？", "大飛山、杉林步道和遊龍湖步道今仔日有接駁車無？"),
     RegressionCase("yunlin_coastal_caoling", "雲林記憶Cool和雲林故事館都在虎尾市區嗎？", "雲林記憶Cool和雲林故事館攏佇虎尾市區無？"),
     RegressionCase("yunlin_coastal_caoling", "虎尾建國一村和北溪剪紙藝術村附近有站牌嗎？", "虎尾建國一村和北溪剪紙藝術村附近有站牌無？"),
+    RegressionCase("yunlin_caoling_minor_stops", "早寮、二坪仔和東內寮附近有站牌嗎？", "早寮、二坪仔和東內寮附近有站牌無？"),
+    RegressionCase("yunlin_caoling_minor_stops", "小旗仔、檳榔宅、外湖和內湖都在草嶺線嗎？", "小旗仔、檳榔宅、外湖和內湖攏佇草嶺線無？"),
+    RegressionCase("yunlin_caoling_minor_stops", "草嶺線會經過東和、受天宮和環球科技大學側門嗎？", "草嶺線會經過東和、受天宮和環球科技大學側門無？"),
+    RegressionCase("yunlin_caoling_minor_stops", "站牌在檳榔宅附近嗎？", "站牌佇檳榔宅附近無？"),
+    RegressionCase("yunlin_caoling_minor_stops", "外湖到內湖要走多久？", "外湖到內湖要走偌久？"),
+    RegressionCase("yunlin_caoling_minor_stops", "新草嶺國小到草嶺山莊會先經過草嶺嗎？", "新草嶺國小到草嶺山莊會先過草嶺無？"),
     # destination clarification prompts
     RegressionCase("destination_prompt", "臺北範圍很廣，請問您具體要去哪個地點呢。", "台北真大，借問你欲去佗位？"),
     RegressionCase("destination_prompt", "請問您具體要去哪個地點呢。", "借問你欲去佗位？"),
