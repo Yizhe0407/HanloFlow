@@ -148,6 +148,13 @@ BUS_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("yunlin_douliu_xiluo_attractions", "Mr. Lobby Coffee Roaster和劍湖山世界樂園有台灣好行優惠嗎？", "Mr. Lobby Coffee Roaster和劍湖山世界樂園有台灣好行優惠無？"),
     RegressionCase("yunlin_douliu_xiluo_attractions", "站牌在斗六棒球場旁邊嗎？", "站牌佇斗六野球場隔壁無？"),
     RegressionCase("yunlin_douliu_xiluo_attractions", "西螺媽廟到西螺大橋要轉車嗎？", "西螺媽廟到西螺大橋愛轉車無？"),
+    RegressionCase("yunlin_shuttle_food_stops", "蜜蜂故事館和華山咖啡大街物產館都在斗六古坑線嗎？", "蜜蜂故事館和華山咖啡大街物產館攏佇斗六古坑線無？"),
+    RegressionCase("yunlin_shuttle_food_stops", "鄉村休閒農莊、咖啡大街民宿和莿桐花咖啡附近有站牌嗎？", "鄉村休閒農莊、咖啡大街民宿和莿桐花咖啡附近有站牌無？"),
+    RegressionCase("yunlin_shuttle_food_stops", "石墩庭園咖啡在華山咖啡大街附近嗎？", "石墩庭園咖啡佇華山咖啡大街附近無？"),
+    RegressionCase("yunlin_shuttle_food_stops", "蝦の故鄉興義軒休閒園區和北港當歸鴨都在雲西線嗎？", "蝦の故鄉興義軒休閒園區和北港當歸鴨攏佇雲西線無？"),
+    RegressionCase("yunlin_shuttle_food_stops", "站牌在蜜蜂故事館前面嗎？", "站牌佇蜜蜂故事館頭前無？"),
+    RegressionCase("yunlin_shuttle_food_stops", "站牌在蝦の故鄉 興義軒休閒園區前面嗎？", "站牌佇蝦の故鄉興義軒休閒園區頭前無？"),
+    RegressionCase("yunlin_shuttle_food_stops", "阿甘薯叔 雲林高鐵門市在高鐵雲林站裡面嗎？", "阿甘薯叔雲林高鐵門市佇高鐵雲林站內底無？"),
     # destination clarification prompts
     RegressionCase("destination_prompt", "臺北範圍很廣，請問您具體要去哪個地點呢。", "台北真大，借問你欲去佗位？"),
     RegressionCase("destination_prompt", "請問您具體要去哪個地點呢。", "借問你欲去佗位？"),
