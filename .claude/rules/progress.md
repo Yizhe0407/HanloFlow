@@ -6,17 +6,37 @@
 
 | 類型 | 數量 |
 |------|------|
-| 總詞條（active runtime） | 15,930 |
-| 人工驗證（trust: human） | ~6,555 |
+| 總詞條（active runtime） | 15,934 |
+| 人工驗證（trust: human） | ~6,559 |
 | base seed（trust: seed，低信任） | source 仍有短詞 active；runtime 以 policy 過濾高風險 seed |
-| 最新 round | round154 |
+| 最新 round | round155 |
 
-所有迴歸測試全部通過（共 535 筆）：
-bus 217、medical 69、transport 60、conversation 34、restaurant 20、shopping 20、hotel 17、taxi 19、bank 21、school 20、family 20、workplace 18
+所有迴歸測試全部通過（共 539 筆）：
+bus 217、medical 69、transport 60、conversation 38、restaurant 20、shopping 20、hotel 17、taxi 19、bank 21、school 20、family 20、workplace 18
 
 ---
 
 ## 近期做了什麼（最新在前）
+
+### 2026-04-29：日常回應「願意/肯傾聽」口語自然度補強（round155）
+**新增人工詞條（4 條 active）：**
+- `我都願意傾聽喔→我攏肯用心聽你講喔`
+- `我都肯傾聽喔→我攏肯聽你講喔`
+- `我都願意傾聽→我攏肯用心聽你講`
+- `我都肯傾聽→我攏肯聽你講`
+
+**修正實測錯誤：**
+- `我都願意傾聽喔` 不再輸出偏華語的 `我都肯傾聽喔`
+- `我都肯傾聽喔` 不再保留書面 `傾聽`
+- 依使用者校正，`願意傾聽` 採較溫柔正式的 `肯用心聽你講`，`肯傾聽` 採較口語的 `肯聽你講`
+
+**新增迴歸測試：**
+- `run_conversation_regression.py / daily_response` +4，分類合計 11 筆
+- 覆蓋有無句尾 `喔` 的兩組傾聽回應
+
+**資料同步：**
+- 根目錄 `data/` 與 `taigi_converter/data/` 同步更新
+- 重編根目錄與 package 內 artifacts
 
 ### 2026-04-29：公車等車時間問句語序收斂（round154）
 **新增人工詞條（6 條 active）：**
