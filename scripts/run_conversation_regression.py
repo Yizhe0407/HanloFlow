@@ -56,6 +56,10 @@ CONVERSATION_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("daily_response", "我都肯傾聽喔", "我攏肯聽你講喔"),
     RegressionCase("daily_response", "我都願意傾聽", "我攏肯用心聽你講"),
     RegressionCase("daily_response", "我都肯傾聽", "我攏肯聽你講"),
+    RegressionCase("daily_response", "才忍不住想說給聽的", "才忍袂牢想講予聽的"),
+    RegressionCase("daily_response", "才忍不住想講給聽的", "才忍袂牢想講予聽的"),
+    RegressionCase("daily_response", "台北和台中都有不少不錯的選擇", "台北佮台中攏有袂少袂䆀的選擇"),
+    RegressionCase("daily_response", "聽到你這樣說", "聽著你按呢講"),
     # scheduling / plans
     RegressionCase("schedule_plans", "等一下打給你。", "等陣仔閣敲予你。"),
     RegressionCase("schedule_plans", "改天再說。", "改工閣講。"),
