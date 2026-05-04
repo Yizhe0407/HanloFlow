@@ -1100,6 +1100,27 @@ class TaigiConverter:
 
         return text, warnings
 
+    def _post_unmask_time_cleanup(self, text: str) -> str:
+        amount = r"[0-9一二兩三四五六七八九十百千零〇半]+"
+        unit = r"(?:个點鐘|點半|點鐘|點|分鐘|刻鐘|工|天|日|个月|月|年|冬|禮拜|星期|週|周)"
+        time_expr = rf"{amount}{unit}"
+        named_time = (
+            r"(?:今仔日|明仔載|明仔|後日|大後日|昨昏|前日|大前日|"
+            r"這禮拜|下禮拜|頂禮拜|這个月|後個月|頂個月|"
+            r"月頭|月中|月尾|年頭|冬尾)"
+        )
+
+        text = re.sub(rf"({amount})天(?=(?:以內|以前|之前|以後|之後|了後|內|前|後|到|至))", r"\1工", text)
+        text = re.sub(rf"({time_expr})(?:以前|之前)", r"\1進前", text)
+        text = re.sub(rf"({time_expr})(?:以後|之後|了後)", r"\1後", text)
+        text = re.sub(rf"({time_expr})以內", r"\1內", text)
+        text = re.sub(rf"({named_time})(?:以前|之前)", r"\1進前", text)
+        text = re.sub(rf"({named_time})(?:以後|之後|了後)", r"\1後", text)
+        text = re.sub(rf"({named_time})以內", r"\1內", text)
+        text = text.replace("進前要報到", "進前愛報到")
+        text = text.replace("進前要到", "進前愛到")
+        return text
+
     def _enqueue_review_if_needed(
         self,
         *,
@@ -1202,6 +1223,7 @@ class TaigiConverter:
 
         final_output, cleanup_warnings = self._post_cleanup(lexicon_output)
         final_output = self._unmask_protected_terms(final_output, protected_token_map)
+        final_output = self._post_unmask_time_cleanup(final_output)
 
         warnings = lexicon_warnings + cleanup_warnings
 
