@@ -81,7 +81,7 @@ MEDICAL_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("pharmacy_payment", "這些藥一天吃三次，飯後服用。", "遮的藥一工食三擺，飯後服用。"),
     RegressionCase("pharmacy_payment", "這個藥要冷藏，你回家記得放冰箱。", "這个藥要寒藏，你轉去厝裡記著放冰箱。"),
     RegressionCase("pharmacy_payment", "你的藥袋在這裡，共有三種藥。", "你的藥袋佇遮，共有三種藥。"),
-    RegressionCase("pharmacy_payment", "今天藥局到五點，你早一點來拿。", "今仔日藥局到五點，你早一咧來拿。"),
+    RegressionCase("pharmacy_payment", "今天藥局到五點，你早一點來拿。", "今仔日藥局到五點，你較早來拿。"),
     # rooms / inpatient
     RegressionCase("rooms_inpatient", "請問病房在幾樓？", "借問病房佇第幾樓？"),
     RegressionCase("rooms_inpatient", "如果你要住院，先去住院櫃檯辦手續。", "若是欲蹛院，先去住院櫃檯辦手續。"),
