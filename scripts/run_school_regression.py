@@ -37,6 +37,9 @@ SCHOOL_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("homework", "今天有作業嗎？", "今仔日有作業無？"),
     RegressionCase("homework", "功課做完了嗎？", "功課做完矣無？"),
     RegressionCase("homework", "今天有什麼課？", "今仔日有啥課？"),
+    RegressionCase("homework", "我忘記帶作業。", "我袂記得帶作業。"),
+    RegressionCase("homework", "作業明天要交。", "作業明仔載愛交。"),
+    RegressionCase("homework", "可以補交作業嗎？", "會當補交作業無？"),
     # exam — 考試
     RegressionCase("exam", "我要考試了。", "我欲考試矣。"),
     RegressionCase("exam", "考試及格了嗎？", "考試及格矣無？"),
@@ -49,6 +52,10 @@ SCHOOL_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("campus", "請問廁所在哪裡？", "借問便所佇佗位？"),
     RegressionCase("campus", "這本書借我看看。", "這本冊借我看覓。"),
     RegressionCase("campus", "下課了嗎？", "下課矣無？"),
+    RegressionCase("campus", "請問保健室在哪裡？", "借問保健室佇佗位？"),
+    RegressionCase("campus", "老師辦公室在二樓。", "老師辦公室佇二樓。"),
+    RegressionCase("campus", "操場可以借球嗎？", "操場會當借球無？"),
+    RegressionCase("campus", "我要去圖書館還書。", "我欲去圖冊館還書。"),
     # ability — 能力表達
     RegressionCase("ability", "我不會說台語。", "我袂曉講台語。"),
     RegressionCase("ability", "我不太會游泳。", "我袂啥曉泅水。"),

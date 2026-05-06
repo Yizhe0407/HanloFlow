@@ -29,12 +29,22 @@ TAXI_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("hailing", "司機快來了嗎？", "司機緊來矣無？"),
     RegressionCase("hailing", "可以幫我叫一台計程車嗎？", "會當替我叫一台計程車無？"),
     RegressionCase("hailing", "我在飯店門口等車。", "我佇飯店門跤口等車。"),
+    RegressionCase("hailing", "請在門口等我。", "請佇門跤口等我。"),
+    RegressionCase("hailing", "我們有四個人。", "阮有四个人。"),
+    RegressionCase("hailing", "可以派大一點的車嗎？", "會當派較大的車無？"),
+    RegressionCase("hailing", "車可以等五分鐘嗎？", "車會當等五分鐘無？"),
+    RegressionCase("hailing", "我在便利商店門口等車。", "我佇便利店門跤口等車。"),
     # destination — 目的地
     RegressionCase("destination", "請問到台北車站多少錢？", "借問到臺北車站偌濟錢？"),
     RegressionCase("destination", "我要去機場。", "我欲去機場。"),
     RegressionCase("destination", "請到這個地址。", "請到這个地址。"),
     RegressionCase("destination", "請送我到機場。", "請載我到機場。"),
     RegressionCase("destination", "我要去高鐵站。", "我欲去高鐵站。"),
+    RegressionCase("destination", "我想改目的地。", "我想欲改目的地。"),
+    RegressionCase("destination", "請走高速公路。", "請走高速公路。"),
+    RegressionCase("destination", "我要到捷運站。", "我欲到捷運站。"),
+    RegressionCase("destination", "我要到醫院。", "我欲到病院。"),
+    RegressionCase("destination", "請載我到飯店。", "請載我到飯店。"),
     # navigation — 行進指引
     RegressionCase("navigation", "請停在前面。", "請停佇頭前。"),
     RegressionCase("navigation", "在前面右轉。", "佇頭前正斡。"),
@@ -43,6 +53,11 @@ TAXI_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("navigation", "就這裡下車。", "就遮落車。"),
     RegressionCase("navigation", "麻煩靠邊停一下。", "麻煩靠路邊停一下。"),
     RegressionCase("navigation", "前面臨停一下就好。", "頭前暫停一下就好。"),
+    RegressionCase("navigation", "靠右邊停。", "靠正手爿停。"),
+    RegressionCase("navigation", "靠左邊停。", "靠倒手爿停。"),
+    RegressionCase("navigation", "前面路口右轉。", "頭前路口正斡。"),
+    RegressionCase("navigation", "不要走高速公路。", "莫走高速公路。"),
+    RegressionCase("navigation", "可以迴轉嗎？", "會當踅頭無？"),
     # payment — 付款
     RegressionCase("payment", "多少錢？", "偌濟錢？"),
     RegressionCase("payment", "不用找了。", "免找矣。"),
@@ -56,6 +71,10 @@ TAXI_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("misc", "等我一下。", "等我一下仔。"),
     RegressionCase("misc", "到了叫我。", "到矣叫我。"),
     RegressionCase("misc", "打開後車廂。", "拍開後行李箱。"),
+    RegressionCase("misc", "車牌號碼是多少？", "車牌號碼是幾號？"),
+    RegressionCase("misc", "我東西忘在車上了。", "我的物件放袂記佇車頂矣。"),
+    RegressionCase("misc", "可以聯絡司機嗎？", "會當聯絡司機無？"),
+    RegressionCase("misc", "我在前面下車。", "我佇頭前落車。"),
 ]
 
 
