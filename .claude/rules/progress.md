@@ -2,21 +2,186 @@
 
 > 每次大規模優化後請更新此檔案。這是讓下一個人快速接手的地圖。
 
-## 目前辭典狀態（2026-04-29）
+## 目前辭典狀態（2026-05-06）
 
 | 類型 | 數量 |
 |------|------|
-| 總詞條（active runtime） | 15,934 |
-| 人工驗證（trust: human） | ~6,559 |
+| 總詞條（active runtime） | 16,166 |
+| 人工驗證（trust: human active rows） | ~6,994 |
 | base seed（trust: seed，低信任） | source 仍有短詞 active；runtime 以 policy 過濾高風險 seed |
-| 最新 round | round155 |
+| 最新 round | round177 |
 
-所有迴歸測試全部通過（共 539 筆）：
-bus 217、medical 69、transport 60、conversation 38、restaurant 20、shopping 20、hotel 17、taxi 19、bank 21、school 20、family 20、workplace 18
+所有迴歸測試全部通過（共 644 筆）：
+bus 282、medical 72、transport 62、conversation 42、restaurant 24、shopping 24、hotel 25、taxi 28、bank 21、school 26、family 20、workplace 18
 
 ---
 
 ## 近期做了什麼（最新在前）
+
+### 2026-05-06：學校能力/考試情境補強（round177）
+**新增人工詞條（2 條 active）：**
+- `不會寫這題→袂曉寫這題`
+- `考試日期改到→考試日期改做`
+
+**修正實測錯誤：**
+- `我不會寫這題。` 不再輸出偏「未來不寫」的 `我袂寫這題。`
+- `考試日期改到下星期。` 和既有預約/時間改期風格一致，收斂為 `改做下禮拜`
+
+**新增迴歸測試：**
+- `run_school_regression.py / ability` +3，分類合計 5 筆
+- `run_school_regression.py / exam` +3，分類合計 6 筆
+- school 總數 20→26
+
+**資料同步：**
+- 根目錄 `data/` 與 `taigi_converter/data/` 同步更新
+- 重編根目錄與 package 內 artifacts
+
+### 2026-05-06：計程車付款/臨停補強（round176）
+**新增人工詞條（2 條 active）：**
+- `靠邊停一下→靠路邊停一下`
+- `臨停一下→暫停一下`
+
+**修正實測錯誤：**
+- `麻煩靠邊停一下。` 收斂為較自然的 `麻煩靠路邊停一下。`
+- `前面臨停一下就好。` 不再保留偏書面/交通管制語境的 `臨停`
+
+**新增迴歸測試：**
+- `run_taxi_regression.py / navigation` +2，分類合計 7 筆
+- `run_taxi_regression.py / payment` +3，分類合計 7 筆
+- taxi 總數 23→28
+
+**資料同步：**
+- 根目錄 `data/` 與 `taigi_converter/data/` 同步更新
+- 重編根目錄與 package 內 artifacts
+
+### 2026-05-06：計程車叫車/目的地補強（round175）
+**新增人工詞條（2 條 active）：**
+- `幫我叫一台計程車→替我叫一台計程車`
+- `請送我到機場→請載我到機場`
+
+**修正實測錯誤：**
+- `可以幫我叫一台計程車嗎？` 不再保留華語 `幫我`
+- `請送我到機場。` 收斂為計程車語境較自然的 `請載我到機場。`
+
+**新增迴歸測試：**
+- `run_taxi_regression.py / hailing` +2，分類合計 5 筆
+- `run_taxi_regression.py / destination` +2，分類合計 5 筆
+- taxi 總數 19→23
+
+**資料同步：**
+- 根目錄 `data/` 與 `taigi_converter/data/` 同步更新
+- 重編根目錄與 package 內 artifacts
+
+### 2026-05-06：飯店設施與問題反映補強（round174）
+**新增人工詞條（3 條 active，runtime 2 條 + identity 保護 1 條）：**
+- `吹風機→吹風機`
+- `洗衣服務→洗衫服務`
+- `房卡打不開房門→房卡開袂開房門`
+
+**修正實測錯誤：**
+- `請問有吹風機嗎？` 不再輸出像電扇的 `搧風機`
+- `請問有洗衣服務嗎？` 不再被拆成 `洗衫務`
+- `房卡打不開房門。` 不再輸出不自然的 `拍袂開`
+
+**新增迴歸測試：**
+- `run_hotel_regression.py / amenities` +2，分類合計 5 筆
+- `run_hotel_regression.py / issues` +2，分類合計 5 筆
+- hotel 總數 21→25
+
+**資料同步：**
+- 根目錄 `data/` 與 `taigi_converter/data/` 同步更新
+- 重編根目錄與 package 內 artifacts
+
+### 2026-05-06：飯店退房/寄放行李補強（round173）
+**新增人工詞條（2 條 active）：**
+- `延後退房→較晏退房`
+- `房卡要交回櫃檯→房卡愛交轉去櫃檯`
+
+**修正實測錯誤：**
+- `可以延後退房嗎？` 不再被舊詞條拆成錯誤的 `延倒勼房`
+- `房卡要交回櫃檯嗎？` 收斂為 `房卡愛交轉去櫃檯無？`
+
+**新增迴歸測試：**
+- `run_hotel_regression.py / check_out` +4，分類合計 6 筆
+- hotel 總數 17→21
+
+**資料同步：**
+- 根目錄 `data/` 與 `taigi_converter/data/` 同步更新
+- 重編根目錄與 package 內 artifacts
+
+### 2026-05-06：醫療住院/病房流程補強（round172）
+**新增人工詞條（3 條 active）：**
+- `陪病家屬要先登記→陪病家屬愛先登記`
+- `到護理站報到→去護理站報到`
+- `轉到普通病房→轉去普通病房`
+
+**修正實測錯誤：**
+- `陪病家屬要先登記。` 不再整句保留華語
+- `請先到護理站報到。` 收斂為較口語的 `請先去護理站報到。`
+- `這位病人明天要轉到普通病房。` 收斂為 `轉去普通病房`
+
+**新增迴歸測試：**
+- `run_medical_regression.py / rooms_inpatient` +3，分類合計 11 筆
+- medical 總數 69→72
+
+**資料同步：**
+- 根目錄 `data/` 與 `taigi_converter/data/` 同步更新
+- 重編根目錄與 package 內 artifacts
+
+### 2026-05-06：購物售後取消訂單/退款補強（round171）
+**新增人工詞條（3 條 active）：**
+- `需要取消訂單→欲取消訂單`
+- `想取消訂單→想欲取消訂單`
+- `退款→退錢`
+
+**修正實測錯誤：**
+- `我需要取消訂單。` 不再整句保留華語
+- `我想取消訂單。` 收斂為 `我想欲取消訂單。`
+- `可以退款嗎？` 不再保留書面 `退款`
+
+**新增迴歸測試：**
+- `run_shopping_regression.py / after_sales` +4，分類合計 6 筆
+- shopping 總數 20→24
+
+**資料同步：**
+- 根目錄 `data/` 與 `taigi_converter/data/` 同步更新
+- 重編根目錄與 package 內 artifacts
+
+### 2026-05-06：餐廳座位/候位情境補強（round170）
+**新增人工詞條（3 條 active）：**
+- `要等多久→愛等偌久`
+- `兒童椅→囡仔椅`
+- `靠窗的位置→靠窗的位`
+
+**修正實測錯誤：**
+- `請問要等多久？` 不再保留義務/需求語境不自然的 `要等`
+- `可以幫我安排兒童椅嗎？` 不再保留華語 `兒童椅`
+- `可以坐靠窗的位置嗎？` 不再保留華語 `位置`
+
+**新增迴歸測試：**
+- `run_restaurant_regression.py / seating` +4，分類合計 6 筆
+- restaurant 總數 20→24
+
+**資料同步：**
+- 根目錄 `data/` 與 `taigi_converter/data/` 同步更新
+- 重編根目錄與 package 內 artifacts
+
+### 2026-05-06：交通 crowd/safety 薄弱類別補強（round169）
+**新增人工詞條（2 條 active）：**
+- `人很多的時候→人濟的時陣`
+- `月台邊緣→月台邊仔`
+
+**修正實測錯誤：**
+- `人很多的時候，請排隊不要插隊。` 不再被拆成錯誤的 `人規千萬時陣`
+- `請不要靠近月台邊緣。` 收斂為較自然的 `請莫靠近月台邊仔。`
+
+**新增迴歸測試：**
+- `run_transport_regression.py / crowd_safety` +2，分類合計 10 筆
+- transport 總數 60→62
+
+**資料同步：**
+- 根目錄 `data/` 與 `taigi_converter/data/` 同步更新
+- 重編根目錄與 package 內 artifacts
 
 ### 2026-04-29：日常回應「願意/肯傾聽」口語自然度補強（round155）
 **新增人工詞條（4 條 active）：**
@@ -662,23 +827,25 @@ bus 217、medical 69、transport 60、conversation 38、restaurant 20、shopping
 ## 覆蓋率仍薄的地方
 
 ### 迴歸測試內（量少、遇新句型容易破）
-- `transport / crowd_safety`：已 8 條，可補到 10
-- `medical / doctor_flow`：已 10 條，持續觀察
+- `school / homework`：已 3 條，可補交作業、忘記帶作業、作業期限
+- `school / campus`：已 4 條，可補操場、辦公室、保健室與圖書館動線
 
 ### 尚無迴歸測試的情境（已知會踩雷的領域）
-- 診所/掛號情境（擴充版）—— 已有部分，但購物比較詞組未覆蓋
+- 診所/掛號情境（擴充版）—— 已有部分，可持續補現場排隊、改掛與過號後續
+- 線上購物售後 —— 目前只有基本購物 regression，訂單/退款/物流仍可補強
 
 ---
 
 ## 下一步優先工作
 
 1. **繼續補薄弱迴歸類別**
-   - `transport / crowd_safety`：已 8 條，可再補到 10
-   - `medical / doctor_flow`：持續觀察
+   - `school / homework`：可補到 5～6
+   - `school / campus`：可補到 6～8
 
-2. **X一點 購物情境 regression 補充**
-   - round135 新增的比較詞組（大一點的/小一點的等）尚無迴歸覆蓋
-   - 考慮在 `run_shopping_regression.py` 補 2～3 個測試
+2. **學校作業/校園動線情境補充**
+   - `school / homework` 可補交作業、忘記帶作業、作業期限與補交
+   - `school / campus` 可補操場、辦公室、保健室、圖書館與教室動線
+   - 先用實測輸出找華語殘留，再補人工詞條與 regression
 
 3. **已知 edge case（低優先）**
    - 無主語句 `要V` → `要` 不轉義務 `愛`（如 `要走高速嗎` → `要走懸速無`）

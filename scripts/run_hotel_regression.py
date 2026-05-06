@@ -37,14 +37,22 @@ HOTEL_REGRESSION_CASES: list[RegressionCase] = [
     # check_out — 退房
     RegressionCase("check_out", "幾點要退房？", "幾點愛退房？"),
     RegressionCase("check_out", "我要退房。", "我欲退房。"),
+    RegressionCase("check_out", "可以延後退房嗎？", "會當較晏退房無？"),
+    RegressionCase("check_out", "退房後可以寄放行李嗎？", "退房後會當寄放行李無？"),
+    RegressionCase("check_out", "請幫我開收據。", "請共我開收據。"),
+    RegressionCase("check_out", "房卡要交回櫃檯嗎？", "房卡愛交轉去櫃檯無？"),
     # amenities — 設施服務
     RegressionCase("amenities", "請問有早餐嗎？", "借問有早頓無？"),
     RegressionCase("amenities", "早餐在哪裡？", "早頓佇佗位？"),
     RegressionCase("amenities", "請問有游泳池嗎？", "借問有泅水池無？"),
+    RegressionCase("amenities", "請問有吹風機嗎？", "借問有吹風機無？"),
+    RegressionCase("amenities", "請問有洗衣服務嗎？", "借問有洗衫服務無？"),
     # issues — 問題反映
     RegressionCase("issues", "房間太吵了。", "房間太吵矣。"),
     RegressionCase("issues", "冷氣壞了。", "冷氣歹去矣。"),
     RegressionCase("issues", "熱水沒有了。", "熱水無矣。"),
+    RegressionCase("issues", "房卡打不開房門。", "房卡開袂開房門。"),
+    RegressionCase("issues", "房間的網路不能用。", "房間的網路袂當用。"),
 ]
 
 

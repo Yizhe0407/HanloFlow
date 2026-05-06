@@ -38,6 +38,10 @@ RESTAURANT_REGRESSION_CASES: list[RegressionCase] = [
     # seating — 座位
     RegressionCase("seating", "請問還有位子嗎？", "借問閣有位子無？"),
     RegressionCase("seating", "兩位大人一位小孩。", "兩位大人一位囡仔。"),
+    RegressionCase("seating", "請問要等多久？", "借問愛等偌久？"),
+    RegressionCase("seating", "我有訂位。", "我有訂位。"),
+    RegressionCase("seating", "可以幫我安排兒童椅嗎？", "會當幫我安排囡仔椅無？"),
+    RegressionCase("seating", "可以坐靠窗的位置嗎？", "會當坐靠窗的位無？"),
     # payment — 結帳
     RegressionCase("payment", "麻煩結帳。", "麻煩結數。"),
     RegressionCase("payment", "總共多少錢？", "總共偌濟錢？"),

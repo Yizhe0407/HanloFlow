@@ -81,6 +81,8 @@ TRANSPORT_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("crowd_safety", "請不要把行李放在走道上。", "請莫共行李囥佇走道上。"),
     RegressionCase("crowd_safety", "上車請往後面移動。", "上車請往後壁移動。"),
     RegressionCase("crowd_safety", "請讓老人家先上車。", "請讓老大人先上車。"),
+    RegressionCase("crowd_safety", "人很多的時候，請排隊不要插隊。", "人濟的時陣，請排隊莫插隊。"),
+    RegressionCase("crowd_safety", "請不要靠近月台邊緣。", "請莫靠近月台邊仔。"),
     # hospital / campus / specific destination
     RegressionCase("destinations", "如果你要去醫院，這班車不會進病院內底。", "若是你欲去病院，這班車袂進病院內底。"),
     RegressionCase("destinations", "這班車今天不停靠學校門口。", "這班車今仔日無停學校門跤口。"),
