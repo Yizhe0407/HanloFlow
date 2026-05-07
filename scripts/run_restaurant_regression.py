@@ -35,6 +35,8 @@ RESTAURANT_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("ordering", "這份可以做外帶嗎？", "這份會當做外帶無？"),
     RegressionCase("ordering", "飲料可以去冰嗎？", "飲料會當去冰無？"),
     RegressionCase("ordering", "可以先上飲料嗎？", "會當先送飲料來無？"),
+    RegressionCase("ordering", "我想取消訂位。", "我想欲取消訂位。"),
+    RegressionCase("ordering", "我想改訂位時間。", "我想欲改訂位時間。"),
     # spice / dietary — 口味偏好
     RegressionCase("spice_dietary", "不要太辣。", "莫太辣。"),
     RegressionCase("spice_dietary", "我不要加辣。", "我無愛加辣。"),
@@ -74,6 +76,9 @@ RESTAURANT_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("service", "可以換餐具嗎？", "會當換餐具無？"),
     RegressionCase("service", "我的餐還沒來。", "我的餐猶未來。"),
     RegressionCase("service", "可以加一張椅子嗎？", "會當加一張椅仔無？"),
+    RegressionCase("service", "餐點可以快一點嗎？", "餐點會當較緊無？"),
+    RegressionCase("service", "可以幫我加飯嗎？", "會當幫我添飯無？"),
+    RegressionCase("service", "可以幫我拿餐具嗎？", "會當幫我提餐具來無？"),
 ]
 
 

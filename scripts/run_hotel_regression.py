@@ -43,6 +43,7 @@ HOTEL_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("check_in", "入住需要證件嗎？", "入住需要證件無？"),
     RegressionCase("check_in", "需要押金嗎？", "需要押金無？"),
     RegressionCase("check_in", "房號是多少？", "房號是幾號？"),
+    RegressionCase("check_in", "可以幫我保管行李嗎？", "會當替我保管行李無？"),
     # check_out — 退房
     RegressionCase("check_out", "幾點要退房？", "幾點愛退房？"),
     RegressionCase("check_out", "我要退房。", "我欲退房。"),
@@ -53,6 +54,8 @@ HOTEL_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("check_out", "可以晚一點退房嗎？", "會當較晏一點退房無？"),
     RegressionCase("check_out", "房卡要交回哪裡？", "房卡愛交轉去佗位？"),
     RegressionCase("check_out", "可以幫我叫車嗎？", "會當替我叫車無？"),
+    RegressionCase("check_out", "我想晚一點退房。", "我想欲較晏一點退房。"),
+    RegressionCase("check_out", "可以幫我叫計程車嗎？", "會當替我叫計程車無？"),
     # amenities — 設施服務
     RegressionCase("amenities", "請問有早餐嗎？", "借問有早頓無？"),
     RegressionCase("amenities", "早餐在哪裡？", "早頓佇佗位？"),
@@ -64,6 +67,9 @@ HOTEL_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("amenities", "房間有wifi嗎？", "房間有wifi無？"),
     RegressionCase("amenities", "可以多給我一雙拖鞋嗎？", "會當加予我一雙淺拖仔無？"),
     RegressionCase("amenities", "有牙刷嗎？", "有齒抿仔無？"),
+    RegressionCase("amenities", "早餐幾點開始？", "早頓幾點開始？"),
+    RegressionCase("amenities", "房間要打掃嗎？", "房間愛拚掃無？"),
+    RegressionCase("amenities", "我想加一條棉被。", "我想欲加一領棉被。"),
     # issues — 問題反映
     RegressionCase("issues", "房間太吵了。", "房間太吵矣。"),
     RegressionCase("issues", "冷氣壞了。", "冷氣歹去矣。"),
@@ -75,6 +81,7 @@ HOTEL_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("issues", "可以幫我換房嗎？", "會當替我換房無？"),
     RegressionCase("issues", "遙控器壞了。", "遙控器歹去矣。"),
     RegressionCase("issues", "房間太冷了。", "房間太寒矣。"),
+    RegressionCase("issues", "可以換安靜一點的房間嗎？", "會當換較恬的房間無？"),
 ]
 
 

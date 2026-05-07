@@ -5,7 +5,7 @@
 1. `grep -n "關鍵字" data/lexicon_entries.jsonl` 確認無重複
 2. 確認沒有舊 identity/protected entry shadow（輸出完全不變時先查這個）
 3. 決定 tier：`manual` 是新增人工詞條的標準選擇
-4. 決定 level：`phrase` 優先，`sentence` 只用於整句高度耦合的場合
+4. 決定 level：`phrase` 優先，`sentence` 只用於整句高度耦合的場合；`char` 最後才補
 
 ## Tier 說明與 Priority 範圍
 
@@ -51,9 +51,16 @@ print('lx_' + hashlib.sha1(raw).hexdigest()[:12])
 └── 否 → level: sentence（先確認是否只是一次性 patch）
 ```
 
+## 優化優先順序
+
+1. 固定句型或常見說法：補 `sentence` 或長 `phrase`
+2. 穩定詞組：補 `phrase`
+3. 語法型規律：補 `rule_entries.jsonl`
+4. 單字：只在對應非常穩定且不會污染複合詞時補 `char`
+
 ## Round 編號慣例
 
-- 目前最新：`round139`，下一個新增用 `round140`
+- 目前最新：`round199`，下一個新增用 `round200`
 - `source` 格式：`curation:round<N>_<英文描述>`，例如 `curation:round112_daily_speech_refresh`
 - `updated_by` 格式：`curation_round<N>_codex`
 - 每次新增一批相關詞條共用同一個 round 號，不同主題用不同 round

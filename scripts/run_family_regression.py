@@ -41,6 +41,9 @@ FAMILY_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("health_care", "藥要按時吃。", "藥仔愛照時間食。"),
     RegressionCase("health_care", "媽媽要休息。", "阿母欲歇睏。"),
     RegressionCase("health_care", "我陪你去看醫生。", "我陪你去予醫生看。"),
+    RegressionCase("health_care", "媽媽說晚上要吃藥。", "阿母講暗時愛食藥仔。"),
+    RegressionCase("health_care", "爸爸明天要回診。", "阿爸明仔載愛回診。"),
+    RegressionCase("health_care", "今天要帶小孩去看醫生。", "今仔日愛帶囡仔去予醫生看。"),
     # siblings — 兄弟姐妹
     RegressionCase("siblings", "姐姐在讀書。", "阿姊佇咧讀冊。"),
     RegressionCase("siblings", "弟弟在做功課。", "阿弟仔佇咧做功課。"),
@@ -50,6 +53,7 @@ FAMILY_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("siblings", "姐姐幫弟弟拿書包。", "阿姊幫阿弟仔提冊包。"),
     RegressionCase("siblings", "兄弟姐妹要一起分享玩具。", "兄弟姊妹愛鬥陣分享𨑨迌物仔。"),
     RegressionCase("siblings", "妹妹不想寫功課。", "小妹仔毋想欲寫功課。"),
+    RegressionCase("siblings", "請幫我照顧弟弟。", "請替我照顧阿弟仔。"),
     # grandparents — 祖父母
     RegressionCase("grandparents", "爺爺在下棋。", "阿公佇咧行棋。"),
     RegressionCase("grandparents", "奶奶在洗碗。", "阿媽佇咧洗碗。"),
@@ -68,6 +72,8 @@ FAMILY_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("daily", "晚餐好了。", "暗頓好矣。"),
     RegressionCase("daily", "我們一起吃飯。", "咱鬥陣食飯。"),
     RegressionCase("daily", "記得洗碗。", "記著洗碗。"),
+    RegressionCase("daily", "我可以晚一點回家嗎？", "我會當較晏一點轉去厝裡無？"),
+    RegressionCase("daily", "請幫我買晚餐。", "請替我買暗頓。"),
 ]
 
 

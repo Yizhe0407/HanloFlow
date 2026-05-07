@@ -34,6 +34,8 @@ BANK_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("bank_account", "提款卡什麼時候可以拿？", "提款卡啥物時陣會當提？"),
     RegressionCase("bank_account", "可以開通網路銀行嗎？", "會當開通網路銀行無？"),
     RegressionCase("bank_account", "資料不齊可以補件嗎？", "資料無齊會當補件無？"),
+    RegressionCase("bank_account", "我想改提款卡密碼。", "我想欲改提款卡密碼。"),
+    RegressionCase("bank_account", "提款卡被鎖住了。", "提款卡鎖牢矣。"),
     # bank_transaction — 存提匯
     RegressionCase("bank_transaction", "我要存款。", "我欲存款。"),
     RegressionCase("bank_transaction", "我要領錢。", "我欲領錢。"),
@@ -45,6 +47,8 @@ BANK_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("bank_transaction", "請幫我刷存摺。", "請替我刷存摺。"),
     RegressionCase("bank_transaction", "匯款需要什麼資料？", "匯款需要啥物資料？"),
     RegressionCase("bank_transaction", "提款有限額嗎？", "提款有限額無？"),
+    RegressionCase("bank_transaction", "可以幫我查餘額嗎？", "會當替我查餘額無？"),
+    RegressionCase("bank_transaction", "我要取消自動扣款。", "我欲取消自動扣款。"),
     # bank_service — 服務詢問
     RegressionCase("bank_service", "請問ATM在哪裡？", "借問ATM佇佗位？"),
     RegressionCase("bank_service", "請問ATM怎麼用？", "借問ATM按怎用？"),
@@ -68,6 +72,8 @@ BANK_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("postal", "郵資多少錢？", "郵資偌濟錢？"),
     RegressionCase("postal", "郵遞區號要寫嗎？", "郵遞區號愛寫無？"),
     RegressionCase("postal", "可以查追蹤號碼嗎？", "會當查追蹤號碼無？"),
+    RegressionCase("postal", "這個包裹要多久會到？", "這个包裹偌久會到？"),
+    RegressionCase("postal", "可以幫我查郵件狀態嗎？", "會當替我查郵件狀態無？"),
 ]
 
 

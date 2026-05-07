@@ -37,6 +37,12 @@ SHOPPING_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("bargaining", "太貴了。", "太貴矣。"),
     RegressionCase("bargaining", "可以便宜一點嗎？", "會當俗淡薄仔無？"),
     RegressionCase("bargaining", "算我便宜一點。", "算我俗淡薄仔。"),
+    RegressionCase("bargaining", "可以再便宜一點嗎？", "會當閣較俗無？"),
+    RegressionCase("bargaining", "買兩個可以算便宜一點嗎？", "買兩个會當算俗淡薄仔無？"),
+    RegressionCase("bargaining", "有送贈品嗎？", "有送贈品無？"),
+    RegressionCase("bargaining", "買多有折扣嗎？", "買較濟有拍折無？"),
+    RegressionCase("bargaining", "可以打九折嗎？", "會當拍九折無？"),
+    RegressionCase("bargaining", "這個有特價嗎？", "這个有特價無？"),
     # purchase — 購買
     RegressionCase("purchase", "我要買這個。", "我欲買這个。"),
     RegressionCase("purchase", "給我一個袋子。", "予我一个袋仔。"),
@@ -71,6 +77,16 @@ SHOPPING_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("after_sales", "我想取消訂單。", "我想欲取消訂單。"),
     RegressionCase("after_sales", "可以退款嗎？", "會當退錢無？"),
     RegressionCase("after_sales", "我還沒收到包裹。", "我猶未收著包裹。"),
+    RegressionCase("after_sales", "我想查退款進度。", "我想欲查退錢進度。"),
+    RegressionCase("after_sales", "可以換同款不同尺寸嗎？", "會當換同款無仝尺寸無？"),
+    RegressionCase("after_sales", "這個有保固嗎？", "這个有保固無？"),
+    RegressionCase("after_sales", "物流延遲了。", "物流延遲矣。"),
+    RegressionCase("after_sales", "拆封了還可以換貨嗎？", "拆封矣猶會當換貨無？"),
+    RegressionCase("after_sales", "可以只退一部分嗎？", "會當干焦退一部分無？"),
+    RegressionCase("after_sales", "退款要等幾天？", "退錢愛等幾工？"),
+    RegressionCase("after_sales", "商品少了一個配件。", "商品欠一个配件。"),
+    RegressionCase("after_sales", "我想改送貨時間。", "我想欲改送貨時間。"),
+    RegressionCase("after_sales", "物流一直沒有更新。", "物流攏無更新。"),
 ]
 
 

@@ -39,8 +39,12 @@ python3 scripts/run_workplace_regression.py
 ## 資料修正優先順序
 
 1. `data/lexicon_entries.jsonl` — 最常改的地方，優先調整詞條
-2. `data/rule_entries.jsonl` — 確認 pattern 夠穩定再動
+   - 固定句型或常見說法：優先補 `sentence` 或長 `phrase`
+   - 可重用穩定片段：補 `phrase`，這是日常優化的主要層級
+   - 單字 `char` 最後才補；影響面最大，容易誤傷地名、人名與複合詞
+2. `data/rule_entries.jsonl` — 只有多句共享同一個穩定文法模式時才動
 3. **不要手動編輯** `data/artifacts/*`（由 build script 生成）
+4. 修改根目錄 `data/` 後，同步 `taigi_converter/data/` 並重編兩邊 artifacts
 
 ## 回應語言
 
