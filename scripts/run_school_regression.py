@@ -34,6 +34,8 @@ SCHOOL_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("teacher_class", "今天要考小考嗎？", "今仔日愛考小考無？"),
     RegressionCase("teacher_class", "老師請大家安靜。", "老師請逐家恬恬。"),
     RegressionCase("teacher_class", "請同學打開課本。", "請同學拍開課本。"),
+    RegressionCase("teacher_class", "可以幫我影印講義嗎？", "會當替我影印講義無？"),
+    RegressionCase("teacher_class", "可以幫我聯絡導師嗎？", "會當替我聯絡導師無？"),
     # student_class — 學生課堂
     RegressionCase("student_class", "我要去學校。", "我欲去學校。"),
     RegressionCase("student_class", "學生在讀書。", "學生佇咧讀冊。"),
@@ -46,6 +48,9 @@ SCHOOL_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("student_class", "今天要帶課本嗎？", "今仔日愛帶課本無？"),
     RegressionCase("student_class", "下課後要留下來嗎？", "下課後愛留落來無？"),
     RegressionCase("student_class", "明天要帶聯絡簿嗎？", "明仔載愛帶聯絡簿無？"),
+    RegressionCase("student_class", "我想晚一點到學校。", "我想欲較晏一點到學校。"),
+    RegressionCase("student_class", "可以幫我請假嗎？", "會當替我請假無？"),
+    RegressionCase("student_class", "我想跟老師請假。", "我想欲佮老師請假。"),
     # homework — 功課作業
     RegressionCase("homework", "今天有作業嗎？", "今仔日有作業無？"),
     RegressionCase("homework", "功課做完了嗎？", "功課做完矣無？"),
@@ -55,6 +60,7 @@ SCHOOL_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("homework", "可以補交作業嗎？", "會當補交作業無？"),
     RegressionCase("homework", "我可以晚一點交作業嗎？", "我會當較晏一點交作業無？"),
     RegressionCase("homework", "作業要寫第幾頁？", "作業愛寫第幾頁？"),
+    RegressionCase("homework", "作業可以晚一點交嗎？", "作業會當較晏一點交無？"),
     # exam — 考試
     RegressionCase("exam", "我要考試了。", "我欲考試矣。"),
     RegressionCase("exam", "考試及格了嗎？", "考試及格矣無？"),

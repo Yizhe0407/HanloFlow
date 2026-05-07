@@ -34,6 +34,7 @@ HOTEL_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("reservation", "訂房有含早餐嗎？", "訂房有含早頓無？"),
     RegressionCase("reservation", "入住人數要改。", "入住人數愛改。"),
     RegressionCase("reservation", "可以取消訂房嗎？", "會當取消訂房無？"),
+    RegressionCase("reservation", "我想改入住時間。", "我想欲改入住時間。"),
     # check_in — 入住
     RegressionCase("check_in", "幾點可以入住？", "幾點會當入住？"),
     RegressionCase("check_in", "可以提早入住嗎？", "會當較早入住無？"),
@@ -70,6 +71,11 @@ HOTEL_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("amenities", "早餐幾點開始？", "早頓幾點開始？"),
     RegressionCase("amenities", "房間要打掃嗎？", "房間愛拚掃無？"),
     RegressionCase("amenities", "我想加一條棉被。", "我想欲加一領棉被。"),
+    RegressionCase("amenities", "可以幫我補毛巾嗎？", "會當替我補面巾無？"),
+    RegressionCase("amenities", "可以幫我換枕頭嗎？", "會當替我換枕頭無？"),
+    RegressionCase("amenities", "可以幫我叫客房服務嗎？", "會當替我叫客房服務無？"),
+    RegressionCase("amenities", "可以幫我換房卡嗎？", "會當替我換房卡無？"),
+    RegressionCase("amenities", "可以幫我加早餐嗎？", "會當替我加早頓無？"),
     # issues — 問題反映
     RegressionCase("issues", "房間太吵了。", "房間太吵矣。"),
     RegressionCase("issues", "冷氣壞了。", "冷氣歹去矣。"),
@@ -82,6 +88,11 @@ HOTEL_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("issues", "遙控器壞了。", "遙控器歹去矣。"),
     RegressionCase("issues", "房間太冷了。", "房間太寒矣。"),
     RegressionCase("issues", "可以換安靜一點的房間嗎？", "會當換較恬的房間無？"),
+    RegressionCase("issues", "可以幫我修冷氣嗎？", "會當替我修空調無？"),
+    RegressionCase("issues", "房間可以不要打掃嗎？", "房間會當免拚掃無？"),
+    RegressionCase("issues", "房間可以晚一點打掃嗎？", "房間會當較晏一點拚掃無？"),
+    RegressionCase("issues", "可以幫我換房型嗎？", "會當替我換房型無？"),
+    RegressionCase("issues", "可以幫我叫清潔人員嗎？", "會當替我叫清潔人員無？"),
 ]
 
 

@@ -36,6 +36,10 @@ WORKPLACE_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("meeting", "會議要準備資料嗎？", "會議愛準備資料無？"),
     RegressionCase("meeting", "請幫我確認會議時間。", "請替我確認會議時間。"),
     RegressionCase("meeting", "可以改成線上會議嗎？", "會當改做線上會議無？"),
+    RegressionCase("meeting", "我想改會議地點。", "我想欲改會議地點。"),
+    RegressionCase("meeting", "可以幫我安排會議室嗎？", "會當替我安排會議室無？"),
+    RegressionCase("meeting", "可以幫我預約會議室嗎？", "會當替我預約會議室無？"),
+    RegressionCase("meeting", "我想改開會時間。", "我想欲改開會時間。"),
     # office location / progressive
     RegressionCase("office_location", "主管在會議室。", "主管佇會議室。"),
     RegressionCase("office_location", "我們在會議室開會。", "咱佇會議室開會。"),
@@ -64,6 +68,9 @@ WORKPLACE_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("workflow", "報告要在下班前交。", "報告愛佇下班前交。"),
     RegressionCase("workflow", "請幫我轉給主管。", "請替我轉予主管。"),
     RegressionCase("workflow", "這份資料要更新。", "這份資料愛更新。"),
+    RegressionCase("workflow", "資料我晚點補。", "資料我較晏補。"),
+    RegressionCase("workflow", "請幫我看一下這份資料。", "請替我看覓這份資料。"),
+    RegressionCase("workflow", "請幫我追一下進度。", "請替我追一下進度。"),
     # leave / availability
     RegressionCase("leave_availability", "我今天請假。", "我今仔日請假。"),
     RegressionCase("leave_availability", "我想請半天假。", "我想欲請半日假。"),
@@ -73,6 +80,10 @@ WORKPLACE_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("leave_availability", "我想請病假。", "我想欲告病。"),
     RegressionCase("leave_availability", "我臨時有事。", "我臨時有代誌。"),
     RegressionCase("leave_availability", "我不在座位上。", "我無佇座位頂。"),
+    RegressionCase("leave_availability", "我晚點進公司。", "我較晏進公司。"),
+    RegressionCase("leave_availability", "可以幫我代班嗎？", "會當替我代班無？"),
+    RegressionCase("leave_availability", "可以幫我改時間嗎？", "會當替我改時間無？"),
+    RegressionCase("leave_availability", "可以幫我請公假嗎？", "會當替我請公假無？"),
 ]
 
 

@@ -6,17 +6,402 @@
 
 | 類型 | 數量 |
 |------|------|
-| 總詞條（active runtime） | 16,377 |
-| 人工驗證（trust: human active rows） | ~7,404 |
+| 總詞條（active runtime） | 16,483 |
+| 人工驗證（trust: human active rows） | ~7,510 |
 | base seed（trust: seed，低信任） | source 仍有短詞 active；runtime 以 policy 過濾高風險 seed |
-| 最新 round | round199 |
+| 最新 round | round210 |
 
-所有迴歸測試全部通過（共 868 筆）：
-bus 282、medical 72、transport 62、conversation 45、restaurant 51、shopping 58、hotel 54、taxi 54、bank 47、school 51、family 46、workplace 46
+所有迴歸測試全部通過（共 974 筆）：
+bus 282、medical 83、transport 71、conversation 53、restaurant 62、shopping 72、hotel 65、taxi 61、bank 56、school 57、family 55、workplace 57
 
 ---
 
 ## 近期做了什麼（最新在前）
+
+### 2026-05-07：交通查詢/餐廳服務與日常購物補強（round210）
+**新增人工詞條（15 條 active）：**
+- `可以幫我查發車時間嗎→會當替我查開車時間無`
+- `可以幫我查月台嗎→會當替我查月台無`
+- `我想改搭下一班車→我想欲改搭後一班車`
+- `可以幫我找服務台嗎→會當替我揣服務台無`
+- `可以幫我取消訂位嗎→會當替我取消訂位無`
+- `我想改成內用→我想欲改做內用`
+- `可以幫我加醬嗎→會當幫我添醬無`
+- `可以幫我拿衛生紙嗎→會當幫我提衛生紙來無`
+- `我晚點到你家→我較晏到你兜`
+- `我等等再出門→我等陣仔閣出門`
+- `我晚點再打給你→我較晏閣敲予你`
+- `可以幫我查會員資料嗎→會當替我查會員資料無`
+- `我想改取貨門市→我想欲改取貨門市`
+- `可以幫我取消出貨嗎→會當替我取消出貨無`
+- `這個可以幫我退刷嗎→這个會當替我退刷無`
+
+**修正實測錯誤：**
+- 交通/購物查詢請託 `可以幫我查...` 收斂為 `會當替我查...`
+- `我想改搭下一班車。`、`我想改成內用。`、`我想改取貨門市。` 補足 `想欲`
+- 日常 `晚點` 句不再誤轉成等待語境 `等陣仔`
+- 餐廳 `加醬`、`拿衛生紙` 收斂為服務場景的 `添...`、`提...來`
+- 購物退刷/取消出貨用完整句固定，避免拆成不自然請託
+
+**新增迴歸測試：**
+- `run_transport_regression.py / ticketing` +2，分類合計 13 筆
+- `run_transport_regression.py / service_redirect` +2，分類合計 11 筆
+- `run_restaurant_regression.py / ordering` +2，分類合計 16 筆
+- `run_restaurant_regression.py / service` +2，分類合計 16 筆
+- `run_conversation_regression.py / schedule_plans` +3，分類合計 18 筆
+- `run_shopping_regression.py / payment` +1，分類合計 11 筆
+- `run_shopping_regression.py / after_sales` +3，分類合計 22 筆
+- transport 總數 67→71
+- restaurant 總數 58→62
+- conversation 總數 50→53
+- shopping 總數 68→72
+
+**資料同步：**
+- 根目錄 `data/` 與 `taigi_converter/data/` 同步更新
+- 重編根目錄與 package 內 artifacts
+
+### 2026-05-07：醫療/飯店/計程車與辦公請託補強（round209）
+**新增人工詞條（16 條 active）：**
+- `可以幫我改掛號科別嗎→會當替我改掛號科別無`
+- `可以幫我查門診進度嗎→會當替我查門診進度無`
+- `我想取消回診→我想欲取消回診`
+- `可以幫我申請病歷嗎→會當替我申請病歷無`
+- `可以幫我加早餐嗎→會當替我加早頓無`
+- `可以幫我換房型嗎→會當替我換房型無`
+- `我想改入住時間→我想欲改入住時間`
+- `可以幫我叫清潔人員嗎→會當替我叫清潔人員無`
+- `可以幫我改上車地點嗎→會當替我改上車地點無`
+- `我想改下車地點→我想欲改落車地點`
+- `請幫我開窗戶→請替我開窗仔門`
+- `可以幫我查車資嗎→會當替我查車錢無`
+- `可以幫我預約會議室嗎→會當替我預約會議室無`
+- `我想改開會時間→我想欲改開會時間`
+- `請幫我追一下進度→請替我追一下進度`
+- `可以幫我請公假嗎→會當替我請公假無`
+
+**修正實測錯誤：**
+- 醫療/飯店/計程車/辦公服務請託 `可以幫我...` 收斂為 `會當替我...`
+- `我想取消回診。`、`我想改入住時間。`、`我想改下車地點。` 補足 `想欲`
+- `我想改開會時間。` 不再把 `開會時間` 誤切成錯誤輸出
+- 飯店 `早餐` 統一收斂為 `早頓`
+- 計程車 `上車地點`、`車資` 用完整 phrase 固定，避免拆成不穩定字詞
+
+**新增迴歸測試：**
+- `run_medical_regression.py / registration` +1，分類合計 18 筆
+- `run_medical_regression.py / doctor_flow` +2，分類合計 27 筆
+- `run_medical_regression.py / redirect` +1，分類合計 7 筆
+- `run_hotel_regression.py / reservation` +1，分類合計 11 筆
+- `run_hotel_regression.py / amenities` +1，分類合計 18 筆
+- `run_hotel_regression.py / issues` +2，分類合計 16 筆
+- `run_taxi_regression.py / destination` +2，分類合計 15 筆
+- `run_taxi_regression.py / payment` +1，分類合計 9 筆
+- `run_taxi_regression.py / misc` +1，分類合計 13 筆
+- `run_workplace_regression.py / meeting` +2，分類合計 16 筆
+- `run_workplace_regression.py / workflow` +1，分類合計 15 筆
+- `run_workplace_regression.py / leave_availability` +1，分類合計 12 筆
+- medical 總數 79→83
+- hotel 總數 61→65
+- taxi 總數 57→61
+- workplace 總數 53→57
+
+**資料同步：**
+- 根目錄 `data/` 與 `taigi_converter/data/` 同步更新
+- 重編根目錄與 package 內 artifacts
+
+### 2026-05-07：銀行查詢/購物售後與學校家庭請託補強（round208）
+**新增人工詞條（10 條 active）：**
+- `可以幫我查匯率嗎→會當替我查匯率無`
+- `可以幫我查貸款利率嗎→會當替我查貸款利率無`
+- `可以幫我開存款證明嗎→會當替我開存款證明無`
+- `可以幫我查配送狀態嗎→會當替我查配送狀態無`
+- `可以幫我換顏色嗎→會當替我換顏色無`
+- `我想改付款方式→我想欲改付款方式`
+- `我想跟老師請假→我想欲佮老師請假`
+- `可以幫我聯絡導師嗎→會當替我聯絡導師無`
+- `我晚點去接小孩→我較晏去接囡仔`
+- `可以幫我煮晚餐嗎→會當替我煮暗頓無`
+
+**修正實測錯誤：**
+- 銀行/購物/學校服務請託 `可以幫我...` 收斂為 `會當替我...`
+- `我想改付款方式。`、`我想跟老師請假。` 補足 `想欲`
+- `我晚點去接小孩。` 不再把 `晚點` 誤轉成等待語境 `等陣仔`
+- 家庭晚餐語境統一使用 `暗頓`
+
+**新增迴歸測試：**
+- `run_bank_regression.py / bank_account` +1，分類合計 15 筆
+- `run_bank_regression.py / bank_transaction` +1，分類合計 16 筆
+- `run_bank_regression.py / bank_service` +1，分類合計 11 筆
+- `run_shopping_regression.py / purchase` +1，分類合計 13 筆
+- `run_shopping_regression.py / payment` +1，分類合計 10 筆
+- `run_shopping_regression.py / after_sales` +1，分類合計 19 筆
+- `run_school_regression.py / teacher_class` +1，分類合計 12 筆
+- `run_school_regression.py / student_class` +1，分類合計 14 筆
+- `run_family_regression.py / parent_child` +1，分類合計 12 筆
+- `run_family_regression.py / daily` +1，分類合計 14 筆
+- bank 總數 53→56
+- shopping 總數 65→68
+- school 總數 55→57
+- family 總數 53→55
+
+**資料同步：**
+- 根目錄 `data/` 與 `taigi_converter/data/` 同步更新
+- 重編根目錄與 package 內 artifacts
+
+### 2026-05-07：交通查詢/餐廳客製與日常訊息補強（round207）
+**新增人工詞條（8 條 active）：**
+- `可以幫我查車票價格嗎→會當替我查車票價錢無`
+- `可以幫我查車班嗎→會當替我查車班無`
+- `這班車會停哪幾站→這班車會停佗幾站`
+- `可以幫我換成外帶嗎→會當替我換做外帶無`
+- `這個可以不要辣嗎→這个會當免辣無`
+- `可以幫我拿吸管嗎→會當幫我提吸管來無`
+- `我快到了→我欲到矣`
+- `我晚點再跟你說→我較晏閣共你講`
+
+**修正實測錯誤：**
+- 交通查詢 `可以幫我查...` 收斂為 `會當替我查...`
+- `這班車會停哪幾站？` 補足 `哪幾站→佗幾站`
+- 餐廳外帶/客製句避免 `換成`、`不要辣` 的華語式直譯
+- `我快到了。` 不再誤作速度副詞 `緊到矣`
+- `我晚點再跟你說。` 不再把 `晚點` 誤轉成等待語境 `等陣仔`
+
+**新增迴歸測試：**
+- `run_transport_regression.py / ticketing` +2，分類合計 11 筆
+- `run_transport_regression.py / service_redirect` +1，分類合計 9 筆
+- `run_restaurant_regression.py / ordering` +1，分類合計 14 筆
+- `run_restaurant_regression.py / spice_dietary` +1，分類合計 10 筆
+- `run_restaurant_regression.py / service` +1，分類合計 14 筆
+- `run_conversation_regression.py / status_check` +1，分類合計 7 筆
+- `run_conversation_regression.py / schedule_plans` +1，分類合計 15 筆
+- transport 總數 64→67
+- restaurant 總數 55→58
+- conversation 總數 48→50
+
+**資料同步：**
+- 根目錄 `data/` 與 `taigi_converter/data/` 同步更新
+- 重編根目錄與 package 內 artifacts
+
+### 2026-05-07：家庭早餐/醫療掛號與飯店房務補強（round206）
+**新增人工詞條（8 條 active）：**
+- `可以幫我買早餐嗎→會當替我買早頓無`
+- `我晚點帶小孩回家→我較晏帶囡仔轉去厝裡`
+- `可以幫我掛急診嗎→會當替我掛急診無`
+- `我想改回診時間→我想欲改回診時間`
+- `可以幫我查藥單嗎→會當替我查藥單無`
+- `可以幫我叫客房服務嗎→會當替我叫客房服務無`
+- `房間可以晚一點打掃嗎→房間會當較晏一點拚掃無`
+- `可以幫我換房卡嗎→會當替我換房卡無`
+
+**修正實測錯誤：**
+- 家庭/醫療/飯店服務請託 `可以幫我...` 收斂為 `會當替我...`
+- `我晚點帶小孩回家。` 不再把 `晚點` 誤轉成等待語境 `等陣仔`，也不再把 `帶小孩` 誤轉成 `夾細囝`
+- `我想改回診時間。` 補足 `想欲`
+- `房間可以晚一點打掃嗎？` 收斂為飯店房務語境 `較晏一點拚掃`
+
+**新增迴歸測試：**
+- `run_family_regression.py / parent_child` +1，分類合計 11 筆
+- `run_family_regression.py / daily` +1，分類合計 13 筆
+- `run_medical_regression.py / registration` +1，分類合計 17 筆
+- `run_medical_regression.py / doctor_flow` +1，分類合計 25 筆
+- `run_medical_regression.py / pharmacy_payment` +1，分類合計 10 筆
+- `run_hotel_regression.py / amenities` +2，分類合計 17 筆
+- `run_hotel_regression.py / issues` +1，分類合計 14 筆
+- family 總數 51→53
+- medical 總數 76→79
+- hotel 總數 58→61
+
+**資料同步：**
+- 根目錄 `data/` 與 `taigi_converter/data/` 同步更新
+- 重編根目錄與 package 內 artifacts
+
+### 2026-05-07：購物出貨/學校影印與辦公會議補強（round205）
+**新增人工詞條（8 條 active）：**
+- `可以幫我查出貨進度嗎→會當替我查出貨進度無`
+- `我想改收件地址→我想欲改收件地址`
+- `這件可以幫我留一下嗎→這件會當替我留一下無`
+- `可以幫我包起來嗎→會當替我包起來無`
+- `可以幫我影印講義嗎→會當替我影印講義無`
+- `我想改會議地點→我想欲改會議地點`
+- `可以幫我安排會議室嗎→會當替我安排會議室無`
+- `我晚點再回覆你→我較晏閣回覆你`
+
+**修正實測錯誤：**
+- 購物/學校/辦公服務請託 `可以幫我...` 收斂為 `會當替我...`
+- `我想改收件地址。`、`我想改會議地點。` 補足 `想欲`
+- `我晚點再回覆你。` 不再把 `晚點` 誤轉成等待語境 `等陣仔`
+- 購物留貨/包裝句用長 phrase 固定，避免後續拆詞造成語氣不自然
+
+**新增迴歸測試：**
+- `run_shopping_regression.py / purchase` +2，分類合計 12 筆
+- `run_shopping_regression.py / after_sales` +2，分類合計 18 筆
+- `run_school_regression.py / teacher_class` +1，分類合計 11 筆
+- `run_workplace_regression.py / meeting` +2，分類合計 14 筆
+- `run_conversation_regression.py / schedule_plans` +1，分類合計 14 筆
+- shopping 總數 61→65
+- school 總數 54→55
+- workplace 總數 51→53
+- conversation 總數 47→48
+
+**資料同步：**
+- 根目錄 `data/` 與 `taigi_converter/data/` 同步更新
+- 重編根目錄與 package 內 artifacts
+
+### 2026-05-07：日常通話/計程車路線與銀行帳單補強（round204）
+**新增人工詞條（8 條 active）：**
+- `你方便說話嗎→你方便講話無`
+- `晚點再聊→較晏閣聊`
+- `可以幫我叫大車嗎→會當替我叫大車無`
+- `可以幫我看一下路線嗎→會當替我看覓路線無`
+- `我想先去便利商店→我想欲先去便利店`
+- `我想查信用卡帳單→我想欲查信用卡費用明細`
+- `可以幫我補辦提款卡嗎→會當替我補辦提款卡無`
+- `可以幫我寄到國外嗎→會當替我寄到國外無`
+
+**修正實測錯誤：**
+- `晚點再聊。` 不再把 `晚點` 誤轉成等待語境 `等陣仔`
+- 計程車/銀行/郵局服務請託 `可以幫我...` 收斂為 `會當替我...`
+- `我想先去便利商店。` 補足 `想欲` 並與既有 taxi 便利店用語一致
+- `我想查信用卡帳單。` 避開舊 base `帳單→數單` 污染，改收斂為 `信用卡費用明細`
+
+**新增迴歸測試：**
+- `run_conversation_regression.py / daily_response` +1，分類合計 16 筆
+- `run_conversation_regression.py / schedule_plans` +1，分類合計 13 筆
+- `run_taxi_regression.py / hailing` +1，分類合計 12 筆
+- `run_taxi_regression.py / destination` +1，分類合計 13 筆
+- `run_taxi_regression.py / misc` +1，分類合計 12 筆
+- `run_bank_regression.py / bank_account` +1，分類合計 14 筆
+- `run_bank_regression.py / bank_transaction` +1，分類合計 15 筆
+- `run_bank_regression.py / postal` +1，分類合計 14 筆
+- conversation 總數 45→47
+- taxi 總數 54→57
+- bank 總數 50→53
+
+**資料同步：**
+- 根目錄 `data/` 與 `taigi_converter/data/` 同步更新
+- 重編根目錄與 package 內 artifacts
+
+### 2026-05-07：交通查詢與餐廳服務請託補強（round203）
+**新增人工詞條（6 條 active）：**
+- `可以幫我查末班車時間嗎→會當替我查尾班車時間無`
+- `可以幫我查轉乘路線嗎→會當替我查轉乘路線無`
+- `可以幫我加湯嗎→會當幫我添湯無`
+- `可以幫我換座位嗎→會當替我換座位無`
+- `可以不要放蔥嗎→會當免放蔥無`
+- `這道菜可以快一點嗎→這道菜會當較緊無`
+
+**修正實測錯誤：**
+- 交通服務查詢 `可以幫我查...` 收斂為 `會當替我查...`
+- 餐廳 `加湯` 收斂為較自然的 `添湯`
+- `這道菜可以快一點嗎？` 不再多出不自然的 `咧無`
+- `可以不要放蔥嗎？` 收斂為餐點客製語境 `免放蔥`
+
+**新增迴歸測試：**
+- `run_transport_regression.py / ticketing` +1，分類合計 9 筆
+- `run_transport_regression.py / service_redirect` +1，分類合計 8 筆
+- `run_restaurant_regression.py / spice_dietary` +1，分類合計 9 筆
+- `run_restaurant_regression.py / seating` +1，分類合計 12 筆
+- `run_restaurant_regression.py / service` +2，分類合計 13 筆
+- transport 總數 62→64
+- restaurant 總數 51→55
+
+**資料同步：**
+- 根目錄 `data/` 與 `taigi_converter/data/` 同步更新
+- 重編根目錄與 package 內 artifacts
+
+### 2026-05-07：飯店服務請託與醫療報告/領藥補強（round202）
+**新增人工詞條（8 條 active）：**
+- `可以幫我補毛巾嗎→會當替我補面巾無`
+- `可以幫我修冷氣嗎→會當替我修空調無`
+- `房間可以不要打掃嗎→房間會當免拚掃無`
+- `可以幫我換枕頭嗎→會當替我換枕頭無`
+- `我想查檢查報告→我想欲查檢查報告`
+- `可以幫我查報告嗎→會當替我查報告無`
+- `我要領慢性病藥→我欲領慢性病藥`
+- `可以幫我量血壓嗎→會當替我量血壓無`
+
+**修正實測錯誤：**
+- 飯店/醫療服務請託 `可以幫我...` 收斂為 `會當替我...`
+- `我要領慢性病藥。` 不再把 `慢性病` 誤拆成怪字
+- `房間可以不要打掃嗎？` 收斂為飯店房務語境 `免拚掃`
+- 醫療查報告句補足 `想欲`
+
+**新增迴歸測試：**
+- `run_hotel_regression.py / amenities` +2，分類合計 15 筆
+- `run_hotel_regression.py / issues` +2，分類合計 13 筆
+- `run_medical_regression.py / doctor_flow` +2，分類合計 24 筆
+- `run_medical_regression.py / pharmacy_payment` +2，分類合計 9 筆
+- hotel 總數 54→58
+- medical 總數 72→76
+
+**資料同步：**
+- 根目錄 `data/` 與 `taigi_converter/data/` 同步更新
+- 重編根目錄與 package 內 artifacts
+
+### 2026-05-07：銀行明細/購物庫存與學校請假補強（round201）
+**新增人工詞條（9 條 active）：**
+- `我想查帳戶明細→我想欲查口座明細`
+- `可以幫我列印明細嗎→會當替我列印明細無`
+- `我想改通訊地址→我想欲改通訊地址`
+- `可以幫我查庫存嗎→會當替我查庫存無`
+- `可以幫我換尺寸嗎→會當替我換尺寸無`
+- `發票可以重開嗎→發票會當重開無`
+- `作業可以晚一點交嗎→作業會當較晏一點交無`
+- `我想晚一點到學校→我想欲較晏一點到學校`
+- `可以幫我請假嗎→會當替我請假無`
+
+**修正實測錯誤：**
+- `我想查帳戶明細。` 不再把 `帳戶` 誤拆成 `數戶`
+- 銀行/購物/學校服務請託 `可以幫我...` 收斂為 `會當替我...`
+- `作業可以晚一點交嗎？` 不再把 `晚一點` 誤轉成等待語境 `等陣仔`
+- `我想晚一點到學校。` 補足 `想欲`
+
+**新增迴歸測試：**
+- `run_bank_regression.py / bank_account` +1，分類合計 13 筆
+- `run_bank_regression.py / bank_transaction` +2，分類合計 14 筆
+- `run_shopping_regression.py / purchase` +2，分類合計 10 筆
+- `run_shopping_regression.py / payment` +1，分類合計 9 筆
+- `run_school_regression.py / student_class` +2，分類合計 13 筆
+- `run_school_regression.py / homework` +1，分類合計 9 筆
+- bank 總數 47→50
+- shopping 總數 58→61
+- school 總數 51→54
+
+**資料同步：**
+- 根目錄 `data/` 與 `taigi_converter/data/` 同步更新
+- 重編根目錄與 package 內 artifacts
+
+### 2026-05-07：辦公晚點/家庭照護日常 phrase 補強（round200）
+**新增人工詞條（10 條 active）：**
+- `我晚點進公司→我較晏進公司`
+- `資料我晚點補→資料我較晏補`
+- `請幫我看一下這份資料→請替我看覓這份資料`
+- `可以幫我代班嗎→會當替我代班無`
+- `可以幫我改時間嗎→會當替我改時間無`
+- `我帶小孩去學校→我帶囡仔去學校`
+- `可以幫我接小孩嗎→會當替我接囡仔無`
+- `小孩肚子痛→囡仔腹肚疼`
+- `晚餐要吃什麼→暗頓欲食啥`
+- `晚餐吃什麼→暗頓食啥`
+
+**修正實測錯誤：**
+- `我晚點進公司。`、`資料我晚點補。` 不再把 `晚點` 誤轉成等待語境 `等陣仔`
+- 辦公請託 `可以幫我...` 收斂為 `會當替我...`
+- `我帶小孩去學校。` 不再把 `帶小孩` 誤轉成 `夾細囝`
+- `小孩肚子痛。` 收斂為身體部位疼痛語境 `腹肚疼`
+- 家庭日常 `晚餐` 統一收斂為 `暗頓`
+
+**新增迴歸測試：**
+- `run_workplace_regression.py / workflow` +2，分類合計 14 筆
+- `run_workplace_regression.py / leave_availability` +3，分類合計 11 筆
+- `run_family_regression.py / parent_child` +2，分類合計 10 筆
+- `run_family_regression.py / health_care` +1，分類合計 12 筆
+- `run_family_regression.py / daily` +2，分類合計 12 筆
+- workplace 總數 46→51
+- family 總數 46→51
+
+**資料同步：**
+- 根目錄 `data/` 與 `taigi_converter/data/` 同步更新
+- 重編根目錄與 package 內 artifacts
 
 ### 2026-05-07：日常訊息與餐廳服務 phrase 補強（round199）
 **停用舊人工詞條（1 條）：**

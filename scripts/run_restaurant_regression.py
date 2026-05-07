@@ -35,8 +35,11 @@ RESTAURANT_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("ordering", "這份可以做外帶嗎？", "這份會當做外帶無？"),
     RegressionCase("ordering", "飲料可以去冰嗎？", "飲料會當去冰無？"),
     RegressionCase("ordering", "可以先上飲料嗎？", "會當先送飲料來無？"),
+    RegressionCase("ordering", "可以幫我換成外帶嗎？", "會當替我換做外帶無？"),
     RegressionCase("ordering", "我想取消訂位。", "我想欲取消訂位。"),
     RegressionCase("ordering", "我想改訂位時間。", "我想欲改訂位時間。"),
+    RegressionCase("ordering", "可以幫我取消訂位嗎？", "會當替我取消訂位無？"),
+    RegressionCase("ordering", "我想改成內用。", "我想欲改做內用。"),
     # spice / dietary — 口味偏好
     RegressionCase("spice_dietary", "不要太辣。", "莫太辣。"),
     RegressionCase("spice_dietary", "我不要加辣。", "我無愛加辣。"),
@@ -46,6 +49,8 @@ RESTAURANT_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("spice_dietary", "可以少鹽嗎？", "會當少鹽無？"),
     RegressionCase("spice_dietary", "我對花生過敏。", "我食塗豆會過敏。"),
     RegressionCase("spice_dietary", "我不能吃牛肉。", "我袂當食牛肉。"),
+    RegressionCase("spice_dietary", "可以不要放蔥嗎？", "會當免放蔥無？"),
+    RegressionCase("spice_dietary", "這個可以不要辣嗎？", "這个會當免辣無？"),
     # seating — 座位
     RegressionCase("seating", "請問還有位子嗎？", "借問閣有位子無？"),
     RegressionCase("seating", "兩位大人一位小孩。", "兩位大人一位囡仔。"),
@@ -58,6 +63,7 @@ RESTAURANT_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("seating", "可以併桌嗎？", "會當併桌無？"),
     RegressionCase("seating", "有四個人的位子嗎？", "有四个人的位子無？"),
     RegressionCase("seating", "可以換到裡面的位置嗎？", "會當換到內底的位無？"),
+    RegressionCase("seating", "可以幫我換座位嗎？", "會當替我換座位無？"),
     # payment — 結帳
     RegressionCase("payment", "麻煩結帳。", "麻煩結數。"),
     RegressionCase("payment", "總共多少錢？", "總共偌濟錢？"),
@@ -79,6 +85,11 @@ RESTAURANT_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("service", "餐點可以快一點嗎？", "餐點會當較緊無？"),
     RegressionCase("service", "可以幫我加飯嗎？", "會當幫我添飯無？"),
     RegressionCase("service", "可以幫我拿餐具嗎？", "會當幫我提餐具來無？"),
+    RegressionCase("service", "可以幫我加湯嗎？", "會當幫我添湯無？"),
+    RegressionCase("service", "這道菜可以快一點嗎？", "這道菜會當較緊無？"),
+    RegressionCase("service", "可以幫我拿吸管嗎？", "會當幫我提吸管來無？"),
+    RegressionCase("service", "可以幫我加醬嗎？", "會當幫我添醬無？"),
+    RegressionCase("service", "可以幫我拿衛生紙嗎？", "會當幫我提衛生紙來無？"),
 ]
 
 

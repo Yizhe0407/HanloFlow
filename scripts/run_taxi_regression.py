@@ -35,6 +35,7 @@ TAXI_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("hailing", "車可以等五分鐘嗎？", "車會當等五分鐘無？"),
     RegressionCase("hailing", "我在便利商店門口等車。", "我佇便利店門跤口等車。"),
     RegressionCase("hailing", "我想晚一點出發。", "我想欲較晏一點出發。"),
+    RegressionCase("hailing", "可以幫我叫大車嗎？", "會當替我叫大車無？"),
     # destination — 目的地
     RegressionCase("destination", "請問到台北車站多少錢？", "借問到臺北車站偌濟錢？"),
     RegressionCase("destination", "我要去機場。", "我欲去機場。"),
@@ -48,6 +49,9 @@ TAXI_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("destination", "請載我到飯店。", "請載我到飯店。"),
     RegressionCase("destination", "到機場要多久？", "到機場愛偌久？"),
     RegressionCase("destination", "我想先去加油站。", "我想欲先去加油站。"),
+    RegressionCase("destination", "我想先去便利商店。", "我想欲先去便利店。"),
+    RegressionCase("destination", "可以幫我改上車地點嗎？", "會當替我改上車地點無？"),
+    RegressionCase("destination", "我想改下車地點。", "我想欲改落車地點。"),
     # navigation — 行進指引
     RegressionCase("navigation", "請停在前面。", "請停佇頭前。"),
     RegressionCase("navigation", "在前面右轉。", "佇頭前正斡。"),
@@ -70,6 +74,7 @@ TAXI_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("payment", "可以開發票嗎？", "會當開發票無？"),
     RegressionCase("payment", "不用找零了。", "免找錢矣。"),
     RegressionCase("payment", "我想改成現金付款。", "我想欲改做現錢付款。"),
+    RegressionCase("payment", "可以幫我查車資嗎？", "會當替我查車錢無？"),
     # misc — 其他
     RegressionCase("misc", "請快一點。", "請較緊咧。"),
     RegressionCase("misc", "等我一下。", "等我一下仔。"),
@@ -82,6 +87,8 @@ TAXI_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("misc", "可以幫我開後車廂嗎？", "會當替我開後行李箱無？"),
     RegressionCase("misc", "請幫我等一下。", "請替我等一下仔。"),
     RegressionCase("misc", "可以幫我聯絡司機嗎？", "會當替我聯絡司機無？"),
+    RegressionCase("misc", "可以幫我看一下路線嗎？", "會當替我看覓路線無？"),
+    RegressionCase("misc", "請幫我開窗戶。", "請替我開窗仔門。"),
 ]
 
 

@@ -35,6 +35,7 @@ CONVERSATION_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("status_check", "剛到家。", "拄到厝。"),
     RegressionCase("status_check", "出發了沒？", "出發矣未？"),
     RegressionCase("status_check", "你到了嗎？", "你到矣無？"),
+    RegressionCase("status_check", "我快到了。", "我欲到矣。"),
     RegressionCase("status_check", "下班了沒？", "下班未？"),
     RegressionCase("status_check", "你今天幾點下班？", "你今仔日幾點下班？"),
     # daily chat
@@ -60,6 +61,7 @@ CONVERSATION_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("daily_response", "才忍不住想講給聽的", "才忍袂牢想講予聽的"),
     RegressionCase("daily_response", "台北和台中都有不少不錯的選擇", "台北佮台中攏有袂少袂䆀的選擇"),
     RegressionCase("daily_response", "聽到你這樣說", "聽著你按呢講"),
+    RegressionCase("daily_response", "你方便說話嗎？", "你方便講話無？"),
     # scheduling / plans
     RegressionCase("schedule_plans", "等一下打給你。", "等陣仔閣敲予你。"),
     RegressionCase("schedule_plans", "改天再說。", "改工閣講。"),
@@ -73,6 +75,12 @@ CONVERSATION_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("schedule_plans", "路上小心。", "路裡細膩。"),
     RegressionCase("schedule_plans", "我晚點回你。", "我較晏閣回你。"),
     RegressionCase("schedule_plans", "我到了再打給你。", "我到矣閣敲予你。"),
+    RegressionCase("schedule_plans", "晚點再聊。", "較晏閣聊。"),
+    RegressionCase("schedule_plans", "我晚點再回覆你。", "我較晏閣回覆你。"),
+    RegressionCase("schedule_plans", "我晚點再跟你說。", "我較晏閣共你講。"),
+    RegressionCase("schedule_plans", "我晚點到你家。", "我較晏到你兜。"),
+    RegressionCase("schedule_plans", "我等等再出門。", "我等陣仔閣出門。"),
+    RegressionCase("schedule_plans", "我晚點再打給你。", "我較晏閣敲予你。"),
 ]
 
 
