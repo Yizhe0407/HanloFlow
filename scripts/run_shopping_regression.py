@@ -57,6 +57,9 @@ SHOPPING_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("purchase", "這件可以幫我留一下嗎？", "這件會當替我留一下無？"),
     RegressionCase("purchase", "可以幫我包起來嗎？", "會當替我包起來無？"),
     RegressionCase("purchase", "可以幫我換顏色嗎？", "會當替我換顏色無？"),
+    RegressionCase("purchase", "可以幫我查商品規格嗎？", "會當替我查商品規格無？"),
+    RegressionCase("purchase", "可以幫我查門市庫存嗎？", "會當替我查門市庫存無？"),
+    RegressionCase("purchase", "可以幫我改商品顏色嗎？", "會當替我改商品顏色無？"),
     # payment — 付款
     RegressionCase("payment", "請問收現金嗎？", "借問收現錢無？"),
     RegressionCase("payment", "可以刷卡嗎？", "會當刷卡無？"),
@@ -69,6 +72,9 @@ SHOPPING_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("payment", "發票可以重開嗎？", "發票會當重開無？"),
     RegressionCase("payment", "我想改付款方式。", "我想欲改付款方式。"),
     RegressionCase("payment", "這個可以幫我退刷嗎？", "這个會當替我退刷無？"),
+    RegressionCase("payment", "可以幫我查發票號碼嗎？", "會當替我查發票號碼無？"),
+    RegressionCase("payment", "我想改發票載具。", "我想欲改發票載具。"),
+    RegressionCase("payment", "可以幫我查會員點數嗎？", "會當替我查會員點數無？"),
     # comparative — 比較詞組
     RegressionCase("comparative", "有沒有大一點的？", "敢有較大的？"),
     RegressionCase("comparative", "有小一點的嗎？", "有較細的無？"),
@@ -96,11 +102,21 @@ SHOPPING_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("after_sales", "我想改送貨時間。", "我想欲改送貨時間。"),
     RegressionCase("after_sales", "物流一直沒有更新。", "物流攏無更新。"),
     RegressionCase("after_sales", "可以幫我查出貨進度嗎？", "會當替我查出貨進度無？"),
+    RegressionCase("after_sales", "可以幫我查訂單嗎？", "會當替我查訂單無？"),
+    RegressionCase("after_sales", "可以幫我查包裹嗎？", "會當替我查包裹無？"),
     RegressionCase("after_sales", "我想改收件地址。", "我想欲改收件地址。"),
+    RegressionCase("after_sales", "可以幫我改送貨地址嗎？", "會當替我改送貨地址無？"),
+    RegressionCase("after_sales", "我想改收貨時間。", "我想欲改收貨時間。"),
     RegressionCase("after_sales", "可以幫我查配送狀態嗎？", "會當替我查配送狀態無？"),
     RegressionCase("after_sales", "可以幫我查會員資料嗎？", "會當替我查會員資料無？"),
     RegressionCase("after_sales", "我想改取貨門市。", "我想欲改取貨門市。"),
     RegressionCase("after_sales", "可以幫我取消出貨嗎？", "會當替我取消出貨無？"),
+    RegressionCase("after_sales", "可以幫我查保固期限嗎？", "會當替我查保固期限無？"),
+    RegressionCase("after_sales", "可以幫我改退貨方式嗎？", "會當替我改退貨方式無？"),
+    RegressionCase("after_sales", "我想改配送時間。", "我想欲改配送時間。"),
+    RegressionCase("after_sales", "可以幫我申請退貨嗎？", "會當替我申請退貨無？"),
+    RegressionCase("after_sales", "我想改取貨時間。", "我想欲改取貨時間。"),
+    RegressionCase("after_sales", "可以幫我查退貨進度嗎？", "會當替我查退貨進度無？"),
 ]
 
 

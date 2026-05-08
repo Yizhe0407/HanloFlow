@@ -39,6 +39,10 @@ BANK_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("bank_account", "我想改通訊地址。", "我想欲改通訊地址。"),
     RegressionCase("bank_account", "可以幫我補辦提款卡嗎？", "會當替我補辦提款卡無？"),
     RegressionCase("bank_account", "可以幫我開存款證明嗎？", "會當替我開存款證明無？"),
+    RegressionCase("bank_account", "可以幫我改密碼嗎？", "會當替我改密碼無？"),
+    RegressionCase("bank_account", "可以幫我重設密碼嗎？", "會當替我重設密碼無？"),
+    RegressionCase("bank_account", "我想改聯絡電話。", "我想欲改聯絡電話。"),
+    RegressionCase("bank_account", "可以幫我查帳戶狀態嗎？", "會當替我查口座狀態無？"),
     # bank_transaction — 存提匯
     RegressionCase("bank_transaction", "我要存款。", "我欲存款。"),
     RegressionCase("bank_transaction", "我要領錢。", "我欲領錢。"),
@@ -56,6 +60,11 @@ BANK_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("bank_transaction", "可以幫我列印明細嗎？", "會當替我列印明細無？"),
     RegressionCase("bank_transaction", "我想查信用卡帳單。", "我想欲查信用卡費用明細。"),
     RegressionCase("bank_transaction", "可以幫我查匯率嗎？", "會當替我查匯率無？"),
+    RegressionCase("bank_transaction", "可以幫我補寄帳單嗎？", "會當替我補寄帳單無？"),
+    RegressionCase("bank_transaction", "我想改扣款帳戶。", "我想欲改扣款口座。"),
+    RegressionCase("bank_transaction", "可以幫我查轉帳紀錄嗎？", "會當替我查轉帳紀錄無？"),
+    RegressionCase("bank_transaction", "我想改匯款金額。", "我想欲改匯款金額。"),
+    RegressionCase("bank_transaction", "我想改領錢金額。", "我想欲改領錢金額。"),
     # bank_service — 服務詢問
     RegressionCase("bank_service", "請問ATM在哪裡？", "借問ATM佇佗位？"),
     RegressionCase("bank_service", "請問ATM怎麼用？", "借問ATM按怎用？"),
@@ -68,6 +77,7 @@ BANK_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("bank_service", "營業時間到幾點？", "營業時間到幾點？"),
     RegressionCase("bank_service", "手續費可以減免嗎？", "手續費會當減免無？"),
     RegressionCase("bank_service", "可以幫我查貸款利率嗎？", "會當替我查貸款利率無？"),
+    RegressionCase("bank_service", "可以幫我更新資料嗎？", "會當替我更新資料無？"),
     # postal — 郵局寄件
     RegressionCase("postal", "我要寄掛號信。", "我欲寄掛號信。"),
     RegressionCase("postal", "我要寄包裹。", "我欲寄包裹。"),
@@ -83,6 +93,7 @@ BANK_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("postal", "這個包裹要多久會到？", "這个包裹偌久會到？"),
     RegressionCase("postal", "可以幫我查郵件狀態嗎？", "會當替我查郵件狀態無？"),
     RegressionCase("postal", "可以幫我寄到國外嗎？", "會當替我寄到國外無？"),
+    RegressionCase("postal", "可以幫我查郵局營業時間嗎？", "會當替我查郵局營業時間無？"),
 ]
 
 

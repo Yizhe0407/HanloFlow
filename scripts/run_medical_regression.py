@@ -42,6 +42,10 @@ MEDICAL_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("registration", "如果過號了，要再去櫃台處理嗎？", "若是過號矣，愛閣去櫃檯處理無？"),
     RegressionCase("registration", "可以幫我掛急診嗎？", "會當替我掛急診無？"),
     RegressionCase("registration", "可以幫我改掛號科別嗎？", "會當替我改掛號科別無？"),
+    RegressionCase("registration", "可以幫我改預約時間嗎？", "會當替我改預約時間無？"),
+    RegressionCase("registration", "可以幫我查候補名單嗎？", "會當替我查候補名單無？"),
+    RegressionCase("registration", "我想改看診科別。", "我想欲改看診科別。"),
+    RegressionCase("registration", "可以幫我查掛號費嗎？", "會當替我查掛號費無？"),
     # tests / labs
     RegressionCase("tests", "請問抽血要先去哪裡報到？", "借問抽血愛先去佗位報到？"),
     RegressionCase("tests", "這個檢查要空腹八小時。", "這个檢查要空腹八點鐘。"),
@@ -53,6 +57,9 @@ MEDICAL_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("tests", "這個檢查需要家屬陪同。", "這个檢查需要家屬陪同。"),
     RegressionCase("tests", "今天的採樣結果明天才出來。", "今仔日的採樣結果明仔載才出來。"),
     RegressionCase("tests", "請先去抽血，回來再做其他檢查。", "請先去抽血，轉來再做其他檢查。"),
+    RegressionCase("tests", "可以幫我安排檢查時間嗎？", "會當替我安排檢查時間無？"),
+    RegressionCase("tests", "可以幫我查檢查結果嗎？", "會當替我查檢查結果無？"),
+    RegressionCase("tests", "我想改抽血時間。", "我想欲改抽血時間。"),
     # reports / doctor flow
     RegressionCase("doctor_flow", "我剛剛沒有聽清楚醫生的名字。", "我拄仔無聽清楚醫生的名。"),
     RegressionCase("doctor_flow", "如果有結果我會再通知你。", "若是有結果，我會閣共你講。"),
@@ -81,6 +88,7 @@ MEDICAL_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("doctor_flow", "我想改回診時間。", "我想欲改回診時間。"),
     RegressionCase("doctor_flow", "可以幫我查門診進度嗎？", "會當替我查門診進度無？"),
     RegressionCase("doctor_flow", "我想取消回診。", "我想欲取消回診。"),
+    RegressionCase("doctor_flow", "可以幫我查醫生門診時間嗎？", "會當替我查醫生門診時間無？"),
     # pharmacy / payment / cards
     RegressionCase("pharmacy_payment", "如果你要領藥，先去批價再過來。", "若是欲領藥，先去算錢才過來。"),
     RegressionCase("pharmacy_payment", "你的健保卡刷不過，先去旁邊櫃檯問一下。", "你的健保卡鑢袂過，先去隔壁櫃檯問一下。"),
@@ -92,6 +100,11 @@ MEDICAL_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("pharmacy_payment", "我要領慢性病藥。", "我欲領慢性病藥。"),
     RegressionCase("pharmacy_payment", "可以幫我量血壓嗎？", "會當替我量血壓無？"),
     RegressionCase("pharmacy_payment", "可以幫我查藥單嗎？", "會當替我查藥單無？"),
+    RegressionCase("pharmacy_payment", "我想改取藥時間。", "我想欲改取藥時間。"),
+    RegressionCase("pharmacy_payment", "可以幫我改領藥地點嗎？", "會當替我改領藥地點無？"),
+    RegressionCase("pharmacy_payment", "可以幫我查藥局位置嗎？", "會當替我查藥局位置無？"),
+    RegressionCase("pharmacy_payment", "可以幫我補印收據嗎？", "會當替我補印收據無？"),
+    RegressionCase("pharmacy_payment", "可以幫我查疫苗紀錄嗎？", "會當替我查疫苗紀錄無？"),
     # rooms / inpatient
     RegressionCase("rooms_inpatient", "請問病房在幾樓？", "借問病房佇第幾樓？"),
     RegressionCase("rooms_inpatient", "如果你要住院，先去住院櫃檯辦手續。", "若是欲蹛院，先去住院櫃檯辦手續。"),
@@ -104,6 +117,9 @@ MEDICAL_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("rooms_inpatient", "陪病家屬要先登記。", "陪病家屬愛先登記。"),
     RegressionCase("rooms_inpatient", "請先到護理站報到。", "請先去護理站報到。"),
     RegressionCase("rooms_inpatient", "這位病人明天要轉到普通病房。", "這位病人明仔載要轉去普通病房。"),
+    RegressionCase("rooms_inpatient", "可以幫我查床位嗎？", "會當替我查床位無？"),
+    RegressionCase("rooms_inpatient", "我想改病房。", "我想欲改病房。"),
+    RegressionCase("rooms_inpatient", "可以幫我改陪病人數嗎？", "會當替我改陪病人數無？"),
     # redirect / service
     RegressionCase("redirect", "如果你只是要問廁所在哪裡，我可以跟你說。", "若是你只是欲問便所佇佗位，我會當共你講。"),
     RegressionCase("redirect", "如果你要申請病歷，請去一樓服務台。", "若是你欲申請病歷，請去一樓服務台。"),

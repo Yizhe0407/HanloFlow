@@ -40,6 +40,10 @@ RESTAURANT_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("ordering", "我想改訂位時間。", "我想欲改訂位時間。"),
     RegressionCase("ordering", "可以幫我取消訂位嗎？", "會當替我取消訂位無？"),
     RegressionCase("ordering", "我想改成內用。", "我想欲改做內用。"),
+    RegressionCase("ordering", "可以幫我查訂位紀錄嗎？", "會當替我查訂位紀錄無？"),
+    RegressionCase("ordering", "可以幫我改訂位時間嗎？", "會當替我改訂位時間無？"),
+    RegressionCase("ordering", "我想改用外帶。", "我想欲改做外帶。"),
+    RegressionCase("ordering", "可以幫我改用內用嗎？", "會當替我改做內用無？"),
     # spice / dietary — 口味偏好
     RegressionCase("spice_dietary", "不要太辣。", "莫太辣。"),
     RegressionCase("spice_dietary", "我不要加辣。", "我無愛加辣。"),
@@ -64,6 +68,7 @@ RESTAURANT_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("seating", "有四個人的位子嗎？", "有四个人的位子無？"),
     RegressionCase("seating", "可以換到裡面的位置嗎？", "會當換到內底的位無？"),
     RegressionCase("seating", "可以幫我換座位嗎？", "會當替我換座位無？"),
+    RegressionCase("seating", "可以幫我查候位進度嗎？", "會當替我查候位進度無？"),
     # payment — 結帳
     RegressionCase("payment", "麻煩結帳。", "麻煩結數。"),
     RegressionCase("payment", "總共多少錢？", "總共偌濟錢？"),
@@ -72,7 +77,10 @@ RESTAURANT_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("payment", "可以分開結帳嗎？", "會當分開結數無？"),
     RegressionCase("payment", "我要用現金付。", "我欲付現錢。"),
     RegressionCase("payment", "可以開發票嗎？", "會當開發票無？"),
+    RegressionCase("payment", "可以幫我開發票嗎？", "會當替我開發票無？"),
     RegressionCase("payment", "發票可以用載具嗎？", "發票會當用載具無？"),
+    RegressionCase("payment", "我想改用信用卡付款。", "我想欲改用信用卡付款。"),
+    RegressionCase("payment", "我想改用現金付款。", "我想欲改用現錢付款。"),
     # service — 服務需求
     RegressionCase("service", "可以打包嗎？", "會當打包無？"),
     RegressionCase("service", "我要外帶。", "我欲外帶。"),
@@ -90,6 +98,8 @@ RESTAURANT_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("service", "可以幫我拿吸管嗎？", "會當幫我提吸管來無？"),
     RegressionCase("service", "可以幫我加醬嗎？", "會當幫我添醬無？"),
     RegressionCase("service", "可以幫我拿衛生紙嗎？", "會當幫我提衛生紙來無？"),
+    RegressionCase("service", "可以幫我換小碗嗎？", "會當幫我換細碗無？"),
+    RegressionCase("service", "可以幫我查外送進度嗎？", "會當替我查外送進度無？"),
 ]
 
 

@@ -192,6 +192,7 @@ BUS_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("payment_cards", "愛心卡今天可以正常刷卡。", "愛心卡今仔日會當正常刷卡。"),
     RegressionCase("payment_cards", "老人卡感應不到的話，請你先跟司機說。", "若是老人卡感應袂著，請你先佮司機講。"),
     RegressionCase("payment_cards", "你沒有零錢的話，可以去便利商店換。", "若是你無零錢，會當去便利商店換。"),
+    RegressionCase("payment_cards", "可以幫我查公車票價嗎？", "會當替我查公車票價無？"),
     # accessibility / boarding
     RegressionCase("accessibility", "今天這班低底盤公車壞掉了，換成一般車。", "今仔日這班低底盤公車歹去矣，換成一般車。"),
     RegressionCase("accessibility", "這班車今天改成小車，所以沒有輪椅斜板。", "這班車今仔日改成小車，所以無輪椅斜板。"),
@@ -216,6 +217,8 @@ BUS_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("route_transfer", "要去朝天宮的話，你在外圍下車就可以。", "若是欲去朝天宮，你佇外圍落車就會當。"),
     RegressionCase("route_transfer", "你去對面坐回火車站那班。", "你去對面坐回火車頭彼班。"),
     RegressionCase("route_transfer", "往市場的車在這裡排隊。", "欲去市場的車佇遮排線。"),
+    RegressionCase("route_transfer", "我想改搭公車。", "我想欲改搭公車。"),
+    RegressionCase("route_transfer", "我想改轉車地點。", "我想欲改轉車地點。"),
     # Yunlin station names / attractions
     RegressionCase("yunlin_stops_attractions", "這班車會到雲林布袋戲館嗎？", "這班車會到雲林布袋戲館無？"),
     RegressionCase("yunlin_stops_attractions", "北港朝天宮站牌在水道頭文化園區旁邊嗎？", "北港朝天宮站牌佇水道頭文化園區隔壁無？"),
@@ -299,6 +302,7 @@ BUS_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("service_redirect", "如果你要查失物，我可以先幫你記下車牌和時間。", "若是你欲查失物，我會當先幫你記落車牌佮時間。"),
     RegressionCase("service_redirect", "如果你要找失物，我先幫你記車牌。", "若是你欲找失物，我先替你記車牌。"),
     RegressionCase("service_redirect", "失物要送回總站，你下午再打電話確認。", "遺失物愛送轉去總站，你下晝閣敲電話確認。"),
+    RegressionCase("service_redirect", "可以幫我查公車路線嗎？", "會當替我查公車路線無？"),
     # weather / crowd / queue
     RegressionCase("weather_crowd", "如果車子太滿，站牌這邊就先不要再排。", "若是車子太滿，站牌遮就先莫再排。"),
     RegressionCase("weather_crowd", "等一下如果車子太滿，司機可能不會讓你上車。", "等咧若是車子太滿，司機可能袂予你上車。"),
@@ -316,6 +320,7 @@ BUS_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("misc", "今天站牌移到巷口那邊。", "今仔日站牌移到巷口彼爿。"),
     RegressionCase("misc", "行李太大件的話，麻煩你放旁邊。", "若是行李太大件，麻煩你囥邊仔。"),
     RegressionCase("misc", "這班公車今天不停靠北港朝天宮。", "這班公車今仔日無停北港朝天宮。"),
+    RegressionCase("misc", "可以幫我查站牌位置嗎？", "會當替我查站牌位置無？"),
 ]
 
 
