@@ -44,6 +44,8 @@ WORKPLACE_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("meeting", "可以幫我寄會議紀錄嗎？", "會當替我寄會議紀錄無？"),
     RegressionCase("meeting", "我想改開會地點。", "我想欲改開會地點。"),
     RegressionCase("meeting", "我想改會議時間。", "我想欲改會議時間。"),
+    RegressionCase("meeting", "可以幫我查會議室設備嗎？", "會當替我查會議室設備無？"),
+    RegressionCase("meeting", "可以幫我查會議進度嗎？", "會當替我查會議進度無？"),
     # office location / progressive
     RegressionCase("office_location", "主管在會議室。", "主管佇會議室。"),
     RegressionCase("office_location", "我們在會議室開會。", "咱佇會議室開會。"),
@@ -78,6 +80,13 @@ WORKPLACE_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("workflow", "可以幫我列印文件嗎？", "會當替我列印文件無？"),
     RegressionCase("workflow", "我想改報告期限。", "我想欲改報告期限。"),
     RegressionCase("workflow", "可以幫我查簽核進度嗎？", "會當替我查簽核進度無？"),
+    RegressionCase("workflow", "可以幫我查報表進度嗎？", "會當替我查報表進度無？"),
+    RegressionCase("workflow", "可以幫我查合約進度嗎？", "會當替我查合約進度無？"),
+    RegressionCase("workflow", "可以幫我查報銷進度嗎？", "會當替我查報銷進度無？"),
+    RegressionCase("workflow", "可以幫我查請款狀態嗎？", "會當替我查請款狀態無？"),
+    RegressionCase("workflow", "可以幫我查出差申請嗎？", "會當替我查出張申請無？"),
+    RegressionCase("workflow", "可以幫我查專案進度嗎？", "會當替我查專案進度無？"),
+    RegressionCase("workflow", "可以幫我查任務進度嗎？", "會當替我查任務進度無？"),
     # leave / availability
     RegressionCase("leave_availability", "我今天請假。", "我今仔日請假。"),
     RegressionCase("leave_availability", "我想請半天假。", "我想欲請半日假。"),
@@ -95,6 +104,7 @@ WORKPLACE_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("leave_availability", "我想改班表。", "我想欲改班表。"),
     RegressionCase("leave_availability", "我想改上班時間。", "我想欲改上班時間。"),
     RegressionCase("leave_availability", "可以幫我查請假紀錄嗎？", "會當替我查請假紀錄無？"),
+    RegressionCase("leave_availability", "可以幫我查加班申請嗎？", "會當替我查加班申請無？"),
 ]
 
 

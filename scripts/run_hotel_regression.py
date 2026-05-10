@@ -42,6 +42,8 @@ HOTEL_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("reservation", "我想改房型。", "我想欲改房型。"),
     RegressionCase("reservation", "可以幫我改入住人數嗎？", "會當替我改入住人數無？"),
     RegressionCase("reservation", "我想改加床數量。", "我想欲改加床數量。"),
+    RegressionCase("reservation", "可以幫我查加床費用嗎？", "會當替我查加床費用無？"),
+    RegressionCase("reservation", "我想改退房日期。", "我想欲改退房日期。"),
     # check_in — 入住
     RegressionCase("check_in", "幾點可以入住？", "幾點會當入住？"),
     RegressionCase("check_in", "可以提早入住嗎？", "會當較早入住無？"),
@@ -55,6 +57,9 @@ HOTEL_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("check_in", "可以幫我查入住紀錄嗎？", "會當替我查入住紀錄無？"),
     RegressionCase("check_in", "可以幫我換停車位嗎？", "會當替我換停車位無？"),
     RegressionCase("check_in", "可以幫我查停車費嗎？", "會當替我查停車費無？"),
+    RegressionCase("check_in", "可以幫我查停車場位置嗎？", "會當替我查停車場位置無？"),
+    RegressionCase("check_in", "可以幫我查房卡押金嗎？", "會當替我查房卡押金無？"),
+    RegressionCase("check_in", "可以幫我查停車位位置嗎？", "會當替我查停車位位置無？"),
     # check_out — 退房
     RegressionCase("check_out", "幾點要退房？", "幾點愛退房？"),
     RegressionCase("check_out", "我要退房。", "我欲退房。"),
@@ -69,6 +74,8 @@ HOTEL_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("check_out", "我想晚一點退房。", "我想欲較晏一點退房。"),
     RegressionCase("check_out", "我想改退房時間。", "我想欲改退房時間。"),
     RegressionCase("check_out", "可以幫我叫計程車嗎？", "會當替我叫計程車無？"),
+    RegressionCase("check_out", "可以幫我查退房時間嗎？", "會當替我查退房時間無？"),
+    RegressionCase("check_out", "可以幫我查退房紀錄嗎？", "會當替我查退房紀錄無？"),
     # amenities — 設施服務
     RegressionCase("amenities", "請問有早餐嗎？", "借問有早頓無？"),
     RegressionCase("amenities", "早餐在哪裡？", "早頓佇佗位？"),
@@ -94,6 +101,10 @@ HOTEL_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("amenities", "可以幫我查早餐時間嗎？", "會當替我查早頓時間無？"),
     RegressionCase("amenities", "可以幫我查房間設備嗎？", "會當替我查房間設備無？"),
     RegressionCase("amenities", "可以幫我查洗衣時間嗎？", "會當替我查洗衫時間無？"),
+    RegressionCase("amenities", "可以幫我查房務時間嗎？", "會當替我查房務時間無？"),
+    RegressionCase("amenities", "可以幫我查早餐券嗎？", "會當替我查早頓券無？"),
+    RegressionCase("amenities", "可以幫我查電梯位置嗎？", "會當替我查電梯位置無？"),
+    RegressionCase("amenities", "可以幫我查早餐地點嗎？", "會當替我查早頓地點無？"),
     # issues — 問題反映
     RegressionCase("issues", "房間太吵了。", "房間太吵矣。"),
     RegressionCase("issues", "冷氣壞了。", "冷氣歹去矣。"),

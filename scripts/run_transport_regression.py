@@ -45,6 +45,14 @@ TRANSPORT_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("platform_nav", "今天站牌移到巷口那邊。", "今仔日站牌移到巷口彼爿。"),
     RegressionCase("platform_nav", "站牌旁邊那台機器可以查時刻。", "站牌邊仔那台機器會當查時刻。"),
     RegressionCase("platform_nav", "可以幫我查出口位置嗎？", "會當替我查出口位置無？"),
+    RegressionCase("platform_nav", "可以幫我查月台變更嗎？", "會當替我查月台變更無？"),
+    RegressionCase("platform_nav", "可以幫我查轉乘月台嗎？", "會當替我查轉乘月台無？"),
+    RegressionCase("platform_nav", "可以幫我查轉乘出口嗎？", "會當替我查轉乘出口無？"),
+    RegressionCase("platform_nav", "可以幫我查列車月台嗎？", "會當替我查列車月台無？"),
+    RegressionCase("platform_nav", "可以幫我查售票口位置嗎？", "會當替我查賣票口位置無？"),
+    RegressionCase("platform_nav", "可以幫我查行李寄放處嗎？", "會當替我查行李寄放處無？"),
+    RegressionCase("platform_nav", "可以幫我查驗票口位置嗎？", "會當替我查驗票口位置無？"),
+    RegressionCase("platform_nav", "可以幫我查剪票口位置嗎？", "會當替我查剪票口位置無？"),
     # train service / announcements
     RegressionCase("rail_service", "這一班火車大概還要等多久？", "這一班火車差不多猶愛等偌久？"),
     RegressionCase("rail_service", "這班列車只停大站，不停靠小站。", "這班列車只停大站，無停細站。"),
@@ -76,6 +84,7 @@ TRANSPORT_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("ticketing", "我想改搭捷運。", "我想欲改搭捷運。"),
     RegressionCase("ticketing", "可以幫我查票券效期嗎？", "會當替我查票券效期無？"),
     RegressionCase("ticketing", "我想改搭客運。", "我想欲改搭客運。"),
+    RegressionCase("ticketing", "可以幫我查轉乘票價嗎？", "會當替我查轉乘票價無？"),
     # service / redirect / lost property
     RegressionCase("service_redirect", "如果你只是問廁所在哪裡，我可以跟你說。", "若是你只是問便所佇佗位，我會當共你講。"),
     RegressionCase("service_redirect", "這個問題不是站務能決定的，你要問服務台。", "這个問題毋是站務會當決定的，你欲問服務台。"),
@@ -90,6 +99,7 @@ TRANSPORT_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("service_redirect", "可以幫我查月台嗎？", "會當替我查月台無？"),
     RegressionCase("service_redirect", "可以幫我找服務台嗎？", "會當替我揣服務台無？"),
     RegressionCase("service_redirect", "可以幫我改下車站嗎？", "會當替我改落車站無？"),
+    RegressionCase("service_redirect", "可以幫我查轉乘站嗎？", "會當替我查轉乘站無？"),
     # crowd / safety / queue
     RegressionCase("crowd_safety", "今天車站人很多，你先到旁邊等一下。", "今仔日車站人誠濟，你先到邊仔等一下。"),
     RegressionCase("crowd_safety", "這裡不能停車接人，請到外圍等。", "遮袂當停車接人，請到外圍等。"),

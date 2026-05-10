@@ -181,6 +181,8 @@ BUS_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("bus_time_queries", "多少天一次？", "幾工一擺？"),
     RegressionCase("bus_time_queries", "昨天晚上幾點停駛？", "昨暗幾點停開？"),
     RegressionCase("bus_time_queries", "前晚幾點停駛？", "前暗幾點停開？"),
+    RegressionCase("bus_time_queries", "可以幫我查班距嗎？", "會當替我查班距無？"),
+    RegressionCase("bus_time_queries", "可以幫我查首班車時間嗎？", "會當替我查頭班車時間無？"),
     # payment / cards / ticketing
     RegressionCase("payment_cards", "如果你沒有零錢，可以先投現再去總站補票。", "若是你無零錢，會當先投現錢閣去總站補票。"),
     RegressionCase("payment_cards", "如果你的愛心卡刷不過，可以改用投現。", "若是你的愛心卡鑢袂過，會當改用投現錢。"),
@@ -193,6 +195,7 @@ BUS_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("payment_cards", "老人卡感應不到的話，請你先跟司機說。", "若是老人卡感應袂著，請你先佮司機講。"),
     RegressionCase("payment_cards", "你沒有零錢的話，可以去便利商店換。", "若是你無零錢，會當去便利商店換。"),
     RegressionCase("payment_cards", "可以幫我查公車票價嗎？", "會當替我查公車票價無？"),
+    RegressionCase("payment_cards", "可以幫我查票卡餘額嗎？", "會當替我查票卡餘額無？"),
     # accessibility / boarding
     RegressionCase("accessibility", "今天這班低底盤公車壞掉了，換成一般車。", "今仔日這班低底盤公車歹去矣，換成一般車。"),
     RegressionCase("accessibility", "這班車今天改成小車，所以沒有輪椅斜板。", "這班車今仔日改成小車，所以無輪椅斜板。"),
@@ -219,6 +222,7 @@ BUS_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("route_transfer", "往市場的車在這裡排隊。", "欲去市場的車佇遮排線。"),
     RegressionCase("route_transfer", "我想改搭公車。", "我想欲改搭公車。"),
     RegressionCase("route_transfer", "我想改轉車地點。", "我想欲改轉車地點。"),
+    RegressionCase("route_transfer", "可以幫我查回程班次嗎？", "會當替我查回程班次無？"),
     # Yunlin station names / attractions
     RegressionCase("yunlin_stops_attractions", "這班車會到雲林布袋戲館嗎？", "這班車會到雲林布袋戲館無？"),
     RegressionCase("yunlin_stops_attractions", "北港朝天宮站牌在水道頭文化園區旁邊嗎？", "北港朝天宮站牌佇水道頭文化園區隔壁無？"),
@@ -303,6 +307,13 @@ BUS_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("service_redirect", "如果你要找失物，我先幫你記車牌。", "若是你欲找失物，我先替你記車牌。"),
     RegressionCase("service_redirect", "失物要送回總站，你下午再打電話確認。", "遺失物愛送轉去總站，你下晝閣敲電話確認。"),
     RegressionCase("service_redirect", "可以幫我查公車路線嗎？", "會當替我查公車路線無？"),
+    RegressionCase("service_redirect", "可以幫我查路線變更嗎？", "會當替我查路線變更無？"),
+    RegressionCase("service_redirect", "可以幫我查公車站名嗎？", "會當替我查公車站名無？"),
+    RegressionCase("service_redirect", "可以幫我查乘車規定嗎？", "會當替我查乘車規定無？"),
+    RegressionCase("service_redirect", "可以幫我查公車時刻表嗎？", "會當替我查公車時刻表無？"),
+    RegressionCase("service_redirect", "可以幫我查公車到站時間嗎？", "會當替我查公車到站時間無？"),
+    RegressionCase("service_redirect", "可以幫我查公車路況嗎？", "會當替我查公車路況無？"),
+    RegressionCase("service_redirect", "可以幫我查公車班次嗎？", "會當替我查公車班次無？"),
     # weather / crowd / queue
     RegressionCase("weather_crowd", "如果車子太滿，站牌這邊就先不要再排。", "若是車子太滿，站牌遮就先莫再排。"),
     RegressionCase("weather_crowd", "等一下如果車子太滿，司機可能不會讓你上車。", "等咧若是車子太滿，司機可能袂予你上車。"),
@@ -321,6 +332,7 @@ BUS_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("misc", "行李太大件的話，麻煩你放旁邊。", "若是行李太大件，麻煩你囥邊仔。"),
     RegressionCase("misc", "這班公車今天不停靠北港朝天宮。", "這班公車今仔日無停北港朝天宮。"),
     RegressionCase("misc", "可以幫我查站牌位置嗎？", "會當替我查站牌位置無？"),
+    RegressionCase("misc", "可以幫我查站牌編號嗎？", "會當替我查站牌編號無？"),
 ]
 
 

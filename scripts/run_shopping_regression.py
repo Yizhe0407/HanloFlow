@@ -60,6 +60,8 @@ SHOPPING_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("purchase", "可以幫我查商品規格嗎？", "會當替我查商品規格無？"),
     RegressionCase("purchase", "可以幫我查門市庫存嗎？", "會當替我查門市庫存無？"),
     RegressionCase("purchase", "可以幫我改商品顏色嗎？", "會當替我改商品顏色無？"),
+    RegressionCase("purchase", "可以幫我查商品評價嗎？", "會當替我查商品評價無？"),
+    RegressionCase("purchase", "可以幫我查庫存門市嗎？", "會當替我查庫存門市無？"),
     # payment — 付款
     RegressionCase("payment", "請問收現金嗎？", "借問收現錢無？"),
     RegressionCase("payment", "可以刷卡嗎？", "會當刷卡無？"),
@@ -75,6 +77,12 @@ SHOPPING_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("payment", "可以幫我查發票號碼嗎？", "會當替我查發票號碼無？"),
     RegressionCase("payment", "我想改發票載具。", "我想欲改發票載具。"),
     RegressionCase("payment", "可以幫我查會員點數嗎？", "會當替我查會員點數無？"),
+    RegressionCase("payment", "可以幫我查優惠券嗎？", "會當替我查優惠券無？"),
+    RegressionCase("payment", "我想改付款卡片。", "我想欲改付款卡片。"),
+    RegressionCase("payment", "可以幫我查折扣碼嗎？", "會當替我查折扣碼無？"),
+    RegressionCase("payment", "可以幫我查付款狀態嗎？", "會當替我查付款狀態無？"),
+    RegressionCase("payment", "我想改付款日期。", "我想欲改付款日期。"),
+    RegressionCase("payment", "我想改刷卡日期。", "我想欲改刷卡日期。"),
     # comparative — 比較詞組
     RegressionCase("comparative", "有沒有大一點的？", "敢有較大的？"),
     RegressionCase("comparative", "有小一點的嗎？", "有較細的無？"),
@@ -117,6 +125,12 @@ SHOPPING_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("after_sales", "可以幫我申請退貨嗎？", "會當替我申請退貨無？"),
     RegressionCase("after_sales", "我想改取貨時間。", "我想欲改取貨時間。"),
     RegressionCase("after_sales", "可以幫我查退貨進度嗎？", "會當替我查退貨進度無？"),
+    RegressionCase("after_sales", "可以幫我改取貨門市嗎？", "會當替我改取貨門市無？"),
+    RegressionCase("after_sales", "可以幫我查退款明細嗎？", "會當替我查退錢明細無？"),
+    RegressionCase("after_sales", "可以幫我查換貨進度嗎？", "會當替我查換貨進度無？"),
+    RegressionCase("after_sales", "我想改退貨日期。", "我想欲改退貨日期。"),
+    RegressionCase("after_sales", "可以幫我查取貨狀態嗎？", "會當替我查取貨狀態無？"),
+    RegressionCase("after_sales", "可以幫我查退貨狀態嗎？", "會當替我查退貨狀態無？"),
 ]
 
 

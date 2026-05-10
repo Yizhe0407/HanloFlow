@@ -37,6 +37,9 @@ FAMILY_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("parent_child", "我晚點帶小孩回家。", "我較晏帶囡仔轉去厝裡。"),
     RegressionCase("parent_child", "我晚點去接小孩。", "我較晏去接囡仔。"),
     RegressionCase("parent_child", "我想改接小孩時間。", "我想欲改接囡仔時間。"),
+    RegressionCase("parent_child", "可以幫我查保母電話嗎？", "會當替我查保母電話無？"),
+    RegressionCase("parent_child", "可以幫我查孩子作業嗎？", "會當替我查囡仔作業無？"),
+    RegressionCase("parent_child", "可以幫我查孩子成績嗎？", "會當替我查囡仔成績無？"),
     # health_care — 照護
     RegressionCase("health_care", "孩子發燒了。", "囡仔發燒矣。"),
     RegressionCase("health_care", "幫孩子洗澡。", "幫囡仔洗身軀。"),
@@ -53,6 +56,13 @@ FAMILY_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("health_care", "可以幫我買藥嗎？", "會當替我買藥仔無？"),
     RegressionCase("health_care", "可以幫我查藥袋嗎？", "會當替我查藥袋無？"),
     RegressionCase("health_care", "可以幫我查小孩體溫嗎？", "會當替我查囡仔體溫無？"),
+    RegressionCase("health_care", "可以幫我查奶粉庫存嗎？", "會當替我查奶粉庫存無？"),
+    RegressionCase("health_care", "可以幫我查尿布庫存嗎？", "會當替我查尿苴仔庫存無？"),
+    RegressionCase("health_care", "可以幫我查小孩作息嗎？", "會當替我查囡仔作息無？"),
+    RegressionCase("health_care", "可以幫我查孩子疫苗嗎？", "會當替我查囡仔疫苗無？"),
+    RegressionCase("health_care", "可以幫我查小孩過敏紀錄嗎？", "會當替我查囡仔過敏紀錄無？"),
+    RegressionCase("health_care", "可以幫我查孩子出勤嗎？", "會當替我查囡仔出勤無？"),
+    RegressionCase("health_care", "可以幫我查孩子聯絡簿嗎？", "會當替我查囡仔聯絡簿無？"),
     # siblings — 兄弟姐妹
     RegressionCase("siblings", "姐姐在讀書。", "阿姊佇咧讀冊。"),
     RegressionCase("siblings", "弟弟在做功課。", "阿弟仔佇咧做功課。"),
@@ -94,6 +104,8 @@ FAMILY_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("daily", "可以幫我提醒媽媽嗎？", "會當替我提醒阿母無？"),
     RegressionCase("daily", "我想改晚睡時間。", "我想欲改晚睡時間。"),
     RegressionCase("daily", "可以幫我提醒爸爸嗎？", "會當替我提醒阿爸無？"),
+    RegressionCase("daily", "我想改回家時間。", "我想欲改轉去厝裡時間。"),
+    RegressionCase("daily", "我想改睡覺時間。", "我想欲改睏眠時間。"),
 ]
 
 

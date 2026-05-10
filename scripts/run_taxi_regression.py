@@ -37,6 +37,10 @@ TAXI_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("hailing", "我想晚一點出發。", "我想欲較晏一點出發。"),
     RegressionCase("hailing", "可以幫我叫大車嗎？", "會當替我叫大車無？"),
     RegressionCase("hailing", "可以幫我改叫車時間嗎？", "會當替我改叫車時間無？"),
+    RegressionCase("hailing", "可以幫我查派車進度嗎？", "會當替我查派車進度無？"),
+    RegressionCase("hailing", "我想改出發時間。", "我想欲改出發時間。"),
+    RegressionCase("hailing", "可以幫我查叫車紀錄嗎？", "會當替我查叫車紀錄無？"),
+    RegressionCase("hailing", "可以幫我查乘車紀錄嗎？", "會當替我查乘車紀錄無？"),
     # destination — 目的地
     RegressionCase("destination", "請問到台北車站多少錢？", "借問到臺北車站偌濟錢？"),
     RegressionCase("destination", "我要去機場。", "我欲去機場。"),
@@ -52,6 +56,7 @@ TAXI_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("destination", "我想先去加油站。", "我想欲先去加油站。"),
     RegressionCase("destination", "我想先去便利商店。", "我想欲先去便利店。"),
     RegressionCase("destination", "可以幫我改上車地點嗎？", "會當替我改上車地點無？"),
+    RegressionCase("destination", "我想改上車時間。", "我想欲改上車時間。"),
     RegressionCase("destination", "我想改下車地點。", "我想欲改落車地點。"),
     RegressionCase("destination", "可以幫我改目的地嗎？", "會當替我改目的地無？"),
     RegressionCase("destination", "可以幫我改下車地址嗎？", "會當替我改落車地址無？"),
@@ -79,6 +84,8 @@ TAXI_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("payment", "我想改成現金付款。", "我想欲改做現錢付款。"),
     RegressionCase("payment", "可以幫我查車資嗎？", "會當替我查車錢無？"),
     RegressionCase("payment", "可以幫我查預估車資嗎？", "會當替我查預估車錢無？"),
+    RegressionCase("payment", "可以幫我查共乘車資嗎？", "會當替我查共乘車錢無？"),
+    RegressionCase("payment", "可以幫我查車資明細嗎？", "會當替我查車錢明細無？"),
     # misc — 其他
     RegressionCase("misc", "請快一點。", "請較緊咧。"),
     RegressionCase("misc", "等我一下。", "等我一下仔。"),
@@ -94,8 +101,12 @@ TAXI_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("misc", "可以幫我查司機電話嗎？", "會當替我查司機電話無？"),
     RegressionCase("misc", "可以幫我查車牌號碼嗎？", "會當替我查車牌號碼無？"),
     RegressionCase("misc", "可以幫我查車子位置嗎？", "會當替我查車子位置無？"),
+    RegressionCase("misc", "可以幫我查司機位置嗎？", "會當替我查司機位置無？"),
+    RegressionCase("misc", "可以幫我查司機姓名嗎？", "會當替我查司機姓名無？"),
     RegressionCase("misc", "可以幫我看一下路線嗎？", "會當替我看覓路線無？"),
     RegressionCase("misc", "請幫我開窗戶。", "請替我開窗仔門。"),
+    RegressionCase("misc", "可以幫我查車型嗎？", "會當替我查車型無？"),
+    RegressionCase("misc", "可以幫我查車輛位置嗎？", "會當替我查車輛位置無？"),
 ]
 
 

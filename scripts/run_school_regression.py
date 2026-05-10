@@ -58,6 +58,9 @@ SCHOOL_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("student_class", "可以幫我查課表嗎？", "會當替我查課表無？"),
     RegressionCase("student_class", "我想改上課地點。", "我想欲改上課地點。"),
     RegressionCase("student_class", "可以幫我查補課時間嗎？", "會當替我查補課時間無？"),
+    RegressionCase("student_class", "可以幫我查校車時間嗎？", "會當替我查校車時間無？"),
+    RegressionCase("student_class", "我想改上課時間。", "我想欲改上課時間。"),
+    RegressionCase("student_class", "可以幫我查請假狀態嗎？", "會當替我查請假狀態無？"),
     # homework — 功課作業
     RegressionCase("homework", "今天有作業嗎？", "今仔日有作業無？"),
     RegressionCase("homework", "功課做完了嗎？", "功課做完矣無？"),
@@ -70,6 +73,9 @@ SCHOOL_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("homework", "作業要寫第幾頁？", "作業愛寫第幾頁？"),
     RegressionCase("homework", "作業可以晚一點交嗎？", "作業會當較晏一點交無？"),
     RegressionCase("homework", "我想改作業期限。", "我想欲改作業期限。"),
+    RegressionCase("homework", "可以幫我查補交期限嗎？", "會當替我查補交期限無？"),
+    RegressionCase("homework", "可以幫我查作業進度嗎？", "會當替我查作業進度無？"),
+    RegressionCase("homework", "可以幫我查作業期限嗎？", "會當替我查作業期限無？"),
     # exam — 考試
     RegressionCase("exam", "我要考試了。", "我欲考試矣。"),
     RegressionCase("exam", "考試及格了嗎？", "考試及格矣無？"),
@@ -82,6 +88,10 @@ SCHOOL_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("exam", "考試要帶鉛筆嗎？", "考試愛帶鉛筆無？"),
     RegressionCase("exam", "可以幫我查成績嗎？", "會當替我查成績無？"),
     RegressionCase("exam", "我想改補考日期。", "我想欲改補考日期。"),
+    RegressionCase("exam", "可以幫我查成績單嗎？", "會當替我查成績單無？"),
+    RegressionCase("exam", "可以幫我查考試地點嗎？", "會當替我查考試地點無？"),
+    RegressionCase("exam", "可以幫我查補考地點嗎？", "會當替我查補考地點無？"),
+    RegressionCase("exam", "可以幫我查段考時間嗎？", "會當替我查段考時間無？"),
     # campus — 校園設施
     RegressionCase("campus", "我去圖書館借書。", "我去圖冊館借冊。"),
     RegressionCase("campus", "請問廁所在哪裡？", "借問便所佇佗位？"),
@@ -92,6 +102,7 @@ SCHOOL_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("campus", "操場可以借球嗎？", "操場會當借球無？"),
     RegressionCase("campus", "我要去圖書館還書。", "我欲去圖冊館還書。"),
     RegressionCase("campus", "我想借這本書。", "我想欲借這本冊。"),
+    RegressionCase("campus", "可以幫我查教室位置嗎？", "會當替我查教室位置無？"),
     # ability — 能力表達
     RegressionCase("ability", "我不會說台語。", "我袂曉講台語。"),
     RegressionCase("ability", "我不太會游泳。", "我袂啥曉泅水。"),
