@@ -63,6 +63,7 @@ FAMILY_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("health_care", "可以幫我查小孩過敏紀錄嗎？", "會當替我查囡仔過敏紀錄無？"),
     RegressionCase("health_care", "可以幫我查孩子出勤嗎？", "會當替我查囡仔出勤無？"),
     RegressionCase("health_care", "可以幫我查孩子聯絡簿嗎？", "會當替我查囡仔聯絡簿無？"),
+    RegressionCase("health_care", "可以幫我查孩子疫苗紀錄嗎？", "會當替我查囡仔疫苗紀錄無？"),
     # siblings — 兄弟姐妹
     RegressionCase("siblings", "姐姐在讀書。", "阿姊佇咧讀冊。"),
     RegressionCase("siblings", "弟弟在做功課。", "阿弟仔佇咧做功課。"),

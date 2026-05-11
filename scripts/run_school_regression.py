@@ -76,6 +76,7 @@ SCHOOL_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("homework", "可以幫我查補交期限嗎？", "會當替我查補交期限無？"),
     RegressionCase("homework", "可以幫我查作業進度嗎？", "會當替我查作業進度無？"),
     RegressionCase("homework", "可以幫我查作業期限嗎？", "會當替我查作業期限無？"),
+    RegressionCase("homework", "可以幫我查學費繳費期限嗎？", "會當替我查學費繳費期限無？"),
     # exam — 考試
     RegressionCase("exam", "我要考試了。", "我欲考試矣。"),
     RegressionCase("exam", "考試及格了嗎？", "考試及格矣無？"),

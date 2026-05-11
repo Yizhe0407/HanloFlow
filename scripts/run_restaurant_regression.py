@@ -76,6 +76,7 @@ RESTAURANT_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("seating", "可以幫我查候位進度嗎？", "會當替我查候位進度無？"),
     RegressionCase("seating", "可以幫我查訂位人數嗎？", "會當替我查訂位人數無？"),
     RegressionCase("seating", "可以幫我查包廂座位嗎？", "會當替我查包廂座位無？"),
+    RegressionCase("seating", "可以幫我查低消規定嗎？", "會當替我查低消規定無？"),
     # payment — 結帳
     RegressionCase("payment", "麻煩結帳。", "麻煩結數。"),
     RegressionCase("payment", "總共多少錢？", "總共偌濟錢？"),

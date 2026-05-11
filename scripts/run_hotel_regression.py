@@ -60,6 +60,7 @@ HOTEL_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("check_in", "可以幫我查停車場位置嗎？", "會當替我查停車場位置無？"),
     RegressionCase("check_in", "可以幫我查房卡押金嗎？", "會當替我查房卡押金無？"),
     RegressionCase("check_in", "可以幫我查停車位位置嗎？", "會當替我查停車位位置無？"),
+    RegressionCase("check_in", "可以幫我查停車場費用嗎？", "會當替我查停車場費用無？"),
     # check_out — 退房
     RegressionCase("check_out", "幾點要退房？", "幾點愛退房？"),
     RegressionCase("check_out", "我要退房。", "我欲退房。"),

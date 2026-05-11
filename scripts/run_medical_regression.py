@@ -136,6 +136,8 @@ MEDICAL_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("rooms_inpatient", "可以幫我改陪病人數嗎？", "會當替我改陪病人數無？"),
     RegressionCase("rooms_inpatient", "可以幫我查住院費用嗎？", "會當替我查蹛院費用無？"),
     RegressionCase("rooms_inpatient", "可以幫我查住院床位嗎？", "會當替我查蹛院床位無？"),
+    RegressionCase("rooms_inpatient", "可以幫我查住院手續嗎？", "會當替我查蹛院手續無？"),
+    RegressionCase("rooms_inpatient", "我想改住院日期。", "我想欲改蹛院日期。"),
     # redirect / service
     RegressionCase("redirect", "如果你只是要問廁所在哪裡，我可以跟你說。", "若是你只是欲問便所佇佗位，我會當共你講。"),
     RegressionCase("redirect", "如果你要申請病歷，請去一樓服務台。", "若是你欲申請病歷，請去一樓服務台。"),

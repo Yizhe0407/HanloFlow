@@ -2,21 +2,64 @@
 
 > 每次大規模優化後請更新此檔案。這是讓下一個人快速接手的地圖。
 
-## 目前辭典狀態（2026-05-10）
+## 目前辭典狀態（2026-05-12）
 
 | 類型 | 數量 |
 |------|------|
-| 總詞條（active runtime） | 16,749 |
-| 人工驗證（trust: human active rows） | ~7,776 |
+| 總詞條（active runtime） | 16,763 |
+| 人工驗證（trust: human active rows） | ~7,790 |
 | base seed（trust: seed，低信任） | source 仍有短詞 active；runtime 以 policy 過濾高風險 seed |
-| 最新 round | round230 |
+| 最新 round | round231 |
 
-所有迴歸測試全部通過（共 1240 筆）：
-bus 299、medical 115、transport 90、conversation 63、restaurant 83、shopping 102、hotel 94、taxi 79、bank 79、school 80、family 78、workplace 78
+所有迴歸測試全部通過（共 1254 筆）：
+bus 300、medical 117、transport 91、conversation 64、restaurant 84、shopping 104、hotel 95、taxi 80、bank 80、school 81、family 79、workplace 79
 
 ---
 
 ## 近期做了什麼（最新在前）
+
+### 2026-05-12：跨情境服務句補強（round231）
+**新增人工詞條（14 條 active）：**
+- `可以幫我查停車場費用嗎→會當替我查停車場費用無`
+- `可以幫我查住院手續嗎→會當替我查蹛院手續無`
+- `可以幫我查訂單狀態嗎→會當替我查訂單狀態無`
+- `可以幫我查月台位置嗎→會當替我查月台位置無`
+- `可以幫我查低消規定嗎→會當替我查低消規定無`
+- `可以幫我查孩子疫苗紀錄嗎→會當替我查囡仔疫苗紀錄無`
+- `可以幫我查學費繳費期限嗎→會當替我查學費繳費期限無`
+- `可以幫我查薪資明細嗎→會當替我查月給明細無`
+- `可以幫我查定存利率嗎→會當替我查定存利率無`
+- `可以幫我查公車營運時間嗎→會當替我查公車營運時間無`
+- `可以幫我查司機評價嗎→會當替我查司機評價無`
+- `我想改聚會時間→我想欲改聚會時間`
+- `我想改住院日期→我想欲改蹛院日期`
+- `我想改發票日期→我想欲改發票日期`
+
+**修正實測錯誤：**
+- 跨飯店、醫療、購物、交通、餐廳、家庭、學校、辦公、銀行、公車與計程車服務查詢句，將 `會當幫我...` 收斂為 `會當替我...`
+- `我想改聚會時間。`、`我想改住院日期。`、`我想改發票日期。` 補足 `想欲`
+- 醫療語境固定 `住院→蹛院`
+- 家庭語境固定 `孩子→囡仔`
+- 辦公語境固定 `薪資→月給`
+
+**新增迴歸測試：**
+- `run_hotel_regression.py / check_in` +1，分類合計 16 筆
+- `run_medical_regression.py / rooms_inpatient` +2，分類合計 18 筆
+- `run_shopping_regression.py / payment` +1，分類合計 21 筆
+- `run_shopping_regression.py / after_sales` +1，分類合計 39 筆
+- `run_transport_regression.py / platform_nav` +1，分類合計 20 筆
+- `run_restaurant_regression.py / seating` +1，分類合計 16 筆
+- `run_family_regression.py / health_care` +1，分類合計 23 筆
+- `run_school_regression.py / homework` +1，分類合計 15 筆
+- `run_workplace_regression.py / workflow` +1，分類合計 26 筆
+- `run_bank_regression.py / bank_service` +1，分類合計 14 筆
+- `run_bus_regression.py / bus_time_queries` +1，分類合計 121 筆
+- `run_taxi_regression.py / misc` +1，分類合計 21 筆
+- `run_conversation_regression.py / schedule_plans` +1，分類合計 29 筆
+
+**資料同步：**
+- 根目錄 `data/` 與 `taigi_converter/data/` 同步更新
+- 重編根目錄與 package 內 artifacts
 
 ### 2026-05-10：跨情境服務句補強（round230）
 **新增人工詞條（14 條 active）：**

@@ -90,6 +90,7 @@ BANK_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("bank_service", "可以幫我查貸款利率嗎？", "會當替我查貸款利率無？"),
     RegressionCase("bank_service", "可以幫我更新資料嗎？", "會當替我更新資料無？"),
     RegressionCase("bank_service", "可以幫我查貸款進度嗎？", "會當替我查貸款進度無？"),
+    RegressionCase("bank_service", "可以幫我查定存利率嗎？", "會當替我查定存利率無？"),
     # postal — 郵局寄件
     RegressionCase("postal", "我要寄掛號信。", "我欲寄掛號信。"),
     RegressionCase("postal", "我要寄包裹。", "我欲寄包裹。"),

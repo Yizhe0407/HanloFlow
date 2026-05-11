@@ -53,6 +53,7 @@ TRANSPORT_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("platform_nav", "可以幫我查行李寄放處嗎？", "會當替我查行李寄放處無？"),
     RegressionCase("platform_nav", "可以幫我查驗票口位置嗎？", "會當替我查驗票口位置無？"),
     RegressionCase("platform_nav", "可以幫我查剪票口位置嗎？", "會當替我查剪票口位置無？"),
+    RegressionCase("platform_nav", "可以幫我查月台位置嗎？", "會當替我查月台位置無？"),
     # train service / announcements
     RegressionCase("rail_service", "這一班火車大概還要等多久？", "這一班火車差不多猶愛等偌久？"),
     RegressionCase("rail_service", "這班列車只停大站，不停靠小站。", "這班列車只停大站，無停細站。"),

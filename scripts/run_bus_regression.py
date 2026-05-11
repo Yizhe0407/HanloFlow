@@ -183,6 +183,7 @@ BUS_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("bus_time_queries", "前晚幾點停駛？", "前暗幾點停開？"),
     RegressionCase("bus_time_queries", "可以幫我查班距嗎？", "會當替我查班距無？"),
     RegressionCase("bus_time_queries", "可以幫我查首班車時間嗎？", "會當替我查頭班車時間無？"),
+    RegressionCase("bus_time_queries", "可以幫我查公車營運時間嗎？", "會當替我查公車營運時間無？"),
     # payment / cards / ticketing
     RegressionCase("payment_cards", "如果你沒有零錢，可以先投現再去總站補票。", "若是你無零錢，會當先投現錢閣去總站補票。"),
     RegressionCase("payment_cards", "如果你的愛心卡刷不過，可以改用投現。", "若是你的愛心卡鑢袂過，會當改用投現錢。"),

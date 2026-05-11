@@ -87,6 +87,7 @@ WORKPLACE_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("workflow", "可以幫我查出差申請嗎？", "會當替我查出張申請無？"),
     RegressionCase("workflow", "可以幫我查專案進度嗎？", "會當替我查專案進度無？"),
     RegressionCase("workflow", "可以幫我查任務進度嗎？", "會當替我查任務進度無？"),
+    RegressionCase("workflow", "可以幫我查薪資明細嗎？", "會當替我查月給明細無？"),
     # leave / availability
     RegressionCase("leave_availability", "我今天請假。", "我今仔日請假。"),
     RegressionCase("leave_availability", "我想請半天假。", "我想欲請半日假。"),
