@@ -82,6 +82,8 @@ CONVERSATION_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("schedule_plans", "我等等再出門。", "我等陣仔閣出門。"),
     RegressionCase("schedule_plans", "我晚點再打給你。", "我較晏閣敲予你。"),
     RegressionCase("schedule_plans", "可以幫我取消預約嗎？", "會當替我取消預約無？"),
+    RegressionCase("schedule_plans", "我想取消預約。", "我想欲取消預約。"),
+    RegressionCase("schedule_plans", "我需要取消預約。", "我欲取消預約。"),
     RegressionCase("schedule_plans", "我想改接送時間。", "我想欲改接送時間。"),
     RegressionCase("schedule_plans", "我想改提醒時間。", "我想欲改提醒時間。"),
     RegressionCase("schedule_plans", "我想改集合時間。", "我想欲改集合時間。"),

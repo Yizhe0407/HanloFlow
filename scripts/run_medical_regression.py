@@ -93,6 +93,8 @@ MEDICAL_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("doctor_flow", "我想改回診時間。", "我想欲改回診時間。"),
     RegressionCase("doctor_flow", "可以幫我查門診進度嗎？", "會當替我查門診進度無？"),
     RegressionCase("doctor_flow", "我想取消回診。", "我想欲取消回診。"),
+    RegressionCase("doctor_flow", "我想取消掛號。", "我想欲取消掛號。"),
+    RegressionCase("doctor_flow", "可以幫我取消掛號嗎？", "會當替我取消掛號無？"),
     RegressionCase("doctor_flow", "可以幫我查醫生門診時間嗎？", "會當替我查醫生門診時間無？"),
     RegressionCase("doctor_flow", "可以幫我查回診時間嗎？", "會當替我查回診時間無？"),
     RegressionCase("doctor_flow", "可以幫我查健檢報告嗎？", "會當替我查健檢報告無？"),

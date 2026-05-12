@@ -32,6 +32,8 @@ HOTEL_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("reservation", "我想改訂房日期。", "我想欲改訂房日期。"),
     RegressionCase("reservation", "我想改預約日期。", "我想欲改預約日期。"),
     RegressionCase("reservation", "可以幫我改預約日期嗎？", "會當替我改預約日期無？"),
+    RegressionCase("reservation", "我想取消訂房。", "我想欲取消訂房。"),
+    RegressionCase("reservation", "我需要取消訂房。", "我欲取消訂房。"),
     RegressionCase("reservation", "可以幫我查房價嗎？", "會當替我查房價無？"),
     RegressionCase("reservation", "可以加床嗎？", "會當加床無？"),
     RegressionCase("reservation", "訂房有含早餐嗎？", "訂房有含早頓無？"),
