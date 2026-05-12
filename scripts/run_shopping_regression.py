@@ -95,10 +95,13 @@ SHOPPING_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("comparative", "哪一個比較划算？", "佗一个較合算？"),
     # after_sales — 售後
     RegressionCase("after_sales", "我要退貨。", "我欲退貨。"),
+    RegressionCase("after_sales", "我想退貨。", "我想欲退貨。"),
+    RegressionCase("after_sales", "我需要退貨。", "我欲退貨。"),
     RegressionCase("after_sales", "可以換貨嗎？", "會當換貨無？"),
     RegressionCase("after_sales", "我需要取消訂單。", "我欲取消訂單。"),
     RegressionCase("after_sales", "我想取消訂單。", "我想欲取消訂單。"),
     RegressionCase("after_sales", "可以退款嗎？", "會當退錢無？"),
+    RegressionCase("after_sales", "可以幫我退費嗎？", "會當幫我退錢無？"),
     RegressionCase("after_sales", "我還沒收到包裹。", "我猶未收著包裹。"),
     RegressionCase("after_sales", "我想查退款進度。", "我想欲查退錢進度。"),
     RegressionCase("after_sales", "可以換同款不同尺寸嗎？", "會當換同款無仝尺寸無？"),
