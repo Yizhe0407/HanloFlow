@@ -315,6 +315,13 @@ BUS_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("service_redirect", "可以幫我查公車到站時間嗎？", "會當替我查公車到站時間無？"),
     RegressionCase("service_redirect", "可以幫我查公車路況嗎？", "會當替我查公車路況無？"),
     RegressionCase("service_redirect", "可以幫我查公車班次嗎？", "會當替我查公車班次無？"),
+    RegressionCase("service_redirect", "我需要查公車班次。", "我欲查公車班次。"),
+    RegressionCase("service_redirect", "我需要確認公車班次。", "我欲確認公車班次。"),
+    RegressionCase("service_redirect", "我想確認公車班次。", "我想欲確認公車班次。"),
+    RegressionCase("service_redirect", "可以幫我確認公車班次嗎？", "會當替我確認公車班次無？"),
+    RegressionCase("service_redirect", "請幫我確認公車班次。", "請替我確認公車班次。"),
+    RegressionCase("service_redirect", "麻煩你幫我確認公車班次。", "麻煩你替我確認公車班次。"),
+    RegressionCase("service_redirect", "幫我確認公車班次。", "替我確認公車班次。"),
     # weather / crowd / queue
     RegressionCase("weather_crowd", "如果車子太滿，站牌這邊就先不要再排。", "若是車子太滿，站牌遮就先莫再排。"),
     RegressionCase("weather_crowd", "等一下如果車子太滿，司機可能不會讓你上車。", "等咧若是車子太滿，司機可能袂予你上車。"),

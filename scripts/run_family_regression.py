@@ -40,6 +40,12 @@ FAMILY_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("parent_child", "可以幫我查保母電話嗎？", "會當替我查保母電話無？"),
     RegressionCase("parent_child", "可以幫我查孩子作業嗎？", "會當替我查囡仔作業無？"),
     RegressionCase("parent_child", "可以幫我查孩子成績嗎？", "會當替我查囡仔成績無？"),
+    RegressionCase("parent_child", "我需要確認孩子成績。", "我欲確認囡仔成績。"),
+    RegressionCase("parent_child", "我想確認孩子成績。", "我想欲確認囡仔成績。"),
+    RegressionCase("parent_child", "可以幫我確認孩子成績嗎？", "會當替我確認囡仔成績無？"),
+    RegressionCase("parent_child", "請幫我確認孩子成績。", "請替我確認囡仔成績。"),
+    RegressionCase("parent_child", "麻煩你幫我確認孩子成績。", "麻煩你替我確認囡仔成績。"),
+    RegressionCase("parent_child", "幫我確認孩子成績。", "替我確認囡仔成績。"),
     # health_care — 照護
     RegressionCase("health_care", "孩子發燒了。", "囡仔發燒矣。"),
     RegressionCase("health_care", "幫孩子洗澡。", "幫囡仔洗身軀。"),

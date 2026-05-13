@@ -2,21 +2,401 @@
 
 > 每次大規模優化後請更新此檔案。這是讓下一個人快速接手的地圖。
 
-## 目前辭典狀態（2026-05-12）
+## 目前辭典狀態（2026-05-13）
 
 | 類型 | 數量 |
 |------|------|
-| 總詞條（active runtime） | 16,763 |
-| 人工驗證（trust: human active rows） | ~7,790 |
+| 總詞條（active runtime） | 16,876 |
+| 人工驗證（trust: human active rows） | ~7,710 |
 | base seed（trust: seed，低信任） | source 仍有短詞 active；runtime 以 policy 過濾高風險 seed |
-| 最新 round | round231 |
+| 最新 round | round246 |
 
-所有迴歸測試全部通過（共 1254 筆）：
-bus 300、medical 117、transport 91、conversation 64、restaurant 84、shopping 104、hotel 95、taxi 80、bank 80、school 81、family 79、workplace 79
+所有迴歸測試全部通過（共 1366 筆）：
+bus 307、medical 141、transport 98、conversation 67、restaurant 94、shopping 130、hotel 114、taxi 80、bank 85、school 81、family 85、workplace 84
 
 ---
 
 ## 近期做了什麼（最新在前）
+
+### 2026-05-13：幫我確認服務詞組補強（round246）
+**新增人工詞條（10 條 active）：**
+- `幫我確認訂房紀錄→替我確認訂房紀錄`
+- `幫我確認掛號狀態→替我確認掛號狀態`
+- `幫我確認回診時間→替我確認回診時間`
+- `幫我確認訂位時間→替我確認訂位時間`
+- `幫我確認付款狀態→替我確認付款狀態`
+- `幫我確認公車班次→替我確認公車班次`
+- `幫我確認月台位置→替我確認月台位置`
+- `幫我確認送貨時間→替我確認送貨時間`
+- `幫我確認會議時間→替我確認會議時間`
+- `幫我確認孩子成績→替我確認囡仔成績`
+
+**修正實測錯誤：**
+- `幫我確認...` 類短請託句將 `幫我` 收斂為 `替我`
+- `幫我確認會議時間。` 避免被拆成 `幫我確認表決間。`
+
+**新增迴歸測試：**
+- `run_hotel_regression.py / reservation` +1，分類合計 36 筆
+- `run_medical_regression.py / registration` +1，分類合計 33 筆
+- `run_medical_regression.py / doctor_flow` +1，分類合計 44 筆
+- `run_restaurant_regression.py / ordering` +1，分類合計 33 筆
+- `run_shopping_regression.py / payment` +1，分類合計 30 筆
+- `run_shopping_regression.py / after_sales` +1，分類合計 56 筆
+- `run_bus_regression.py / service_redirect` +1，分類合計 27 筆
+- `run_transport_regression.py / platform_nav` +1，分類合計 27 筆
+- `run_workplace_regression.py / meeting` +1，分類合計 27 筆
+- `run_family_regression.py / parent_child` +1，分類合計 22 筆
+
+**資料同步：**
+- 根目錄 `data/` 與 `taigi_converter/data/` 同步更新
+- 重編根目錄與 package 內 artifacts
+
+### 2026-05-13：麻煩你幫我確認服務詞組補強（round245）
+**新增人工詞條（10 條 active）：**
+- `麻煩你幫我確認訂房紀錄→麻煩你替我確認訂房紀錄`
+- `麻煩你幫我確認掛號狀態→麻煩你替我確認掛號狀態`
+- `麻煩你幫我確認回診時間→麻煩你替我確認回診時間`
+- `麻煩你幫我確認訂位時間→麻煩你替我確認訂位時間`
+- `麻煩你幫我確認付款狀態→麻煩你替我確認付款狀態`
+- `麻煩你幫我確認公車班次→麻煩你替我確認公車班次`
+- `麻煩你幫我確認月台位置→麻煩你替我確認月台位置`
+- `麻煩你幫我確認送貨時間→麻煩你替我確認送貨時間`
+- `麻煩你幫我確認會議時間→麻煩你替我確認會議時間`
+- `麻煩你幫我確認孩子成績→麻煩你替我確認囡仔成績`
+
+**修正實測錯誤：**
+- `麻煩你幫我確認...` 類請託句將 `幫我` 收斂為 `替我`
+- `麻煩你幫我確認會議時間。` 避免被拆成 `麻煩你幫我確認表決間。`
+
+**新增迴歸測試：**
+- `run_hotel_regression.py / reservation` +1，分類合計 35 筆
+- `run_medical_regression.py / registration` +1，分類合計 32 筆
+- `run_medical_regression.py / doctor_flow` +1，分類合計 43 筆
+- `run_restaurant_regression.py / ordering` +1，分類合計 32 筆
+- `run_shopping_regression.py / payment` +1，分類合計 29 筆
+- `run_shopping_regression.py / after_sales` +1，分類合計 55 筆
+- `run_bus_regression.py / service_redirect` +1，分類合計 26 筆
+- `run_transport_regression.py / platform_nav` +1，分類合計 26 筆
+- `run_workplace_regression.py / meeting` +1，分類合計 26 筆
+- `run_family_regression.py / parent_child` +1，分類合計 21 筆
+
+**資料同步：**
+- 根目錄 `data/` 與 `taigi_converter/data/` 同步更新
+- 重編根目錄與 package 內 artifacts
+
+### 2026-05-13：請幫我確認服務詞組補強（round244）
+**新增人工詞條（9 條 active）：**
+- `請幫我確認訂房紀錄→請替我確認訂房紀錄`
+- `請幫我確認掛號狀態→請替我確認掛號狀態`
+- `請幫我確認回診時間→請替我確認回診時間`
+- `請幫我確認訂位時間→請替我確認訂位時間`
+- `請幫我確認付款狀態→請替我確認付款狀態`
+- `請幫我確認公車班次→請替我確認公車班次`
+- `請幫我確認月台位置→請替我確認月台位置`
+- `請幫我確認送貨時間→請替我確認送貨時間`
+- `請幫我確認孩子成績→請替我確認囡仔成績`
+
+**修正實測錯誤：**
+- `請幫我確認...` 類請託句將 `共我` 收斂為 `替我`
+- `請幫我確認會議時間。` 已由既有詞條覆蓋，本輪未重複新增
+
+**新增迴歸測試：**
+- `run_hotel_regression.py / reservation` +1，分類合計 34 筆
+- `run_medical_regression.py / registration` +1，分類合計 31 筆
+- `run_medical_regression.py / doctor_flow` +1，分類合計 42 筆
+- `run_restaurant_regression.py / ordering` +1，分類合計 31 筆
+- `run_shopping_regression.py / payment` +1，分類合計 28 筆
+- `run_shopping_regression.py / after_sales` +1，分類合計 54 筆
+- `run_bus_regression.py / service_redirect` +1，分類合計 25 筆
+- `run_transport_regression.py / platform_nav` +1，分類合計 25 筆
+- `run_family_regression.py / parent_child` +1，分類合計 20 筆
+
+**資料同步：**
+- 根目錄 `data/` 與 `taigi_converter/data/` 同步更新
+- 重編根目錄與 package 內 artifacts
+
+### 2026-05-13：可以幫我確認服務詞組補強（round243）
+**新增人工詞條（10 條 active）：**
+- `可以幫我確認訂房紀錄嗎→會當替我確認訂房紀錄無`
+- `可以幫我確認掛號狀態嗎→會當替我確認掛號狀態無`
+- `可以幫我確認回診時間嗎→會當替我確認回診時間無`
+- `可以幫我確認訂位時間嗎→會當替我確認訂位時間無`
+- `可以幫我確認付款狀態嗎→會當替我確認付款狀態無`
+- `可以幫我確認公車班次嗎→會當替我確認公車班次無`
+- `可以幫我確認月台位置嗎→會當替我確認月台位置無`
+- `可以幫我確認送貨時間嗎→會當替我確認送貨時間無`
+- `可以幫我確認會議時間嗎→會當替我確認會議時間無`
+- `可以幫我確認孩子成績嗎→會當替我確認囡仔成績無`
+
+**修正實測錯誤：**
+- `可以幫我確認...嗎？` 類請託句將 `幫我` 收斂為 `替我`
+- `可以幫我確認會議時間嗎？` 避免被拆成 `會當幫我確認表決間無？`
+
+**新增迴歸測試：**
+- `run_hotel_regression.py / reservation` +1，分類合計 33 筆
+- `run_medical_regression.py / registration` +1，分類合計 30 筆
+- `run_medical_regression.py / doctor_flow` +1，分類合計 41 筆
+- `run_restaurant_regression.py / ordering` +1，分類合計 30 筆
+- `run_shopping_regression.py / payment` +1，分類合計 27 筆
+- `run_shopping_regression.py / after_sales` +1，分類合計 53 筆
+- `run_bus_regression.py / service_redirect` +1，分類合計 24 筆
+- `run_transport_regression.py / platform_nav` +1，分類合計 24 筆
+- `run_workplace_regression.py / meeting` +1，分類合計 25 筆
+- `run_family_regression.py / parent_child` +1，分類合計 19 筆
+
+**資料同步：**
+- 根目錄 `data/` 與 `taigi_converter/data/` 同步更新
+- 重編根目錄與 package 內 artifacts
+
+### 2026-05-13：想確認服務詞組補強（round242）
+**新增人工詞條（10 條 active）：**
+- `想確認訂房紀錄→想欲確認訂房紀錄`
+- `想確認掛號狀態→想欲確認掛號狀態`
+- `想確認回診時間→想欲確認回診時間`
+- `想確認訂位時間→想欲確認訂位時間`
+- `想確認付款狀態→想欲確認付款狀態`
+- `想確認公車班次→想欲確認公車班次`
+- `想確認月台位置→想欲確認月台位置`
+- `想確認送貨時間→想欲確認送貨時間`
+- `想確認會議時間→想欲確認會議時間`
+- `想確認孩子成績→想欲確認囡仔成績`
+
+**修正實測錯誤：**
+- `我想確認...` 類服務句補足 `我想欲確認...`
+- `我想確認會議時間。` 避免被拆成 `我想確認表決間。`
+
+**新增迴歸測試：**
+- `run_hotel_regression.py / reservation` +1，分類合計 32 筆
+- `run_medical_regression.py / registration` +1，分類合計 29 筆
+- `run_medical_regression.py / doctor_flow` +1，分類合計 40 筆
+- `run_restaurant_regression.py / ordering` +1，分類合計 29 筆
+- `run_shopping_regression.py / payment` +1，分類合計 26 筆
+- `run_shopping_regression.py / after_sales` +1，分類合計 52 筆
+- `run_bus_regression.py / service_redirect` +1，分類合計 23 筆
+- `run_transport_regression.py / platform_nav` +1，分類合計 23 筆
+- `run_workplace_regression.py / meeting` +1，分類合計 24 筆
+- `run_family_regression.py / parent_child` +1，分類合計 18 筆
+
+**資料同步：**
+- 根目錄 `data/` 與 `taigi_converter/data/` 同步更新
+- 重編根目錄與 package 內 artifacts
+
+### 2026-05-13：需要確認服務詞組補強（round241）
+**新增人工詞條（10 條 active）：**
+- `需要確認訂房紀錄→欲確認訂房紀錄`
+- `需要確認掛號狀態→欲確認掛號狀態`
+- `需要確認回診時間→欲確認回診時間`
+- `需要確認訂位時間→欲確認訂位時間`
+- `需要確認付款狀態→欲確認付款狀態`
+- `需要確認公車班次→欲確認公車班次`
+- `需要確認月台位置→欲確認月台位置`
+- `需要確認送貨時間→欲確認送貨時間`
+- `需要確認會議時間→欲確認會議時間`
+- `需要確認孩子成績→欲確認囡仔成績`
+
+**修正實測錯誤：**
+- `我需要確認...` 類服務句補足 `我欲確認...`
+- `我需要確認會議時間。` 避免被拆成 `我需要確認表決間。`
+
+**新增迴歸測試：**
+- `run_hotel_regression.py / reservation` +1，分類合計 31 筆
+- `run_medical_regression.py / registration` +1，分類合計 28 筆
+- `run_medical_regression.py / doctor_flow` +1，分類合計 39 筆
+- `run_restaurant_regression.py / ordering` +1，分類合計 28 筆
+- `run_shopping_regression.py / payment` +1，分類合計 25 筆
+- `run_shopping_regression.py / after_sales` +1，分類合計 51 筆
+- `run_bus_regression.py / service_redirect` +1，分類合計 22 筆
+- `run_transport_regression.py / platform_nav` +1，分類合計 22 筆
+- `run_workplace_regression.py / meeting` +1，分類合計 23 筆
+- `run_family_regression.py / parent_child` +1，分類合計 17 筆
+
+**資料同步：**
+- 根目錄 `data/` 與 `taigi_converter/data/` 同步更新
+- 重編根目錄與 package 內 artifacts
+
+### 2026-05-13：需要更新/重設/補辦/換用詞組補強（round240）
+**新增人工詞條（8 條 active）：**
+- `需要更新資料→欲更新資料`
+- `需要重設密碼→欲重設密碼`
+- `需要補辦提款卡→欲補辦提款卡`
+- `需要開存款證明→欲開存款證明`
+- `需要換房→欲換房`
+- `需要換房卡→欲換房卡`
+- `需要換房型→欲換房型`
+- `需要換座位→欲換座位`
+
+**修正實測錯誤：**
+- `我需要更新/重設/補辦/開/換...` 類服務句補足 `我欲...`
+
+**新增迴歸測試：**
+- `run_bank_regression.py / bank_account` +3，分類合計 26 筆
+- `run_bank_regression.py / bank_service` +1，分類合計 16 筆
+- `run_hotel_regression.py / amenities` +1，分類合計 29 筆
+- `run_hotel_regression.py / issues` +2，分類合計 18 筆
+- `run_restaurant_regression.py / seating` +1，分類合計 17 筆
+
+**資料同步：**
+- 根目錄 `data/` 與 `taigi_converter/data/` 同步更新
+- 重編根目錄與 package 內 artifacts
+
+### 2026-05-13：需要申請/補印/安排詞組補強（round239）
+**新增人工詞條（7 條 active）：**
+- `需要申請退貨→欲申請退貨`
+- `需要申請病歷→欲申請病歷`
+- `需要申請貸款→欲申請貸款`
+- `需要補印收據→欲補印收據`
+- `需要補印發票→欲補印發票`
+- `需要安排檢查時間→欲安排檢查時間`
+- `需要安排接送時間→欲安排接送時間`
+
+**修正實測錯誤：**
+- `我需要申請/補印/安排...` 類服務句補足 `我欲...`
+
+**新增迴歸測試：**
+- `run_shopping_regression.py / payment` +1，分類合計 24 筆
+- `run_shopping_regression.py / after_sales` +1，分類合計 50 筆
+- `run_medical_regression.py / tests` +1，分類合計 16 筆
+- `run_medical_regression.py / pharmacy_payment` +1，分類合計 22 筆
+- `run_medical_regression.py / redirect` +1，分類合計 8 筆
+- `run_bank_regression.py / bank_service` +1，分類合計 15 筆
+- `run_conversation_regression.py / schedule_plans` +1，分類合計 32 筆
+
+**資料同步：**
+- 根目錄 `data/` 與 `taigi_converter/data/` 同步更新
+- 重編根目錄與 package 內 artifacts
+
+### 2026-05-13：需要查詢服務詞組補強（round238）
+**新增人工詞條（9 條 active）：**
+- `需要查訂房紀錄→欲查訂房紀錄`
+- `需要查房價→欲查房價`
+- `需要查掛號狀態→欲查掛號狀態`
+- `需要查回診時間→欲查回診時間`
+- `需要查訂位紀錄→欲查訂位紀錄`
+- `需要查付款狀態→欲查付款狀態`
+- `需要查訂單狀態→欲查訂單狀態`
+- `需要查公車班次→欲查公車班次`
+- `需要查月台位置→欲查月台位置`
+
+**修正實測錯誤：**
+- `我需要查...` 類服務查詢句補足 `我欲查...`
+
+**新增迴歸測試：**
+- `run_hotel_regression.py / reservation` +2，分類合計 30 筆
+- `run_medical_regression.py / registration` +1，分類合計 27 筆
+- `run_medical_regression.py / doctor_flow` +1，分類合計 38 筆
+- `run_restaurant_regression.py / ordering` +1，分類合計 27 筆
+- `run_shopping_regression.py / payment` +1，分類合計 23 筆
+- `run_shopping_regression.py / after_sales` +1，分類合計 49 筆
+- `run_bus_regression.py / service_redirect` +1，分類合計 21 筆
+- `run_transport_regression.py / platform_nav` +1，分類合計 21 筆
+
+**資料同步：**
+- 根目錄 `data/` 與 `taigi_converter/data/` 同步更新
+- 重編根目錄與 package 內 artifacts
+
+### 2026-05-13：需要改期/改資料詞組補強（round237）
+**新增人工詞條（7 條 active）：**
+- `需要改訂房日期→欲改訂房日期`
+- `需要改住宿天數→欲改歇暝天數`
+- `需要改掛號時間→欲改掛號時間`
+- `需要改回診時間→欲改回診時間`
+- `需要改訂位時間→欲改訂位時間`
+- `需要改付款方式→欲改付款方式`
+- `需要改送貨時間→欲改送貨時間`
+
+**修正實測錯誤：**
+- `我需要改...` 類服務句補足 `我欲改...`
+- 飯店語境固定 `住宿天數→歇暝天數`
+
+**新增迴歸測試：**
+- `run_hotel_regression.py / reservation` +2，分類合計 28 筆
+- `run_medical_regression.py / registration` +1，分類合計 26 筆
+- `run_medical_regression.py / doctor_flow` +1，分類合計 37 筆
+- `run_restaurant_regression.py / ordering` +1，分類合計 26 筆
+- `run_shopping_regression.py / payment` +1，分類合計 22 筆
+- `run_shopping_regression.py / after_sales` +1，分類合計 48 筆
+
+**資料同步：**
+- 根目錄 `data/` 與 `taigi_converter/data/` 同步更新
+- 重編根目錄與 package 內 artifacts
+
+### 2026-05-13：取消訂房/訂位/掛號補強（round236）
+**新增人工詞條（7 條 active）：**
+- `可以幫我取消訂房嗎→會當替我取消訂房無`
+- `想取消住宿→想欲取消歇暝`
+- `需要取消住宿→欲取消歇暝`
+- `可以幫我取消住宿嗎→會當替我取消歇暝無`
+- `需要取消訂位→欲取消訂位`
+- `需要取消掛號→欲取消掛號`
+- `需要取消回診→欲取消回診`
+
+**修正實測錯誤：**
+- 飯店取消訂房/住宿服務句，將 `會當幫我...` 收斂為 `會當替我...`
+- `需要取消訂位/掛號/回診/住宿` 補足 `欲取消...`
+- 飯店語境固定 `住宿→歇暝`
+
+**新增迴歸測試：**
+- `run_hotel_regression.py / reservation` +4，分類合計 26 筆
+- `run_medical_regression.py / doctor_flow` +2，分類合計 36 筆
+- `run_restaurant_regression.py / ordering` +1，分類合計 25 筆
+
+**資料同步：**
+- 根目錄 `data/` 與 `taigi_converter/data/` 同步更新
+- 重編根目錄與 package 內 artifacts
+
+### 2026-05-13：取消與退費售後補強（round235）
+**新增人工詞條（7 條 active）：**
+- `可以幫我取消訂單嗎→會當替我取消訂單無`
+- `可以幫我退貨嗎→會當替我退貨無`
+- `可以幫我退費嗎→會當替我退錢無`
+- `可以幫我退款嗎→會當替我退錢無`
+- `想退費→想欲退錢`
+- `需要退費→欲退錢`
+- `可以幫我取消回診嗎→會當替我取消回診無`
+
+**修正實測錯誤：**
+- 售後與醫療取消句，將 `會當幫我...` 收斂為 `會當替我...`
+- `我想退費。`、`我需要退費。` 補足 `想欲/欲`，並固定 `退費/退款→退錢`
+
+**新增/調整迴歸測試：**
+- `run_shopping_regression.py / after_sales` +5，分類合計 47 筆
+- `run_medical_regression.py / doctor_flow` +1，分類合計 34 筆
+- 調整 `可以幫我退費嗎？` 預期值為 `會當替我退錢無？`
+
+**資料同步：**
+- 根目錄 `data/` 與 `taigi_converter/data/` 同步更新
+- 重編根目錄與 package 內 artifacts
+
+### 2026-05-13：售後退費詞組補強（round234）
+**新增人工詞條（3 條 active）：**
+- `退費→退錢`
+- `想退貨→想欲退貨`
+- `需要退貨→欲退貨`
+
+**新增迴歸測試：**
+- `run_shopping_regression.py / after_sales` +3，分類合計 42 筆
+
+**資料同步：**
+- 根目錄 `data/` 與 `taigi_converter/data/` 同步更新
+- 重編根目錄與 package 內 artifacts
+
+### 2026-05-13：取消預約/掛號/訂房詞組補強（round233）
+**新增人工詞條（6 條 active）：**
+- `想取消預約→想欲取消預約`
+- `需要取消預約→欲取消預約`
+- `想取消掛號→想欲取消掛號`
+- `可以幫我取消掛號嗎→會當替我取消掛號無`
+- `想取消訂房→想欲取消訂房`
+- `需要取消訂房→欲取消訂房`
+
+**新增迴歸測試：**
+- `run_conversation_regression.py / schedule_plans` +2，分類合計 31 筆
+- `run_medical_regression.py / doctor_flow` +2，分類合計 33 筆
+- `run_hotel_regression.py / reservation` +2，分類合計 22 筆
+
+**資料同步：**
+- 根目錄 `data/` 與 `taigi_converter/data/` 同步更新
+- 重編根目錄與 package 內 artifacts
 
 ### 2026-05-12：跨情境服務句補強（round231）
 **新增人工詞條（14 條 active）：**
