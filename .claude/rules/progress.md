@@ -2,21 +2,477 @@
 
 > 每次大規模優化後請更新此檔案。這是讓下一個人快速接手的地圖。
 
-## 目前辭典狀態（2026-05-13）
+## 目前辭典狀態（2026-05-14）
 
 | 類型 | 數量 |
 |------|------|
-| 總詞條（active runtime） | 16,876 |
-| 人工驗證（trust: human active rows） | ~7,710 |
+| 總詞條（active runtime） | 16,994 |
+| 人工驗證（trust: human active rows） | ~7,828 |
 | base seed（trust: seed，低信任） | source 仍有短詞 active；runtime 以 policy 過濾高風險 seed |
-| 最新 round | round246 |
+| 最新 round | round263 |
 
-所有迴歸測試全部通過（共 1366 筆）：
-bus 307、medical 141、transport 98、conversation 67、restaurant 94、shopping 130、hotel 114、taxi 80、bank 85、school 81、family 85、workplace 84
+所有迴歸測試全部通過（共 1489 筆）：
+bus 310、medical 162、transport 101、conversation 79、restaurant 98、shopping 152、hotel 132、taxi 80、bank 113、school 83、family 88、workplace 91
 
 ---
 
 ## 近期做了什麼（最新在前）
+
+### 2026-05-14：可不可以麻煩幫我請託問句補強（round263）
+**新增人工詞條（2 條 active）：**
+- `可不可以麻煩你幫我→敢會當麻煩你替我`
+- `可不可以麻煩您幫我→敢會當麻煩你替我`
+
+**修正實測錯誤：**
+- `可不可以麻煩你/您幫我...` 不再誤切成 `可袂使麻煩...`
+- 禮貌請託問句統一收斂為 `敢會當麻煩你替我...`
+- `您` 變體同步收斂為台語書寫中的 `你`
+
+**新增迴歸測試：**
+- `run_medical_regression.py / pharmacy_payment` +1，分類合計 24 筆
+- `run_conversation_regression.py / schedule_plans` +1，分類合計 44 筆
+- `run_shopping_regression.py / payment` +1，分類合計 45 筆
+- `run_bank_regression.py / bank_account` +1，分類合計 52 筆
+
+**資料同步：**
+- 根目錄 `data/` 與 `taigi_converter/data/` 同步更新
+- 重編根目錄與 package 內 artifacts
+
+### 2026-05-14：是否方便與是否麻煩請託問句補強（round262）
+**新增人工詞條（7 條 active）：**
+- `是否方便幫我→敢方便替我`
+- `是否方便請你幫我→敢方便請你替我`
+- `是否方便請您幫我→敢方便請你替我`
+- `是否可以麻煩你幫我→敢會當麻煩你替我`
+- `是否可以麻煩您幫我→敢會當麻煩你替我`
+- `是否能麻煩你幫我→敢會當麻煩你替我`
+- `是否能麻煩您幫我→敢會當麻煩你替我`
+
+**修正實測錯誤：**
+- `是否方便幫我...` 不再殘留華語 `是否`
+- `是否方便請您幫我...` 收斂為 `敢方便請你替我...`
+- `是否可以/能麻煩您幫我...` 收斂為 `敢會當麻煩你替我...`
+
+**新增迴歸測試：**
+- `run_conversation_regression.py / schedule_plans` +1，分類合計 43 筆
+- `run_shopping_regression.py / payment` +1，分類合計 44 筆
+- `run_hotel_regression.py / check_in` +1，分類合計 17 筆
+- `run_bank_regression.py / bank_account` +2，分類合計 51 筆
+
+**資料同步：**
+- 根目錄 `data/` 與 `taigi_converter/data/` 同步更新
+- 重編根目錄與 package 內 artifacts
+
+### 2026-05-14：需要希望想請幫我請託片段補強（round261）
+**新增人工詞條（8 條 active）：**
+- `需要你幫我→需要你替我`
+- `需要您幫我→需要你替我`
+- `希望你幫我→希望你替我`
+- `希望您幫我→希望你替我`
+- `想請你幫我→想欲請你替我`
+- `想請您幫我→想欲請你替我`
+- `我想請你幫我→我想欲請你替我`
+- `我想請您幫我→我想欲請你替我`
+
+**修正實測錯誤：**
+- `我需要你幫我...`、`希望您幫我...` 類請託句不再殘留 `幫我`
+- `想請你/您幫我...` 收斂為 `想欲請你替我...`
+- `我想請您幫我...` 補足敬稱收斂與 `替我`
+
+**新增迴歸測試：**
+- `run_medical_regression.py / tests` +1，分類合計 26 筆
+- `run_conversation_regression.py / schedule_plans` +1，分類合計 42 筆
+- `run_shopping_regression.py / payment` +1，分類合計 43 筆
+- `run_hotel_regression.py / issues` +1，分類合計 28 筆
+- `run_bank_regression.py / bank_account` +2，分類合計 49 筆
+
+**資料同步：**
+- 根目錄 `data/` 與 `taigi_converter/data/` 同步更新
+- 重編根目錄與 package 內 artifacts
+
+### 2026-05-14：拜託幫我服務請求片段補強（round260）
+**新增人工詞條（3 條 active）：**
+- `拜託幫我→拜託替我`
+- `拜託你幫我→拜託你替我`
+- `拜託您幫我→拜託你替我`
+
+**修正實測錯誤：**
+- `拜託幫我補印/安排...` 類口語請求不再殘留 `幫我`
+- `拜託你/您幫我...` 補足 `替我` 並收斂敬稱 `您→你`
+- 保留既有 `拜託` 語氣，不改動單純 `拜託你了。`
+
+**新增迴歸測試：**
+- `run_medical_regression.py / tests` +1，分類合計 25 筆
+- `run_conversation_regression.py / schedule_plans` +1，分類合計 41 筆
+- `run_shopping_regression.py / payment` +1，分類合計 42 筆
+- `run_hotel_regression.py / issues` +1，分類合計 27 筆
+- `run_bank_regression.py / bank_account` +2，分類合計 47 筆
+
+**資料同步：**
+- 根目錄 `data/` 與 `taigi_converter/data/` 同步更新
+- 重編根目錄與 package 內 artifacts
+
+### 2026-05-14：可否與麻煩您幫我正式問句補強（round259）
+**新增人工詞條（8 條 active）：**
+- `可否幫我→敢會當替我`
+- `可否請你幫我→敢會當請你替我`
+- `可否請您幫我→敢會當請你替我`
+- `麻煩您幫我→麻煩你替我`
+- `可否麻煩你幫我→敢會當麻煩你替我`
+- `可否麻煩您幫我→敢會當麻煩你替我`
+- `能否麻煩你幫我→敢會當麻煩你替我`
+- `能否麻煩您幫我→敢會當麻煩你替我`
+
+**修正實測錯誤：**
+- `可否幫我...？` 類正式問句不再原樣殘留
+- `可否麻煩您幫我...？` 收斂為 `敢會當麻煩你替我...？`
+- `麻煩您幫我...` 補足敬稱變體中的 `替我`
+- `能否麻煩您幫我...？` 不再殘留 `能否` 或 `幫我`
+
+**新增迴歸測試：**
+- `run_medical_regression.py / tests` +1，分類合計 24 筆
+- `run_conversation_regression.py / schedule_plans` +1，分類合計 40 筆
+- `run_shopping_regression.py / payment` +1，分類合計 41 筆
+- `run_hotel_regression.py / issues` +1，分類合計 26 筆
+- `run_bank_regression.py / bank_account` +2，分類合計 45 筆
+
+**資料同步：**
+- 根目錄 `data/` 與 `taigi_converter/data/` 同步更新
+- 重編根目錄與 package 內 artifacts
+
+### 2026-05-14：方便與方不方便幫我問句前綴補強（round258）
+**新增人工詞條（6 條 active）：**
+- `方便幫我→方便替我`
+- `方便請你幫我→方便請你替我`
+- `方便請您幫我→方便請你替我`
+- `方不方便幫我→敢方便替我`
+- `方不方便請你幫我→敢方便請你替我`
+- `方不方便請您幫我→敢方便請你替我`
+
+**修正實測錯誤：**
+- `方便幫我補印/安排...嗎？` 不再落成 `利便幫我...`
+- `方便請您幫我...嗎？` 收斂為 `方便請你替我...無？`
+- `方不方便幫我...？` 不再落成 `方無方便幫我...？`
+
+**新增迴歸測試：**
+- `run_medical_regression.py / tests` +1，分類合計 23 筆
+- `run_conversation_regression.py / schedule_plans` +1，分類合計 39 筆
+- `run_shopping_regression.py / payment` +1，分類合計 40 筆
+- `run_hotel_regression.py / issues` +1，分類合計 25 筆
+- `run_bank_regression.py / bank_account` +2，分類合計 43 筆
+
+**資料同步：**
+- 根目錄 `data/` 與 `taigi_converter/data/` 同步更新
+- 重編根目錄與 package 內 artifacts
+
+### 2026-05-14：能否與是否正式幫我問句前綴補強（round257）
+**新增人工詞條（9 條 active）：**
+- `能否幫我→敢會當替我`
+- `能否請你幫我→敢會當請你替我`
+- `能否請您幫我→敢會當請你替我`
+- `是否能幫我→敢會當替我`
+- `是否能請你幫我→敢會當請你替我`
+- `是否能請您幫我→敢會當請你替我`
+- `是否可以幫我→敢會當替我`
+- `是否可以請你幫我→敢會當請你替我`
+- `是否可以請您幫我→敢會當請你替我`
+
+**修正實測錯誤：**
+- `能否幫我...？` 類正式問句不再原樣殘留
+- `是否能/是否可以幫我...？` 收斂為 `敢會當替我...？`
+- `是否可以請您幫我...？` 收斂為 `敢會當請你替我...？`
+
+**新增迴歸測試：**
+- `run_medical_regression.py / tests` +1，分類合計 22 筆
+- `run_conversation_regression.py / schedule_plans` +1，分類合計 38 筆
+- `run_shopping_regression.py / payment` +1，分類合計 39 筆
+- `run_hotel_regression.py / issues` +1，分類合計 24 筆
+- `run_bank_regression.py / bank_account` +2，分類合計 41 筆
+
+**資料同步：**
+- 根目錄 `data/` 與 `taigi_converter/data/` 同步更新
+- 重編根目錄與 package 內 artifacts
+
+### 2026-05-14：能幫我問句前綴補強（round256）
+**新增人工詞條（4 條 active）：**
+- `能幫我→會當替我`
+- `能請你幫我→會當請你替我`
+- `能請您幫我→會當請你替我`
+- `能麻煩你幫我→會當麻煩你替我`
+
+**修正實測錯誤：**
+- `能幫我補印/安排...嗎？` 類問句不再殘留 `能幫我`
+- `能請你/您幫我...嗎？` 收斂為 `會當請你替我...無？`
+- `能麻煩你幫我...嗎？` 補足 `會當麻煩你替我...無？`
+
+**新增迴歸測試：**
+- `run_medical_regression.py / tests` +1，分類合計 21 筆
+- `run_conversation_regression.py / schedule_plans` +1，分類合計 37 筆
+- `run_shopping_regression.py / payment` +1，分類合計 38 筆
+- `run_hotel_regression.py / issues` +1，分類合計 23 筆
+- `run_bank_regression.py / bank_account` +2，分類合計 39 筆
+
+**資料同步：**
+- 根目錄 `data/` 與 `taigi_converter/data/` 同步更新
+- 重編根目錄與 package 內 artifacts
+
+### 2026-05-14：能不能與可不可以幫我問句前綴補強（round255）
+**新增人工詞條（6 條 active）：**
+- `能不能幫我→敢會當替我`
+- `能不能請你幫我→敢會當請你替我`
+- `能不能請您幫我→敢會當請你替我`
+- `可不可以幫我→敢會當替我`
+- `可不可以請你幫我→敢會當請你替我`
+- `可不可以請您幫我→敢會當請你替我`
+
+**修正實測錯誤：**
+- `能不能幫我補印/安排...？` 類問句不再殘留 `幫我`
+- `能不能請您幫我...？`、`可不可以請您幫我...？` 收斂為 `敢會當請你替我...？`
+- `可不可以幫我...？` 避免落成不自然的 `可袂使幫我...？`
+
+**新增迴歸測試：**
+- `run_medical_regression.py / tests` +1，分類合計 20 筆
+- `run_conversation_regression.py / schedule_plans` +1，分類合計 36 筆
+- `run_shopping_regression.py / payment` +1，分類合計 37 筆
+- `run_hotel_regression.py / issues` +1，分類合計 22 筆
+- `run_bank_regression.py / bank_account` +2，分類合計 37 筆
+
+**資料同步：**
+- 根目錄 `data/` 與 `taigi_converter/data/` 同步更新
+- 重編根目錄與 package 內 artifacts
+
+### 2026-05-14：請你幫我與句首幫我請求片段補強（round254）
+**新增人工詞條（3 條 active）：**
+- `請你幫我→請你替我`
+- `請您幫我→請你替我`
+- `幫我→替我`（限句首）
+
+**修正實測錯誤：**
+- `請你幫我補印/重設/安排...` 類服務句不再殘留 `幫我`
+- `請您幫我...` 先收斂為 `請你替我...`
+- 句首 `幫我安排/補辦...` 補足為 `替我...`，並避免覆蓋既有 `請幫我...` 與長詞條
+
+**新增迴歸測試：**
+- `run_medical_regression.py / tests` +1，分類合計 19 筆
+- `run_conversation_regression.py / schedule_plans` +1，分類合計 35 筆
+- `run_shopping_regression.py / payment` +1，分類合計 36 筆
+- `run_hotel_regression.py / issues` +1，分類合計 21 筆
+- `run_bank_regression.py / bank_account` +2，分類合計 35 筆
+
+**資料同步：**
+- 根目錄 `data/` 與 `taigi_converter/data/` 同步更新
+- 重編根目錄與 package 內 artifacts
+
+### 2026-05-14：麻煩幫我服務請求片段補強（round253）
+**新增人工詞條（2 條 active）：**
+- `麻煩你幫我→麻煩你替我`
+- `麻煩幫我→麻煩替我`
+
+**修正實測錯誤：**
+- `麻煩幫我補印/安排/重設...` 類口語服務句不再殘留 `幫我`
+- `麻煩你幫我換房/開存款證明...` 補足 `麻煩你替我...` 的穩定片段
+
+**新增迴歸測試：**
+- `run_medical_regression.py / tests` +1，分類合計 18 筆
+- `run_conversation_regression.py / schedule_plans` +1，分類合計 34 筆
+- `run_shopping_regression.py / payment` +1，分類合計 35 筆
+- `run_hotel_regression.py / issues` +1，分類合計 20 筆
+- `run_bank_regression.py / bank_account` +2，分類合計 33 筆
+
+**資料同步：**
+- 根目錄 `data/` 與 `taigi_converter/data/` 同步更新
+- 重編根目錄與 package 內 artifacts
+
+### 2026-05-14：協助服務動作詞組補強（round252）
+**新增人工詞條（10 條 active）：**
+- `協助補印收據→鬥相共補印收據`
+- `協助補印發票→鬥相共補印發票`
+- `協助安排檢查時間→鬥相共安排檢查時間`
+- `協助安排接送時間→鬥相共安排接送時間`
+- `協助更新資料→鬥相共更新資料`
+- `協助重設密碼→鬥相共重設密碼`
+- `協助補辦提款卡→鬥相共補辦提款卡`
+- `協助開存款證明→鬥相共開存款證明`
+- `協助換房→鬥相共換房`
+- `協助換房卡→鬥相共換房卡`
+
+**修正實測錯誤：**
+- `請協助補印/安排/更新/重設/補辦/開/換...` 類服務句補足 `請鬥相共...`
+- `可以協助安排檢查時間嗎？` 補足疑問句中的 `會當鬥相共...無`
+
+**新增迴歸測試：**
+- `run_medical_regression.py / tests` +1，分類合計 17 筆
+- `run_medical_regression.py / pharmacy_payment` +1，分類合計 23 筆
+- `run_shopping_regression.py / payment` +1，分類合計 34 筆
+- `run_conversation_regression.py / schedule_plans` +1，分類合計 33 筆
+- `run_bank_regression.py / bank_account` +3，分類合計 31 筆
+- `run_bank_regression.py / bank_service` +1，分類合計 18 筆
+- `run_hotel_regression.py / amenities` +1，分類合計 30 筆
+- `run_hotel_regression.py / issues` +1，分類合計 19 筆
+
+**資料同步：**
+- 根目錄 `data/` 與 `taigi_converter/data/` 同步更新
+- 重編根目錄與 package 內 artifacts
+
+### 2026-05-14：協助申請服務詞組補強（round251）
+**新增人工詞條（10 條 active）：**
+- `協助申請退貨→鬥相共申請退貨`
+- `協助申請退費→鬥相共申請退錢`
+- `協助申請退款→鬥相共申請退錢`
+- `協助申請病歷→鬥相共申請病歷`
+- `協助申請貸款→鬥相共申請貸款`
+- `協助申請信用卡→鬥相共申請信用卡`
+- `協助申請存款證明→鬥相共申請存款證明`
+- `協助申請出差→鬥相共申請出張`
+- `協助申請加班→鬥相共申請加班`
+- `協助申請獎學金→鬥相共申請獎學金`
+
+**修正實測錯誤：**
+- `請協助申請...` 類服務句補足 `請鬥相共申請...`
+- `請協助申請退費/退款。` 收斂為 `請鬥相共申請退錢。`
+- `請協助申請出差。` 收斂為 `請鬥相共申請出張。`
+
+**新增迴歸測試：**
+- `run_shopping_regression.py / after_sales` +3，分類合計 63 筆
+- `run_medical_regression.py / redirect` +1，分類合計 9 筆
+- `run_bank_regression.py / bank_account` +2，分類合計 28 筆
+- `run_bank_regression.py / bank_service` +1，分類合計 17 筆
+- `run_workplace_regression.py / workflow` +1，分類合計 27 筆
+- `run_workplace_regression.py / leave_availability` +1，分類合計 19 筆
+- `run_school_regression.py / student_class` +1，分類合計 24 筆
+
+**資料同步：**
+- 根目錄 `data/` 與 `taigi_converter/data/` 同步更新
+- 重編根目錄與 package 內 artifacts
+
+### 2026-05-14：協助取消服務詞組補強（round250）
+**新增人工詞條（10 條 active）：**
+- `協助取消訂房→鬥相共取消訂房`
+- `協助取消住宿→鬥相共取消歇暝`
+- `協助取消預約→鬥相共取消預約`
+- `協助取消訂位→鬥相共取消訂位`
+- `協助取消掛號→鬥相共取消掛號`
+- `協助取消回診→鬥相共取消回診`
+- `協助取消出貨→鬥相共取消出貨`
+- `協助取消會議→鬥相共取消會議`
+- `協助取消請假→鬥相共取消請假`
+- `協助取消課程→鬥相共取消課程`
+
+**修正實測錯誤：**
+- `請協助取消...` 類服務句補足 `請鬥相共取消...`
+- `請協助取消住宿。` 補足 `住宿→歇暝` 的語境轉換
+
+**新增迴歸測試：**
+- `run_hotel_regression.py / reservation` +3，分類合計 42 筆
+- `run_medical_regression.py / doctor_flow` +2，分類合計 49 筆
+- `run_restaurant_regression.py / ordering` +1，分類合計 37 筆
+- `run_shopping_regression.py / after_sales` +1，分類合計 60 筆
+- `run_workplace_regression.py / meeting` +1，分類合計 31 筆
+- `run_workplace_regression.py / leave_availability` +1，分類合計 18 筆
+- `run_school_regression.py / student_class` +1，分類合計 23 筆
+
+**資料同步：**
+- 根目錄 `data/` 與 `taigi_converter/data/` 同步更新
+- 重編根目錄與 package 內 artifacts
+
+### 2026-05-14：協助改服務詞組補強（round249）
+**新增人工詞條（10 條 active）：**
+- `協助改訂房日期→鬥相共改訂房日期`
+- `協助改掛號時間→鬥相共改掛號時間`
+- `協助改回診時間→鬥相共改回診時間`
+- `協助改訂位時間→鬥相共改訂位時間`
+- `協助改付款方式→鬥相共改付款方式`
+- `協助改送貨時間→鬥相共改送貨時間`
+- `協助改轉車地點→鬥相共改轉車地點`
+- `協助改下車站→鬥相共改落車站`
+- `協助改會議時間→鬥相共改會議時間`
+- `協助改接小孩時間→鬥相共改接囡仔時間`
+
+**修正實測錯誤：**
+- `請協助改...` 類服務句補足 `請鬥相共改...`
+- `請協助改會議時間。` 避免被拆成 `請協助改表決間。`
+
+**新增迴歸測試：**
+- `run_hotel_regression.py / reservation` +1，分類合計 39 筆
+- `run_medical_regression.py / registration` +1，分類合計 36 筆
+- `run_medical_regression.py / doctor_flow` +1，分類合計 47 筆
+- `run_restaurant_regression.py / ordering` +1，分類合計 36 筆
+- `run_shopping_regression.py / payment` +1，分類合計 33 筆
+- `run_shopping_regression.py / after_sales` +1，分類合計 59 筆
+- `run_bus_regression.py / route_transfer` +1，分類合計 18 筆
+- `run_transport_regression.py / service_redirect` +1，分類合計 15 筆
+- `run_workplace_regression.py / meeting` +1，分類合計 30 筆
+- `run_family_regression.py / parent_child` +1，分類合計 25 筆
+
+**資料同步：**
+- 根目錄 `data/` 與 `taigi_converter/data/` 同步更新
+- 重編根目錄與 package 內 artifacts
+
+### 2026-05-14：協助查服務詞組補強（round248）
+**新增人工詞條（10 條 active）：**
+- `協助查訂房紀錄→鬥相共查訂房紀錄`
+- `協助查掛號狀態→鬥相共查掛號狀態`
+- `協助查回診時間→鬥相共查回診時間`
+- `協助查訂位時間→鬥相共查訂位時間`
+- `協助查付款狀態→鬥相共查付款狀態`
+- `協助查公車班次→鬥相共查公車班次`
+- `協助查月台位置→鬥相共查月台位置`
+- `協助查送貨時間→鬥相共查送貨時間`
+- `協助查會議時間→鬥相共查會議時間`
+- `協助查孩子成績→鬥相共查囡仔成績`
+
+**修正實測錯誤：**
+- `請協助查...` 類服務句補足 `請鬥相共查...`
+- `請協助查會議時間。` 避免被拆成 `請協助查表決間。`
+
+**新增迴歸測試：**
+- `run_hotel_regression.py / reservation` +1，分類合計 38 筆
+- `run_medical_regression.py / registration` +1，分類合計 35 筆
+- `run_medical_regression.py / doctor_flow` +1，分類合計 46 筆
+- `run_restaurant_regression.py / ordering` +1，分類合計 35 筆
+- `run_shopping_regression.py / payment` +1，分類合計 32 筆
+- `run_shopping_regression.py / after_sales` +1，分類合計 58 筆
+- `run_bus_regression.py / service_redirect` +1，分類合計 29 筆
+- `run_transport_regression.py / platform_nav` +1，分類合計 29 筆
+- `run_workplace_regression.py / meeting` +1，分類合計 29 筆
+- `run_family_regression.py / parent_child` +1，分類合計 24 筆
+
+**資料同步：**
+- 根目錄 `data/` 與 `taigi_converter/data/` 同步更新
+- 重編根目錄與 package 內 artifacts
+
+### 2026-05-14：協助確認服務詞組補強（round247）
+**新增人工詞條（10 條 active）：**
+- `協助確認訂房紀錄→鬥相共確認訂房紀錄`
+- `協助確認掛號狀態→鬥相共確認掛號狀態`
+- `協助確認回診時間→鬥相共確認回診時間`
+- `協助確認訂位時間→鬥相共確認訂位時間`
+- `協助確認付款狀態→鬥相共確認付款狀態`
+- `協助確認公車班次→鬥相共確認公車班次`
+- `協助確認月台位置→鬥相共確認月台位置`
+- `協助確認送貨時間→鬥相共確認送貨時間`
+- `協助確認會議時間→鬥相共確認會議時間`
+- `協助確認孩子成績→鬥相共確認囡仔成績`
+
+**修正實測錯誤：**
+- `請協助確認...` 類服務句補足 `請鬥相共確認...`
+- `請協助確認會議時間。` 避免被拆成 `請協助確認表決間。`
+
+**新增迴歸測試：**
+- `run_hotel_regression.py / reservation` +1，分類合計 37 筆
+- `run_medical_regression.py / registration` +1，分類合計 34 筆
+- `run_medical_regression.py / doctor_flow` +1，分類合計 45 筆
+- `run_restaurant_regression.py / ordering` +1，分類合計 34 筆
+- `run_shopping_regression.py / payment` +1，分類合計 31 筆
+- `run_shopping_regression.py / after_sales` +1，分類合計 57 筆
+- `run_bus_regression.py / service_redirect` +1，分類合計 28 筆
+- `run_transport_regression.py / platform_nav` +1，分類合計 28 筆
+- `run_workplace_regression.py / meeting` +1，分類合計 28 筆
+- `run_family_regression.py / parent_child` +1，分類合計 23 筆
+
+**資料同步：**
+- 根目錄 `data/` 與 `taigi_converter/data/` 同步更新
+- 重編根目錄與 package 內 artifacts
 
 ### 2026-05-13：幫我確認服務詞組補強（round246）
 **新增人工詞條（10 條 active）：**

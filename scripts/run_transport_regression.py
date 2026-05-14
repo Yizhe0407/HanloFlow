@@ -55,12 +55,14 @@ TRANSPORT_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("platform_nav", "可以幫我查剪票口位置嗎？", "會當替我查剪票口位置無？"),
     RegressionCase("platform_nav", "可以幫我查月台位置嗎？", "會當替我查月台位置無？"),
     RegressionCase("platform_nav", "我需要查月台位置。", "我欲查月台位置。"),
+    RegressionCase("platform_nav", "請協助查月台位置。", "請鬥相共查月台位置。"),
     RegressionCase("platform_nav", "我需要確認月台位置。", "我欲確認月台位置。"),
     RegressionCase("platform_nav", "我想確認月台位置。", "我想欲確認月台位置。"),
     RegressionCase("platform_nav", "可以幫我確認月台位置嗎？", "會當替我確認月台位置無？"),
     RegressionCase("platform_nav", "請幫我確認月台位置。", "請替我確認月台位置。"),
     RegressionCase("platform_nav", "麻煩你幫我確認月台位置。", "麻煩你替我確認月台位置。"),
     RegressionCase("platform_nav", "幫我確認月台位置。", "替我確認月台位置。"),
+    RegressionCase("platform_nav", "請協助確認月台位置。", "請鬥相共確認月台位置。"),
     # train service / announcements
     RegressionCase("rail_service", "這一班火車大概還要等多久？", "這一班火車差不多猶愛等偌久？"),
     RegressionCase("rail_service", "這班列車只停大站，不停靠小站。", "這班列車只停大站，無停細站。"),
@@ -107,6 +109,7 @@ TRANSPORT_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("service_redirect", "可以幫我查月台嗎？", "會當替我查月台無？"),
     RegressionCase("service_redirect", "可以幫我找服務台嗎？", "會當替我揣服務台無？"),
     RegressionCase("service_redirect", "可以幫我改下車站嗎？", "會當替我改落車站無？"),
+    RegressionCase("service_redirect", "請協助改下車站。", "請鬥相共改落車站。"),
     RegressionCase("service_redirect", "可以幫我查轉乘站嗎？", "會當替我查轉乘站無？"),
     # crowd / safety / queue
     RegressionCase("crowd_safety", "今天車站人很多，你先到旁邊等一下。", "今仔日車站人誠濟，你先到邊仔等一下。"),
