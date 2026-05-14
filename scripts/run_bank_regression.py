@@ -62,6 +62,7 @@ BANK_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("bank_account", "拜託您幫我開存款證明。", "拜託你替我開存款證明。"),
     RegressionCase("bank_account", "想請您幫我開存款證明。", "想欲請你替我開存款證明。"),
     RegressionCase("bank_account", "是否可以麻煩您幫我開存款證明？", "敢會當麻煩你替我開存款證明？"),
+    RegressionCase("bank_account", "能否協助我開存款證明？", "敢會當鬥相共我開存款證明？"),
     RegressionCase("bank_account", "請協助申請存款證明。", "請鬥相共申請存款證明。"),
     RegressionCase("bank_account", "可以幫我改密碼嗎？", "會當替我改密碼無？"),
     RegressionCase("bank_account", "可以幫我重設密碼嗎？", "會當替我重設密碼無？"),

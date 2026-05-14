@@ -74,6 +74,7 @@ MEDICAL_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("tests", "可以幫我安排檢查時間嗎？", "會當替我安排檢查時間無？"),
     RegressionCase("tests", "我需要安排檢查時間。", "我欲安排檢查時間。"),
     RegressionCase("tests", "請協助安排檢查時間。", "請鬥相共安排檢查時間。"),
+    RegressionCase("tests", "麻煩協助我安排檢查時間。", "麻煩鬥相共我安排檢查時間。"),
     RegressionCase("tests", "麻煩幫我安排檢查時間。", "麻煩替我安排檢查時間。"),
     RegressionCase("tests", "請你幫我安排檢查時間。", "請你替我安排檢查時間。"),
     RegressionCase("tests", "能不能幫我安排檢查時間？", "敢會當替我安排檢查時間？"),

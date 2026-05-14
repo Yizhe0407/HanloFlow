@@ -6,17 +6,41 @@
 
 | 類型 | 數量 |
 |------|------|
-| 總詞條（active runtime） | 16,994 |
-| 人工驗證（trust: human active rows） | ~7,828 |
+| 總詞條（active runtime） | 16,999 |
+| 人工驗證（trust: human active rows） | ~7,833 |
 | base seed（trust: seed，低信任） | source 仍有短詞 active；runtime 以 policy 過濾高風險 seed |
-| 最新 round | round263 |
+| 最新 round | round264 |
 
-所有迴歸測試全部通過（共 1489 筆）：
-bus 310、medical 162、transport 101、conversation 79、restaurant 98、shopping 152、hotel 132、taxi 80、bank 113、school 83、family 88、workplace 91
+所有迴歸測試全部通過（共 1494 筆）：
+bus 310、medical 163、transport 101、conversation 80、restaurant 98、shopping 153、hotel 133、taxi 80、bank 114、school 83、family 88、workplace 91
 
 ---
 
 ## 近期做了什麼（最新在前）
+
+### 2026-05-14：協助我請託片段補強（round264）
+**新增人工詞條（5 條 active）：**
+- `協助我→鬥相共我`
+- `可否協助我→敢會當鬥相共我`
+- `能否協助我→敢會當鬥相共我`
+- `是否可以協助我→敢會當鬥相共我`
+- `是否能協助我→敢會當鬥相共我`
+
+**修正實測錯誤：**
+- `請協助我...`、`麻煩協助我...` 不再原樣殘留 `協助我`
+- `能否/可否協助我...` 不再殘留正式華語問句前綴
+- `是否可以協助我...` 收斂為 `敢會當鬥相共我...`
+
+**新增迴歸測試：**
+- `run_medical_regression.py / tests` +1，分類合計 27 筆
+- `run_conversation_regression.py / schedule_plans` +1，分類合計 45 筆
+- `run_shopping_regression.py / payment` +1，分類合計 46 筆
+- `run_hotel_regression.py / issues` +1，分類合計 29 筆
+- `run_bank_regression.py / bank_account` +1，分類合計 53 筆
+
+**資料同步：**
+- 根目錄 `data/` 與 `taigi_converter/data/` 同步更新
+- 重編根目錄與 package 內 artifacts
 
 ### 2026-05-14：可不可以麻煩幫我請託問句補強（round263）
 **新增人工詞條（2 條 active）：**

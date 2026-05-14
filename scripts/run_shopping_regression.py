@@ -94,6 +94,7 @@ SHOPPING_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("payment", "請協助確認付款狀態。", "請鬥相共確認付款狀態。"),
     RegressionCase("payment", "我需要補印發票。", "我欲補印發票。"),
     RegressionCase("payment", "請協助補印發票。", "請鬥相共補印發票。"),
+    RegressionCase("payment", "請協助我補印發票。", "請鬥相共我補印發票。"),
     RegressionCase("payment", "麻煩幫我補印發票。", "麻煩替我補印發票。"),
     RegressionCase("payment", "請你幫我補印發票。", "請你替我補印發票。"),
     RegressionCase("payment", "可不可以幫我補印發票？", "敢會當替我補印發票？"),

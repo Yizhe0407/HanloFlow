@@ -142,6 +142,7 @@ HOTEL_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("issues", "可以幫我換房嗎？", "會當替我換房無？"),
     RegressionCase("issues", "我需要換房。", "我欲換房。"),
     RegressionCase("issues", "請協助換房。", "請鬥相共換房。"),
+    RegressionCase("issues", "是否可以協助我換房？", "敢會當鬥相共我換房？"),
     RegressionCase("issues", "麻煩你幫我換房。", "麻煩你替我換房。"),
     RegressionCase("issues", "請您幫我換房。", "請你替我換房。"),
     RegressionCase("issues", "可不可以請您幫我換房？", "敢會當請你替我換房？"),
