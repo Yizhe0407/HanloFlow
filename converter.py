@@ -1203,6 +1203,13 @@ class TaigiConverter:
                 collect_trace=trace,
                 skip_passes=skip_passes,
             )
+            # Re-mask protected tokens after phrase/rule rewrites so the char-level
+            # pass cannot split preserved occupation names or other allowlisted terms.
+            rule_output, post_rule_protected_map = self._mask_protected_terms(
+                rule_output,
+                respect_runtime_phrase_overlap=False,
+            )
+            protected_token_map.update(post_rule_protected_map)
             lexicon_output, post_matches, post_warnings = self._apply_lexicon_layers(
                 rule_output,
                 min_src_len=1,

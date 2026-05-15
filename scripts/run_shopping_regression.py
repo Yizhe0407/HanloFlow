@@ -214,6 +214,9 @@ SHOPPING_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("after_sales", "可以幫我查退貨狀態嗎？", "會當替我查退貨狀態無？"),
     RegressionCase("after_sales", "可以幫我查訂單狀態嗎？", "會當替我查訂單狀態無？"),
     RegressionCase("after_sales", "我需要查訂單狀態。", "我欲查訂單狀態。"),
+    RegressionCase("after_sales", "顧客請先排隊。", "人客請先排隊。"),
+    RegressionCase("after_sales", "請幫顧客確認付款狀態。", "請替人客確認付款狀態。"),
+    RegressionCase("after_sales", "可不可以幫顧客換貨？", "敢會當替人客換貨？"),
 ]
 
 

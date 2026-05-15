@@ -108,6 +108,9 @@ TAXI_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("misc", "可以幫我查車型嗎？", "會當替我查車型無？"),
     RegressionCase("misc", "可以幫我查車輛位置嗎？", "會當替我查車輛位置無？"),
     RegressionCase("misc", "可以幫我查司機評價嗎？", "會當替我查司機評價無？"),
+    RegressionCase("misc", "可以幫乘客確認上車地點嗎？", "會當替乘客確認上車所在無？"),
+    RegressionCase("misc", "可不可以幫乘客改下車地點？", "敢會當替乘客改落車地點？"),
+    RegressionCase("misc", "請協助乘客上車。", "請鬥相共乘客上車。"),
 ]
 
 
