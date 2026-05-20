@@ -6,17 +6,44 @@
 
 | 類型 | 數量 |
 |------|------|
-| 總詞條（active runtime） | 19,954 |
-| 人工驗證（trust: human active rows） | ~10,802 |
+| 總詞條（active runtime） | 19,964 |
+| 人工驗證（trust: human active rows） | ~10,812 |
 | base seed（trust: seed，低信任） | source 仍有短詞 active；runtime 以 policy 過濾高風險 seed |
-| 最新 round | round351 |
+| 最新 round | round352 |
 
-所有迴歸測試全部通過（共 2095 筆）：
-bus 549、medical 220、transport 119、conversation 113、restaurant 98、shopping 188、hotel 171、taxi 83、bank 146、school 110、family 88、workplace 346
+所有迴歸測試全部通過（共 2105 筆）：
+bus 549、medical 220、transport 129、conversation 113、restaurant 98、shopping 188、hotel 171、taxi 83、bank 146、school 110、family 88、workplace 346
 
 ---
 
 ## 近期做了什麼（最新在前）
+
+### 2026-05-20：各式交通接駁、月台與計程車片語補強（round352）
+**新增人工詞條（10 條 active）：**
+- `請問高鐵接駁車多久一班→借問高鐵接駁車偌久一班`
+- `請問機場接駁車多久一班→借問機場接駁車偌久一班`
+- `請問高鐵接駁車從哪裡搭→借問高鐵接駁車對佗位搭`
+- `請問機場接駁車從哪裡搭→借問機場接駁車對佗位搭`
+- `請問火車誤點多久→借問火車慢分偌久`
+- `請在月台候車不要跨越月台邊線→請佇月台等車，莫跨越月台邊線`
+- `請問去高鐵站要搭哪一班→借問去高鐵站要搭佗一班`
+- `請問去機場要搭哪一班→借問去機場要搭佗一班`
+- `搭計程車請從前門上車→搭計程車請對頭前門上車`
+- `搭計程車請從前門下車→搭計程車請對頭前門落車`
+
+**修正實測錯誤：**
+- `請問高鐵接駁車多久一班？` 原本只轉出 `偌久一班`，缺少完整接駁車語境
+- `搭計程車請從前門上車。` 原本會保留 `從`，不夠自然
+- `請在月台候車，不要跨越月台邊線。` 原本可轉但未在回歸鎖定
+
+**補回歸：**
+- `scripts/run_transport_regression.py` 新增 10 筆 `transport` 類 case
+
+**驗證：**
+- 重編 `data/` 與 `taigi_converter/data/` artifacts
+- `py_compile`
+- `scripts/run_transport_regression.py --fail-fast`
+- 12 支 regression 全綠（共 2105 筆）
 
 ### 2026-05-20：公車拍攝與視訊告示片語補強（round351）
 **新增人工詞條（10 條 active）：**
