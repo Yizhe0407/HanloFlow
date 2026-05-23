@@ -7,15 +7,29 @@
 
 | 類型 | 數量 |
 |------|------|
-| 總詞條（active runtime） | 20,298 |
+| 總詞條（active runtime） | 20,309 |
 | 人工驗證（trust: human active rows） | 11,857 |
 | base seed（trust: seed，低信任） | source 仍有短詞 active；runtime 以 policy 過濾高風險 seed |
-| 最新資料 round | round408 |
+| 最新資料 round | round410 |
 
-所有迴歸測試全部通過（共 3168 筆）：
-bus 549、medical 220、transport 269、conversation 900、restaurant 98、shopping 188、hotel 171、taxi 83、bank 146、school 110、family 88、workplace 346。
+所有迴歸測試全部通過（共 3205 筆）：
+bus 549、medical 220、transport 269、conversation 937、restaurant 98、shopping 188、hotel 171、taxi 83、bank 146、school 110、family 88、workplace 346。
 
 ## 最近重要變更
+
+### 2026-05-23：CTS 無菸城市與南港城市治理詞補強（round410）
+
+- 來源：華視台語新聞「無菸城藍綠轟！」，內容涵蓋台北市無菸城市政策、議會質詢、南港城市治理與首都市長戰。
+- 補強 `無菸城藍綠轟`、`無菸城市政策`、`社群平台`、`辦公孤島`、`黑鄉變成潮城`、`首都市長戰的攻防之一` 等正式新聞詞。
+- 修正正式語境被口語化或誤轉的問題，例如 `他的→伊的`、`先前→原前`、`高價→懸價`、`晚上→暗時`、`從→對`、`攻防→柔道`。
+- `scripts/run_conversation_regression.py` 新增 19 筆 `news_cts_terms` case；12 支 regression 全綠。
+
+### 2026-05-23：CTS 安平廟埕震天祭詞補強（round409）
+
+- 來源：華視台語新聞「安平廟埕震天祭」明登場，解謎走讀認識信仰。
+- 補強 `安平廟埕震天祭`、`安平開台天后宮`、`角頭廟宇`、`實境解謎走讀`、`城隍爺夫人`、`踩街嘉年華` 等活動/信仰詞。
+- 修正新聞正式語境被口語化的問題，例如 `這次→這擺`、`我們→咱`、`跟→佮`、`其實→論真`、`這個→這个`、`將在→欲在`。
+- `scripts/run_conversation_regression.py` 新增 18 筆 `news_cts_terms` case；12 支 regression 全綠。
 
 ### 2026-05-23：converter runtime 效能優化
 
@@ -29,10 +43,12 @@ bus 549、medical 220、transport 269、conversation 900、restaurant 98、shopp
 - README 新增 `資料檔案使用順序與功能`。
 - 說明 `lexicon_entries.jsonl`、`rule_entries.jsonl`、`core_lexicon.json`、`char_verified_allowlist.txt`、`data/artifacts/*` 的使用順序與功能。
 
-### 2026-05-23：CTS 新聞詞補強 round404-round408
+### 2026-05-23：CTS 新聞詞補強 round404-round410
 
 - 補強華視台語新聞相關專有詞、地名、人名、機關名與新聞語境 passthrough。
-- 最新 round408：花蓮免費營養午餐採購弊案詞補強。
+- 最新 round410：無菸城市與南港城市治理詞補強。
+- round409：安平廟埕震天祭與解謎走讀活動詞補強。
+- round408：花蓮免費營養午餐採購弊案詞補強。
 - round407：彰化縣長提名與藍營選戰詞補強。
 - round406：馬英九基金會人事風波與調查聲明詞補強。
 - round405：北市公車自撞山壁事故詞補強。
