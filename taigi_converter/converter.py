@@ -38,6 +38,13 @@ class Candidate:
     layer_rank: int
 
 
+@dataclass(frozen=True)
+class RuntimeRule:
+    rule: RuleEntry
+    compiled: re.Pattern[str] | None
+    required_literal: str | None
+
+
 class TaigiConverter:
     def __init__(
         self,
@@ -78,14 +85,21 @@ class TaigiConverter:
         self.char_map = self._load_char_map(char_map_doc)
         self.has_char_entries: bool = bool(self.char_map)
         self.rule_pass_order, self.rules_by_pass = self._load_rule_plan(rule_plan)
-        self.compiled_rules_by_pass: dict[str, list[tuple[RuleEntry, re.Pattern[str] | None]]] = {}
+        self.compiled_rules_by_pass: dict[str, list[RuntimeRule]] = {}
         for pass_name, parsed_rules in self.rules_by_pass.items():
-            compiled_rules: list[tuple[RuleEntry, re.Pattern[str] | None]] = []
+            compiled_rules: list[RuntimeRule] = []
             for rule in parsed_rules:
+                if not rule.enabled or not rule.pattern:
+                    continue
                 if rule.type == "regex":
                     rule.replacement = self._decode_regex_replacement(rule.replacement)
                 compiled = re.compile(rule.pattern) if rule.type == "regex" and rule.pattern else None
-                compiled_rules.append((rule, compiled))
+                required_literal = (
+                    self._regex_required_literal(rule.pattern)
+                    if rule.type == "regex"
+                    else rule.pattern
+                )
+                compiled_rules.append(RuntimeRule(rule, compiled, required_literal))
             self.compiled_rules_by_pass[pass_name] = compiled_rules
 
         raw_lexicon_stage = str(
@@ -169,6 +183,13 @@ class TaigiConverter:
                 return match.group(0)
 
         return UNICODE_ESCAPE_IN_REPLACEMENT.sub(_replace_unicode, replacement)
+
+    @staticmethod
+    def _regex_required_literal(pattern: str) -> str | None:
+        regex_meta = frozenset(".^$*+?{}[]\\|()")
+        if not pattern or any(ch in regex_meta for ch in pattern):
+            return None
+        return pattern
 
     @staticmethod
     def _decode_runtime_context(context: Any) -> dict[str, Any] | None:
@@ -770,10 +791,10 @@ class TaigiConverter:
             # Keep raw text when the protected span can participate in a longer
             # runtime phrase, so conversion can win over short protected masking.
             span_covers_full_text = cursor == 0 and longest_end == text_len
-            if respect_runtime_phrase_overlap and not span_covers_full_text and (
-                self._has_longer_runtime_phrase(masked_text, cursor, longest_end - cursor)
-                or self._is_inside_longer_runtime_phrase(masked_text, cursor, longest_end)
-                or self._overlaps_runtime_phrase(masked_text, cursor, longest_end)
+            if (
+                respect_runtime_phrase_overlap
+                and not span_covers_full_text
+                and self._overlaps_runtime_phrase(masked_text, cursor, longest_end)
             ):
                 parts.append(masked_text[cursor])
                 cursor += 1
@@ -1047,10 +1068,10 @@ class TaigiConverter:
         for pass_name in self.rule_pass_order:
             if pass_name in skip:
                 continue
-            for rule, compiled in self.compiled_rules_by_pass.get(pass_name, []):
-                if not rule.enabled:
-                    continue
-                if not rule.pattern:
+            for runtime_rule in self.compiled_rules_by_pass.get(pass_name, []):
+                rule = runtime_rule.rule
+                compiled = runtime_rule.compiled
+                if runtime_rule.required_literal and runtime_rule.required_literal not in text:
                     continue
 
                 if rule.type == "regex":
