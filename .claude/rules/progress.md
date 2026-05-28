@@ -3,19 +3,26 @@
 > 精簡接手版。只保留目前狀態、最近重要變更與下一步；舊的逐輪細節已封存到 `.claude/rules/archive/progress-2026-05.md`。
 > 除非需要追溯某輪詞條/規則的歷史原因，不要預設讀 archive，避免消耗大量 LLM token。
 
-## 目前辭典狀態（2026-05-23）
+## 目前辭典狀態（2026-05-28）
 
 | 類型 | 數量 |
 |------|------|
-| 總詞條（active runtime） | 20,309 |
-| 人工驗證（trust: human active rows） | 11,857 |
+| 總詞條（active runtime） | 20,384 |
+| 人工驗證（trust: human active rows） | 12,150 |
 | base seed（trust: seed，低信任） | source 仍有短詞 active；runtime 以 policy 過濾高風險 seed |
-| 最新資料 round | round410 |
+| 最新資料 round | round424 |
 
-所有迴歸測試全部通過（共 3205 筆）：
-bus 549、medical 220、transport 269、conversation 937、restaurant 98、shopping 188、hotel 171、taxi 83、bank 146、school 110、family 88、workplace 346。
+所有迴歸測試全部通過（共 3210 筆）：
+bus 549、medical 220、transport 269、conversation 942、restaurant 98、shopping 188、hotel 171、taxi 83、bank 146、school 110、family 88、workplace 346。
 
 ## 最近重要變更
+
+### 2026-05-28：CTS 文夏經典金曲活動細節詞補強（round424）
+
+- 來源：華視台語新聞「總爺『聞到夏天』 文夏用音樂串聯新舊世代」（2026-05-28）。
+- 補強 `以老中青三代的音樂人一起作為主題`、`將文夏的音樂作品重新、和地方串聯`、`週日則以年輕人演唱A Cappella的方式` 等同篇新聞細節片語。
+- 修正 `一起作為主題` 被 core `一起→鬥陣` 轉成較突兀的 `鬥陣作為主題`，改為 `作伙作為主題`；也補上 `和地方串聯→佮地方串聯`。
+- `scripts/run_conversation_regression.py` 新增 5 筆 `news_cts_terms` case；12 支 regression 全綠。
 
 ### 2026-05-23：CTS 無菸城市與南港城市治理詞補強（round410）
 

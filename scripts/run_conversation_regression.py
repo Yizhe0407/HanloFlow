@@ -889,6 +889,11 @@ CONVERSATION_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("news_cts_terms", "從無菸城市到南港的未來規劃", "從無菸城市到南港的未來規劃"),
     RegressionCase("news_cts_terms", "不外乎都與城市治理有關", "不外乎都與城市治理有關"),
     RegressionCase("news_cts_terms", "也成為首都市長戰的攻防之一", "也成為首都市長戰的攻防之一"),
+    RegressionCase("news_cts_terms", "以老中青三代的音樂人一起作為主題", "以老中青三代的音樂人作伙作為主題"),
+    RegressionCase("news_cts_terms", "將文夏的音樂作品重新、和地方串聯", "將文夏的音樂作品重新、佮地方串聯"),
+    RegressionCase("news_cts_terms", "週日則以年輕人演唱A Cappella的方式", "禮拜日則以年輕人演唱A Cappella的方式"),
+    RegressionCase("news_cts_terms", "重新演出文夏老師的經典作品", "重新演出文夏老師的經典作品"),
+    RegressionCase("news_cts_terms", "5月30日、31日音樂盛會", "五月三十日、三十一日音樂盛會"),
     # scheduling / plans
     RegressionCase("schedule_plans", "等一下打給你。", "等陣仔閣敲予你。"),
     RegressionCase("schedule_plans", "改天再說。", "改工閣講。"),
