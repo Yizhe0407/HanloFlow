@@ -7,15 +7,22 @@
 
 | 類型 | 數量 |
 |------|------|
-| 總詞條（active runtime） | 20,457 |
-| 人工驗證（trust: human active rows） | 12,368 |
+| 總詞條（active runtime） | 20,458 |
+| 人工驗證（trust: human active rows） | 12,374 |
 | base seed（trust: seed，低信任） | source 仍有短詞 active；runtime 以 policy 過濾高風險 seed |
-| 最新資料 round | round442 |
+| 最新資料 round | round443 |
 
-所有迴歸測試全部通過（共 3425 筆）：
-bus 549、medical 220、transport 269、conversation 1157、restaurant 98、shopping 188、hotel 171、taxi 83、bank 146、school 110、family 88、workplace 346。
+所有迴歸測試全部通過（共 3431 筆）：
+bus 549、medical 220、transport 269、conversation 1163、restaurant 98、shopping 188、hotel 171、taxi 83、bank 146、school 110、family 88、workplace 346。
 
 ## 最近重要變更
+
+### 2026-05-29：CTS 文夏經典金曲活動完整句正式語境補強（round443）
+
+- 來源：華視台語新聞列表「總爺『聞到夏天』 文夏用音樂串聯新舊世代」（2026-05-28；2026-05-29 查驗）。
+- 補強 `為紀念「寶島歌王」文夏老師一生對台灣的貢獻`、`透過兩天的活動，以不同主題的演出，串聯文夏、台南、麻豆、在地居民與青年創作者`、`有市集，有演唱會，還有我們的特展，多元的形式，來帶領大家進入文夏老師的音樂創作` 等 6 筆。
+- 修正活動/文化新聞正式語境中 `一生→一世人`、`兩天→兩工`、`不同→無仝`、`還有我們的→閣有阮的`、`大家→逐家`、`更加→閣較` 等局部不合語境的輸出；`金曲歌後/歌后` 依既有字形正規化以長詞條穩定。
+- `scripts/run_conversation_regression.py` 新增 6 筆 `news_cts_terms` case；12 支 regression 全綠。
 
 ### 2026-05-29：CTS 關西石油津貼設籍期限新聞正式語境補強（round442）
 

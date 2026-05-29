@@ -1109,6 +1109,12 @@ CONVERSATION_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("news_cts_terms", "只要在5月29日前設籍關西鎮，都符合領取資格", "只要在五月二十九日前設籍關西鎮，都符合領取資格"),
     RegressionCase("news_cts_terms", "今(27)日一早戶政事務所出現大批人潮，紛紛搶著把戶籍遷到關西鎮", "今(二十七)日一早戶政事務所出現大批人潮，紛紛搶著把戶籍遷到關西鎮"),
     RegressionCase("news_cts_terms", "根據統計，25日、26日兩天，超過5百人遷戶籍到關西，也讓工作人員得加班到晚上8點", "根據統計，二十五日、二十六日兩天，超過五百人遷戶籍到關西，也讓工作人員得加班到晚上八點"),
+    RegressionCase("news_cts_terms", "為紀念「寶島歌王」文夏老師一生對台灣的貢獻", "為紀念「寶島歌王」文夏老師一生對台灣的貢獻"),
+    RegressionCase("news_cts_terms", "透過兩天的活動，以不同主題的演出，串聯文夏、台南、麻豆、在地居民與青年創作者", "透過兩天的活動，以不同主題的演出，串聯文夏、台南、麻豆、在地居民與青年創作者"),
+    RegressionCase("news_cts_terms", "第一個主軸，是我們要跨時代，跨世代的方式，我們來演唱，或是詮釋，文夏老師的創作", "第一個主軸，是我們要跨時代，跨世代的方式，我們來演唱，或是詮釋，文夏老師的創作"),
+    RegressionCase("news_cts_terms", "將音樂活動結合市集與展覽，週六的活動，特別邀請到金曲歌后曾心梅", "將音樂活動結合市集與展覽，週六的活動，特別邀請到金曲歌后曾心梅"),
+    RegressionCase("news_cts_terms", "有市集，有演唱會，還有我們的特展，多元的形式，來帶領大家進入文夏老師的音樂創作", "有市集，有演唱會，還有我們的特展，多元的形式，來帶領大家進入文夏老師的音樂創作"),
+    RegressionCase("news_cts_terms", "透過活動，更加認識台灣重要的音樂家，感受台灣不同世代的音樂文化", "透過活動，更加認識台灣重要的音樂家，感受台灣不同世代的音樂文化"),
     # scheduling / plans
     RegressionCase("schedule_plans", "等一下打給你。", "等陣仔閣敲予你。"),
     RegressionCase("schedule_plans", "改天再說。", "改工閣講。"),
