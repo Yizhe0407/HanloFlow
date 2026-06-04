@@ -7,15 +7,57 @@
 
 | 類型 | 數量 |
 |------|------|
-| 總詞條（active runtime） | 20,468 |
-| 人工驗證（trust: human active rows） | 12,740 |
+| 總詞條（active runtime） | 20,448 |
+| 人工驗證（trust: human active rows） | 12,771 |
 | base seed（trust: seed，低信任） | source 仍有短詞 active；runtime 以 policy 過濾高風險 seed |
-| 最新資料 round | round486 |
+| 最新資料 round | round492 |
 
-所有迴歸測試全部通過（共 3790 筆）：
-bus 549、medical 220、transport 269、conversation 1522、restaurant 98、shopping 188、hotel 171、taxi 83、bank 146、school 110、family 88、workplace 346。
+所有迴歸測試全部通過（共 3878 筆）：
+bus 549、medical 220、transport 269、conversation 1610、restaurant 98、shopping 188、hotel 171、taxi 83、bank 146、school 110、family 88、workplace 346。
 
 ## 最近重要變更
+
+### 2026-06-04：CTS 設備、機構與堤防詞界根因修正（round492）
+
+- 來源：華視台語新聞列表頁 `https://news.cts.com.tw/taiwanese/list`（2026-06-04 再查驗，台語列表最新仍為 2026-05-28），從漫畫店設備、故宮博物院與堤防工程新聞反向抽測短片段。
+- 停用 5 筆錯誤或冗餘 base seed：`方便管理→歸類`、`博物院→博物館`、`以為→叫是`、`堤防→駁岸`、`針孔→針空`；另停用錯誤 machine hotfix `海堤→海墘`。
+- 修正 `方便管理資料→歸類資料`、`國立博物院→國立博物館`、`海堤工程→海墘工程`、`沿海堤防受損→沿海墘防受損`；`以為` 仍由 core 正確轉為 `掠準`。
+- `scripts/run_conversation_regression.py` 新增 17 筆 `news_cts_terms` case；`news_cts_terms` 1474 筆與 12 支 regression 共 3878 筆全綠。
+
+### 2026-06-04：CTS 殘缺片段與跨詞界 seed 根因修正（round491）
+
+- 來源：華視台語新聞列表頁 `https://news.cts.com.tw/taiwanese/list`（2026-06-04 再查驗；台語列表仍只顯示 2026-05-28 內容，快訊標題亦已逐筆驗證），從 `台中人本身`、`中文才能了解`、`盟友的大日子`、`地方大選`、`民意代表介入`、`具體內容`、`用筆電辦公` 等片段反向追查低信任 seed。
+- 停用 11 筆高風險 base seed：`中人→公親`、`文才→武藝`、`友的→朋友`、`親的→乞的`、`地方大→所在闊`、`民意代表→大選`、`有通→無通`、`用筆→書法`、`落台→在野`、`體內→腹內`、`向來→由來`。
+- 修正 `集中人力→集公親力`、`中文才能→中武藝能`、`盟友的關係→盟朋友關係`、`民意代表選舉→大選選舉`、`有通過考試→無通過考試`、`用筆記錄→冊法記錄`、`具體內容→具腹內容`、`向來賓致意→由來賓致意` 等可泛用語義錯誤。
+- `scripts/run_conversation_regression.py` 新增 23 筆 `news_cts_terms` case；`news_cts_terms` 1457 筆與 12 支 regression 共 3861 筆全綠。
+
+### 2026-06-04：CTS `中分` 跨詞界 seed 根因修正（round490）
+
+- 來源：華視台語新聞列表頁 `https://news.cts.com.tw/taiwanese/list`（2026-06-04 再查驗，頁面仍只顯示 2026-05-28 台語新聞列表），從新聞正式敘述中的 `在致詞中分享` 反向抽測短片段與相同詞界型態。
+- 停用低信任 base seed `中分→剖`，修正跨詞界造成的 `致詞中分享→致詞剖享`、`會議中分享→會議剖享`、`文中分析→文剖析`、`內容中分成三類→內容剖成三類`。
+- 新增完整詞彙保護 `中分頭→中分頭`，避免停用 seed 後仍被單字層轉成 `中分路`；`高中分班` 也維持原詞界。
+- `scripts/run_conversation_regression.py` 新增 7 筆 `news_cts_terms` case；`news_cts_terms` 1434 筆與 12 支 regression 共 3838 筆全綠。
+
+### 2026-06-04：CTS 國名量詞與行政層級 seed 根因修正（round489）
+
+- 來源：華視台語新聞列表頁 `https://news.cts.com.tw/taiwanese/list`（2026-06-04 再查驗，頁面仍只顯示 2026-05-28 台語新聞列表），從寮國洞穴救援與竹北選情新聞的短片段反向追查誤轉根因。
+- 停用兩筆低信任 base seed：`國一→初一` 與 `鄉鎮市→鄉鎮`。前者會跨越國名與量詞邊界，後者會錯刪行政層級。
+- 修正 `寮國一處→寮初一處`、`美國一處基地→美初一處基地`、`中國一家公司→中初一家公司`、`泰國一名旅客→泰初一名旅客`、`鄉鎮市長→鄉鎮長`、`鄉鎮市公所→鄉鎮公所` 等可泛用語義錯誤。
+- `scripts/run_conversation_regression.py` 新增 11 筆 `news_cts_terms` case；`news_cts_terms` 1427 筆與 12 支 regression 全綠。
+
+### 2026-06-04：CTS 正式敘述、交通與法律短邊界補強（round488）
+
+- 來源：華視台語新聞列表頁 `https://news.cts.com.tw/taiwanese/list`（2026-06-04 再查驗，頁面仍只顯示 2026-05-28 台語新聞列表），延續文夏活動、台中美食、AIT、主題公車、竹北選情、漫畫店設備與高鐵站務新聞的既有長句保護。
+- 補強 14 筆 phrase/protected terms，包含 `在致詞中分享`、`向來賓舉杯敬酒`、`台中人本身`、`台灣重要的音樂家`、`拿著手機在車內拍拍拍`、`讓公車不只是交通工具`、`刑事上的毀損必須是`、`用筆電辦公`、`非本案律師`。
+- 修正短片段直接貼入時 `分享→剖享`、`向來賓→由來賓`、`台中→臺中`、`本身→家己`、`交通工具→交通家私`、`筆電→冊法電`、`律師→辯護士` 等語義誤轉；另撤回會改變既有長句契約的 `美方盟友的大日子` 與 `三款不同造型的主題車` 兩筆候選。
+- `scripts/run_conversation_regression.py` 新增 14 筆 `news_cts_terms` case；`news_cts_terms` 1416 筆與 12 支 regression 全綠。
+
+### 2026-06-04：CTS 可重用短邊界補強（round487）
+
+- 來源：華視台語新聞列表頁 `https://news.cts.com.tw/taiwanese/list`（2026-06-04 再查驗，頁面仍只顯示 2026-05-28 台語新聞列表），延續文夏活動、竹北選情、寮國救援、漫畫店設備、AIT 與主題公車新聞的既有長片段保護，進一步縮短為可重用邊界。
+- 補強 16 筆 phrase/protected terms，包含 `台南市政府文化局`、`市長大位`、`潛水員`、`準備清潔時`、`內部的接線`、`內部的溝通`、`公車內部塗裝`、`高掛笑容`、`當前台灣朝野關係`。
+- 修正短片段直接貼入時 `台南→臺南`、`大家→逐家`、`有時候→有時陣`、`市長大位→市大漢位`、`潛水員→藏水沬員`、`清潔→清氣`、`內部→內底`、`高掛→懸掛`、`當前→眼前` 等新聞專名、設備與正式敘述誤切。
+- `scripts/run_conversation_regression.py` 新增 16 筆 `news_cts_terms` case；`news_cts_terms` 1402 筆與 12 支 regression 全綠。
 
 ### 2026-06-04：CTS 人名、事件與設備語境短邊界補強（round486）
 
