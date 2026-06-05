@@ -14,9 +14,3 @@ build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
 packages = ["taigi_converter"]
-
-[tool.hatch.build.targets.wheel.sources]
-"taigi_converter" = "taigi_converter"
-
-[tool.hatch.build.targets.wheel.force-include]
-"taigi_converter/data" = "taigi_converter/data"
