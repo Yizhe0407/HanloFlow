@@ -3,19 +3,75 @@
 > 精簡接手版。只保留目前狀態、最近重要變更與下一步；舊的逐輪細節已封存到 `.claude/rules/archive/progress-2026-05.md`。
 > 除非需要追溯某輪詞條/規則的歷史原因，不要預設讀 archive，避免消耗大量 LLM token。
 
-## 目前辭典狀態（2026-06-05）
+## 目前辭典狀態（2026-06-09）
 
 | 類型 | 數量 |
 |------|------|
-| 總詞條（active runtime） | 20,451 |
-| 人工驗證（trust: human active rows） | 12,862 |
+| 總詞條（active runtime） | 20,469 |
+| 人工驗證（trust: human active rows） | 12,951 |
 | base seed（trust: seed，低信任） | source 仍有短詞 active；runtime 以 policy 過濾高風險 seed |
-| 最新資料 round | round499 |
+| 最新資料 round | round513 |
 
-所有迴歸測試全部通過（共 3966 筆）：
-bus 549、medical 220、transport 269、conversation 1698、restaurant 98、shopping 188、hotel 171、taxi 83、bank 146、school 110、family 88、workplace 346。
+所有迴歸測試全部通過（共 4072 筆）：
+bus 549、medical 220、transport 269、conversation 1804、restaurant 98、shopping 188、hotel 171、taxi 83、bank 146、school 110、family 88、workplace 346。
 
 ## 最近重要變更
+
+### 2026-06-09：CTS 今日浪費、抱怨、掉落與高風險詞界根因修正（round513）
+
+- 來源：華視台語新聞列表頁 `https://news.cts.com.tw/taiwanese/list`、政治新聞頁 `https://news.cts.com.tw/politics/list` 與社會新聞頁 `https://news.cts.com.tw/society/list`（2026-06-09 查驗；社會頁新增毒駕攔車、高雄坑洞與豪雨停班課新聞）。
+- 停用 3 筆低信任且語義不相干映射：`浪費→討債`、`抱怨→哭爸`、`掉落→拍交落`，修正 `不要浪費任期→不要討債任期`、`抱怨消息發布太慢→哭爸消息發布太慢`、`落石掉落→落石拍交落`。
+- 新增正式複合詞保護 `高風險`，避免 `高風險巡邏點→懸風險巡邏點`；保留 `討債→討數`、`哭爸` 原詞、`高山→懸山`、`風險很高→風險真懸` 與既有長片語 `隨身物品掉落→隨身物件落去`。
+- `scripts/run_conversation_regression.py` 新增 15 筆 `news_cts_terms` case；`news_cts_terms` 1668 筆與 12 支 regression 共 4072 筆全綠。
+
+### 2026-06-09：CTS 今日法律、醫療與交通正式詞界根因修正（round512）
+
+- 來源：華視台語新聞列表頁 `https://news.cts.com.tw/taiwanese/list`、政治新聞頁 `https://news.cts.com.tw/politics/list` 與社會新聞頁 `https://news.cts.com.tw/society/list`（2026-06-09 查驗；台語列表正文仍主要回傳 2026-05-28，社會頁新增毒駕再犯與醫用口罩二審新聞）。
+- 停用 5 筆低信任或顛倒語義映射：`車頭→車站`、`傳染→穢`、`情形→情勢`、`生產→生囝`、`損害→破壞`，修正 `車頭嚴重毀損→車站嚴重毀損`、`法定傳染病→法定穢病`、`生產情形→生囝情勢`、`社會損害→社會破壞`。
+- 新增正式詞保護 `被告`、`傳染`、`傳染病`，避免被動語態與 `染病→著病` 跨界誤切；保留 `火車站→火車頭`、`被人告→予人告` 與獨立 `染病→著病`。
+- `scripts/run_conversation_regression.py` 新增 19 筆 `news_cts_terms` case；`news_cts_terms` 1653 筆與 12 支 regression 共 4057 筆全綠。
+
+### 2026-06-09：CTS 今日藥名、正式角色與低信任 machine hotfix 根因修正（round511）
+
+- 來源：華視台語新聞列表頁 `https://news.cts.com.tw/taiwanese/list`、政治新聞頁 `https://news.cts.com.tw/politics/list` 與社會新聞頁 `https://news.cts.com.tw/society/list`（2026-06-09 查驗；台語列表正文仍主要回傳 2026-05-28，政治與社會頁已有 2026-06-09 今日新聞）。
+- 停用 4 筆低信任 machine hotfix：`主持→主盤`、`支持→伨`、`減輕→伻輕`、`辛勞→勞力`，修正今日正文中的 `現場造勢主持人→現場造勢主盤人`、`政府的支持→政府的伨`、`減輕油價波動→伻輕油價波動`、`駕駛朋友辛勞→駕駛朋友勞力`。
+- 新增可重用短語保護 `安非他命`、`高喊`，修正 `毒品安非他命→毒品安非伊命` 與 `以台語高喊三重→以台語懸喊三重`；一般 `他的命令→伊的命令`、`高山→懸山` 仍維持既有轉換。
+- `scripts/run_conversation_regression.py` 新增 18 筆 `news_cts_terms` case；`news_cts_terms` 1634 筆與 12 支 regression 共 4038 筆全綠。
+
+### 2026-06-09：CTS 今日氣象、否定片語與成語詞界修正（round510）
+
+- 來源：華視台語新聞列表頁 `https://news.cts.com.tw/taiwanese/list`、政治新聞頁 `https://news.cts.com.tw/politics/list` 與社會新聞頁 `https://news.cts.com.tw/society/list`（2026-06-09 查驗；台語列表正文仍主要回傳 2026-05-28，政治與社會頁已有 2026-06-09 今日新聞）。
+- 新增可重用短語 `高溫→高溫`、`不一定→毋一定`、`回頭是岸→回頭是岸`，修正 `高溫燈號→懸溫燈號`、`不一定要成為敵人→不定著要成做敵人`、`請蘇巧慧回頭是岸→請蘇巧慧越頭是岸`。
+- 保留一般轉換邊界：`最高溫度→上懸溫度`、`一定要來→定著要來`、`回頭看→越頭看`。
+- `scripts/run_conversation_regression.py` 新增 13 筆 `news_cts_terms` case；`news_cts_terms` 1616 筆與 12 支 regression 共 4020 筆全綠。
+
+### 2026-06-09：CTS 今日校園寢室、翻車與政治短語詞界修正（round509）
+
+- 來源：華視台語新聞列表頁 `https://news.cts.com.tw/taiwanese/list`、政治新聞頁 `https://news.cts.com.tw/politics/list` 與社會新聞頁 `https://news.cts.com.tw/society/list`（2026-06-09 查驗；台語列表正文仍主要回傳 2026-05-28，政治與社會頁已有 2026-06-09 今日新聞）。
+- 停用 machine hotfix `寢室→睏房` 與低信任 base seed `翻車→反車`，修正 `同寢室友→同睏房友`、`翻車事故→反車事故`、`政治翻車→政治反車`。
+- 新增可重用短語保護 `住家地址`、`拉抬小雞`，避免今日政治正文中的正式個資詞與政治比喻被拆成 `徛家地址`、`拉抬雞仔囝`；一般 `住家` 與字面 `小雞` 仍維持既有轉換。
+- `scripts/run_conversation_regression.py` 新增 10 筆 `news_cts_terms` case；`news_cts_terms` 1603 筆與 12 支 regression 共 4007 筆全綠。
+
+### 2026-06-09：CTS 今日正式區域、行為與偏袒詞界根因修正（round508）
+
+- 來源：華視台語新聞列表頁 `https://news.cts.com.tw/taiwanese/list`、政治新聞頁 `https://news.cts.com.tw/politics/list` 與社會新聞頁 `https://news.cts.com.tw/society/list`（2026-06-09 查驗；台語列表正文仍主要回傳 2026-05-28，政治與社會頁已有 2026-06-09 今日新聞）。
+- 停用 3 筆過度泛化 machine hotfix：`區域→區`、`行為→行踏`、`偏袒→重頭輕`；新增人工可重用詞條 `偏袒→偏心`。
+- 修正 `區域合作→區合作`、`示警區域→示警區`、`違法違紀行為→違法違紀行踏`、`偏袒學生→重頭輕學生` 等正式新聞與一般片語的語義或搭配問題。
+- `scripts/run_conversation_regression.py` 新增 10 筆 `news_cts_terms` case；`news_cts_terms` 1593 筆與 12 支 regression 共 3997 筆全綠。
+
+### 2026-06-09：CTS 今日人名、財經與斜線日期詞界根因修正（round507）
+
+- 來源：華視台語新聞列表頁 `https://news.cts.com.tw/taiwanese/list`、政治新聞頁 `https://news.cts.com.tw/politics/list` 與社會新聞頁 `https://news.cts.com.tw/society/list`（2026-06-09 查驗；台語列表正文仍主要回傳 2026-05-28，政治與社會頁已有 2026-06-09 今日新聞）。
+- 停用錯誤人工詞條 `周天→禮拜日`，避免誤傷 `周天成`、`每周天氣`、`大周天`；正規星期詞 `周日→禮拜日` 維持不變。
+- 停用低信任 base seed `反彈→倒彈`，修正財經新聞中的 `股價反彈`、`晶片股反彈` 等正式詞彙；新增斜線日期規則，修正 `6/1起生效→六/鬥陣生效`。
+- `scripts/run_conversation_regression.py` 新增 12 筆 `news_cts_terms` case；`news_cts_terms` 1583 筆與 12 支 regression 共 3987 筆全綠。
+
+### 2026-06-09：CTS 今日政治新聞正式詞界與專名補強（round506）
+
+- 來源：華視台語新聞列表頁 `https://news.cts.com.tw/taiwanese/list` 與政治新聞頁 `https://news.cts.com.tw/politics/list`（2026-06-09 查驗；台語列表正文仍主要回傳 2026-05-28，政治頁已有 2026-06-09 今日新聞）。
+- 補強 6 筆可重用 phrase/protected terms：`跟隨`、`高虹安`、`高翠路`、`貽笑大方`、`冷戰`、`停止冷戰`。
+- 修正 `港府跟隨北京→港府佮隨北京`、`高虹安→懸虹安`、`高翠路→懸翠路`、`貽笑大方→貽笑大扮`、`停止冷戰→停睏寒戰` 等正式新聞詞界與專名誤轉。
+- `scripts/run_conversation_regression.py` 新增 9 筆 `news_cts_terms` case；`news_cts_terms` 1571 筆與 12 支 regression 共 3975 筆全綠。
 
 ### 2026-06-05：CTS 娛樂與快訊正式詞界補強（round499）
 

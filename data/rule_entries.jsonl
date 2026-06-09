@@ -184,3 +184,4 @@
 {"rule_id": "rl_percent_to_percent_han", "pass_name": "grammar", "type": "regex", "pattern": "([0-9一二兩三四五六七八九十百千零〇幾半]+)%", "replacement": "百分之\\1", "priority": 82, "enabled": true, "note": "百分比符號：5% -> 百分之五（先經數字轉寫，再統一成漢字百分比）"}
 {"rule_id": "rl_percent_hundred_fix", "pass_name": "grammar", "type": "literal", "pattern": "百分之一百", "replacement": "百分之百", "priority": 81, "enabled": true, "note": "百分比慣用法：百分之一百 -> 百分之百"}
 {"rule_id": "rl_round416_daliao_eight_li_admin_fix", "pass_name": "fluency", "type": "literal", "pattern": "大寮區八个里", "replacement": "大寮區八個里", "priority": 96, "enabled": true, "note": "round416 CTS 地方新聞行政區片語：避免通用量詞規則把「八個里」改成台文量詞字。"}
+{"rule_id":"rl_round507_slash_date_first_day_suffix","pass_name":"grammar","type":"regex","pattern":"([一二三四五六七八九十]{1,3})/(?:一起|鬥陣)(?=(?:生效|上路|實施|施行|適用|啟用|開放|開始|辦理|執行|收費|調整|調漲|調降|停用|禁止|受理))","replacement":"\\1/一日起","priority":93,"enabled":true,"note":"round507 CTS 日期詞界：斜線日期 M/1起 不應被核心詞條「一起」改成「鬥陣」；兼容 lexicon 已先套用的鬥陣形式。"}
