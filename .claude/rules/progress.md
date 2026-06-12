@@ -3,19 +3,78 @@
 > 精簡接手版。只保留目前狀態、最近重要變更與下一步；舊的逐輪細節已封存到 `.claude/rules/archive/progress-2026-05.md`。
 > 除非需要追溯某輪詞條/規則的歷史原因，不要預設讀 archive，避免消耗大量 LLM token。
 
-## 目前辭典狀態（2026-06-09）
+## 目前辭典狀態（2026-06-12）
 
 | 類型 | 數量 |
 |------|------|
-| 總詞條（active runtime） | 20,469 |
-| 人工驗證（trust: human active rows） | 12,951 |
+| 總詞條（active runtime） | 20,492 |
+| 人工驗證（trust: human active rows） | 13,042 |
 | base seed（trust: seed，低信任） | source 仍有短詞 active；runtime 以 policy 過濾高風險 seed |
-| 最新資料 round | round513 |
+| 最新資料 round | round522 |
 
-所有迴歸測試全部通過（共 4072 筆）：
-bus 549、medical 220、transport 269、conversation 1804、restaurant 98、shopping 188、hotel 171、taxi 83、bank 146、school 110、family 88、workplace 346。
+所有迴歸測試全部通過（共 4179 筆）：
+bus 549、medical 220、transport 269、conversation 1911、restaurant 98、shopping 188、hotel 171、taxi 83、bank 146、school 110、family 88、workplace 346。
 
 ## 最近重要變更
+
+### 2026-06-12：CTS 今日司法詞界與正式商業角色修正（round522）
+
+- 來源：華視台語新聞列表頁 `https://news.cts.com.tw/taiwanese/list` 與社會新聞頁 `https://news.cts.com.tw/society/list`（2026-06-12 查驗；抽測嘉市警局分隊長涉貪瀆新聞）。
+- 停用會跨詞界誤切的低信任 seed `人列→人次`，修正 `三人列隊前進→三人次隊前進`；既有正式量詞 `旅遊人次` 維持不變。
+- 停用語意扁平化的 machine hotfix `涉及→牽連`、`合夥→合股`，新增正式詞保護，修正 `疑涉及洩密→疑牽連洩密`、`陳姓合夥人→陳姓合股人`。
+- 保留長片語與獨立詞邊界：`涉及法律案件→涉案`、`合夥做生意→合股做生理`、`合股→鬥股`、`受到案件牽連→受著案件牽連`。
+- `scripts/run_conversation_regression.py` 新增 13 筆 `news_cts_terms` case；`news_cts_terms` 1775 筆與 12 支 regression 共 4179 筆全綠。
+
+### 2026-06-12：CTS 今日財經帳戶、社會安全與正式語意修正（round521）
+
+- 來源：華視台語新聞列表頁 `https://news.cts.com.tw/taiwanese/list`、國際新聞頁 `https://news.cts.com.tw/international/list` 與社會新聞頁 `https://news.cts.com.tw/society/list`（2026-06-12 查驗；抽測川普帳戶、SpaceX 虧損及毒駕生命財產新聞）。
+- 停用語意不精確的低信任映射 `作用→力`、`財產→家伙`、`虧損→虧空`，修正 `警報器也起了力`、`生命家伙安全`、`投資虧空`；保留 `道德虧損→失德`、`財產留給子孫→財產放予囝孫` 與獨立 `虧空`。
+- 新增正式財經複合詞保護 `川普帳戶`、`投資帳戶`，避免脫離既有完整標題後轉成 `川普口座`、`投資口座`；銀行服務語境 `銀行帳戶→銀行口座` 維持不變。
+- `scripts/run_conversation_regression.py` 新增 15 筆 `news_cts_terms` case；`news_cts_terms` 1762 筆與 12 支 regression 共 4166 筆全綠。
+
+### 2026-06-12：CTS 今日財經正式角色與時間詞界修正（round520）
+
+- 來源：華視台語新聞列表頁 `https://news.cts.com.tw/taiwanese/list` 與國際新聞頁 `https://news.cts.com.tw/international/list`（2026-06-12 查驗；延伸抽測 SpaceX 首次公開募股新聞）。
+- 停用低信任 machine hotfix `企業→事業`、`最終→最後`，新增正式詞保護，修正 `已經下注的企業→已經落注的事業` 與 `最終目標→最後目標` 的語意扁平化。
+- 保留語境邊界：`下注→落注`、獨立 `事業` 維持不變，華語 `最後結果→上後結果` 仍正常轉換。
+- `scripts/run_conversation_regression.py` 新增 8 筆 `news_cts_terms` case；`news_cts_terms` 1747 筆與 12 支 regression 共 4151 筆全綠。
+
+### 2026-06-12：CTS 今日研究、安全與正式語意詞界修正（round519）
+
+- 來源：華視台語新聞列表頁 `https://news.cts.com.tw/taiwanese/list` 與國際新聞頁 `https://news.cts.com.tw/international/list`（2026-06-12 查驗；延伸抽測靈活就業研究與北約軍事安全新聞）。
+- 停用錯誤 machine hotfix `引起→起致`、`荒謬→譀古`、`解釋→註解`，以及低信任 seed `樣本→見本`；新增正式詞保護，修正 `引起輿論恐慌→起致輿論恐慌`、`有效樣本→有效見本`、`荒謬的事→譀古的事`、`宣傳和解釋→宣傳和註解`。保留 `引起禍端→惹代誌`、獨立 `見本`、`譀古→譀呱呱` 與 `註解程式碼`。
+- 新增安全正式詞 `不對稱`，修正 `不對稱優勢→毋著稱優勢`；保留 `對稱圖形`。
+- 新增抽象程度片語 `高度重視`、`高度關注`，避免轉成 `懸度重視／懸度關注`；物理量 `飛行高度→飛行懸度` 維持不變。
+- `scripts/run_conversation_regression.py` 新增 18 筆 `news_cts_terms` case；`news_cts_terms` 1739 筆與 12 支 regression 共 4143 筆全綠。
+
+### 2026-06-12：CTS 今日財經、統計與新聞正式詞界修正（round518）
+
+- 來源：華視台語新聞列表頁 `https://news.cts.com.tw/taiwanese/list`、國際新聞頁 `https://news.cts.com.tw/international/list` 與社會新聞頁 `https://news.cts.com.tw/society/list`（2026-06-12 查驗；延伸抽測 SpaceX 募股與世足開幕式快訊）。
+- 停用錯誤 machine hotfix `資金→箍箍`，新增正式詞保護 `資金`，修正 `募資金額→募箍箍額`、`籌措資金→籌措箍箍`；保留既有長片語 `增加資金→增資`、`資金的運轉→周轉`。
+- 新增正式詞 `新高`、`高潮`，修正 `新高紀錄→新懸紀錄`、`壓軸掀高潮→壓軸掀懸潮`；保留一般高度描述 `潮水很高→潮水真懸`。
+- 停用低信任 seed `舉動→行動` 並新增正式詞保護，避免 `不友善的舉動→不友善的行動` 語意扁平化；獨立 `行動` 維持不變。
+- `scripts/run_conversation_regression.py` 新增 14 筆 `news_cts_terms` case；`news_cts_terms` 1721 筆與 12 支 regression 共 4125 筆全綠。
+
+### 2026-06-12：CTS 今日國際制裁與財經正式詞界修正（round517）
+
+- 來源：華視台語新聞列表頁 `https://news.cts.com.tw/taiwanese/list` 與國際新聞頁 `https://news.cts.com.tw/international/list`（2026-06-12 查驗；國際頁已有今日菲律賓防長遭北京制裁與 SpaceX 首次公開募股新聞）。
+- 停用 3 筆錯誤 machine hotfix：`欺騙→騙鬼`、`極限→盡磅`、`近親→親親成`，新增正式詞保護，修正 `欺騙行徑→騙鬼行徑`、`突破極限→突破盡磅`、`近親實施制裁→親親成實施制裁`；保留 `欺騙人→騙人`、`受到欺騙→受騙` 與獨立 `騙鬼`。
+- 新增財經片語 `創新高` 與成語 `水漲船高`，修正 `募得創新高紀錄→募得創新懸紀錄`、`身價水漲船高→身價水漲船懸`；保留一般高度描述 `船很高→船真懸`。
+- `scripts/run_conversation_regression.py` 新增 15 筆 `news_cts_terms` case；`news_cts_terms` 1707 筆與 12 支 regression 共 4111 筆全綠。
+
+### 2026-06-12：CTS 今日消防、司法與毒駕正式詞界修正（round516）
+
+- 來源：華視台語新聞列表頁 `https://news.cts.com.tw/taiwanese/list` 與社會新聞頁 `https://news.cts.com.tw/society/list`（2026-06-12 查驗；社會頁已有今日神岡家具工廠火警、燕巢養女湖火警、嘉市警涉貪與桃園毒駕新聞）。
+- 新增正式複合詞保護 `易燃`、`易燃物`、`釐清`、`高速`、`火災`；停用會跨界誤切的低信任 seed `清火→退火` 與過度泛化 machine hotfix `火災→火燒厝`，改補明確片語 `清火氣→退火氣`。修正 `易燃物→硫物`、`高速逃逸→懸速逃逸`、`釐清火災原因→釐退火災原因`，並保留 `房子失火→火燒厝`、`高山→懸山`。
+- 新增司法正式詞 `帳戶金流` 與地名片段 `養女湖周邊`，修正 `帳戶金流異常進出狀況→口座金流異常進出狀況`、`養女湖周邊鐵皮倉庫→養女湖四邊鐵皮倉庫`；保留銀行語境 `銀行帳戶→銀行口座` 與一般 `車站周邊→車站四邊`。
+- `scripts/run_conversation_regression.py` 新增 16 筆 `news_cts_terms` case；`news_cts_terms` 1692 筆與 12 支 regression 共 4096 筆全綠。
+
+### 2026-06-12：CTS 今日正式量詞與快訊標題詞界修正（round515）
+
+- 來源：華視台語新聞列表頁 `https://news.cts.com.tw/taiwanese/list` 與政治新聞頁 `https://news.cts.com.tw/politics/list`（2026-06-12 查驗；台語列表正文仍主要回傳 2026-05-28，快訊與政治頁顯示近期新聞）。
+- 停用錯誤低信任 seed `各項→萬項`，新增正式詞保護 `各項`，修正 `論壇各項籌備工作基本就緒→論壇萬項籌備工作基本就緒`，並保留獨立 `萬項工作→萬般工作`。
+- 新增新聞標題片語 `管制時段一次看`，修正 `交流道封閉管制時段一次看→交流道封閉管制時段一擺看`，同時保留一般量詞語境 `一次看病→一擺看病`、`我去過一次→我有去過一擺`。
+- `scripts/run_conversation_regression.py` 新增 8 筆 `news_cts_terms` case，並同步 4 筆 round514 舊期待值；`news_cts_terms` 1676 筆與 12 支 regression 共 4080 筆全綠。
 
 ### 2026-06-09：CTS 今日浪費、抱怨、掉落與高風險詞界根因修正（round513）
 

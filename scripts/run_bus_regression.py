@@ -142,7 +142,7 @@ BUS_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("bus_time_queries", "月底以前會公告嗎？", "月尾進前會公告無？"),
     RegressionCase("bus_time_queries", "這週末會加班嗎？", "這禮拜尾會加班無？"),
     RegressionCase("bus_time_queries", "今天早上幾點開始？", "今仔日早起幾點開始？"),
-    RegressionCase("bus_time_queries", "今天上午幾點開始？", "今仔日早起幾點開始？"),
+    RegressionCase("bus_time_queries", "今天上午幾點開始？", "今仔日上晝幾點開始？"),
     RegressionCase("bus_time_queries", "今晚幾點結束？", "今仔暗幾點結束？"),
     RegressionCase("bus_time_queries", "上週末有車嗎？", "頂禮拜尾有車無？"),
     RegressionCase("bus_time_queries", "上周末有車嗎？", "頂禮拜尾有車無？"),

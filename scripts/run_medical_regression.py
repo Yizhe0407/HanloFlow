@@ -145,7 +145,7 @@ MEDICAL_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("doctor_flow", "如果你要看報告，先去門診櫃檯報到。", "若是你欲看報告，先去門診櫃檯報到。"),
     RegressionCase("doctor_flow", "現在叫號還沒到你，你先坐旁邊等。", "現佇咧叫號猶未到你，你先坐隔壁等。"),
     RegressionCase("doctor_flow", "報告還沒出來，你晚一點再回來拿。", "報告猶未出來，你較慢閣轉來拿。"),
-    RegressionCase("doctor_flow", "醫生現在還在看上一位，你再等一下。", "醫生這馬猶在看上一位，你閣等咧。"),
+    RegressionCase("doctor_flow", "醫生現在還在看上一位，你再等一下。", "醫生這馬猶在看上一位，你閣等一下仔。"),
     RegressionCase("doctor_flow", "請問今天看診的醫生是哪一位？", "借問今仔日看診的醫生是佗一位？"),
     RegressionCase("doctor_flow", "醫生說你需要再回診一次。", "醫生講你需要再回診一擺。"),
     RegressionCase("doctor_flow", "這份報告已經轉給主治醫生了。", "這份報告已經轉給主治醫生矣。"),
@@ -197,7 +197,7 @@ MEDICAL_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("doctor_flow", "我想改回診日期。", "我想欲改回診日期。"),
     # pharmacy / payment / cards
     RegressionCase("pharmacy_payment", "如果你要領藥，先去批價再過來。", "若是欲領藥，先去算錢才過來。"),
-    RegressionCase("pharmacy_payment", "你的健保卡刷不過，先去旁邊櫃檯問一下。", "你的健保卡鑢袂過，先去隔壁櫃檯問一下。"),
+    RegressionCase("pharmacy_payment", "你的健保卡刷不過，先去旁邊櫃檯問一下。", "你的健保卡鑢袂過，先去隔壁櫃檯問一下仔。"),
     RegressionCase("pharmacy_payment", "這張單子你先拿去批價，再回來給我。", "這張單仔你先提去批價，閣轉來予我。"),
     RegressionCase("pharmacy_payment", "這些藥一天吃三次，飯後服用。", "遮的藥一工食三擺，飯後服用。"),
     RegressionCase("pharmacy_payment", "這個藥要冷藏，你回家記得放冰箱。", "這个藥要寒藏，你轉去厝裡記著放冰箱。"),

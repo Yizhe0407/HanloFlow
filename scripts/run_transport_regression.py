@@ -105,7 +105,7 @@ TRANSPORT_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("rail_service", "旅客在排隊。", "旅客佇咧排隊。"),
     # ticketing / payments
     RegressionCase("ticketing", "如果你要補票，先去窗口抽號碼牌。", "若是你欲補票，先去窗口提號碼牌。"),
-    RegressionCase("ticketing", "這張票刷不過，你去櫃檯問一下。", "這張票鑢袂過，你去櫃檯問一下。"),
+    RegressionCase("ticketing", "這張票刷不過，你去櫃檯問一下。", "這張票鑢袂過，你去櫃檯問一下仔。"),
     RegressionCase("ticketing", "如果刷卡還是失敗，就先投現金。", "若是刷袂過，就先投現錢。"),
     RegressionCase("ticketing", "愛心卡今天可以正常刷卡。", "愛心卡今仔日會當正常刷卡。"),
     RegressionCase("ticketing", "老人卡感應不到的話，請你先跟司機說。", "若是老人卡感應袂著，請你先佮司機講。"),
