@@ -34,6 +34,7 @@ python3 scripts/run_bank_regression.py
 python3 scripts/run_school_regression.py
 python3 scripts/run_family_regression.py
 python3 scripts/run_workplace_regression.py
+python3 scripts/run_package_parity_regression.py
 ```
 
 ## 資料修正優先順序

@@ -772,6 +772,29 @@ def detect_pipeline_conflicts(rules: list[RuleEntry]) -> list[str]:
     return warnings
 
 
+def _validate_unique_entry_ids(entries: list[LexiconEntry]) -> None:
+    entries_by_id: dict[str, list[LexiconEntry]] = {}
+    for entry in entries:
+        entries_by_id.setdefault(entry.entry_id, []).append(entry)
+
+    duplicates = {
+        entry_id: grouped_entries
+        for entry_id, grouped_entries in entries_by_id.items()
+        if len(grouped_entries) > 1
+    }
+    if not duplicates:
+        return
+
+    details: list[str] = []
+    for entry_id, grouped_entries in sorted(duplicates.items())[:10]:
+        sources = ", ".join(repr(entry.src) for entry in grouped_entries[:3])
+        details.append(f"{entry_id}: {sources}")
+    raise ValueError(
+        "詞典存在重複 entry_id；每筆詞條必須使用唯一 ID: "
+        + "; ".join(details)
+    )
+
+
 def compile_runtime_artifacts(data_dir: Path = DATA_DIR, fail_on_mask: bool = False) -> dict[str, Any]:
     lexicon_path = data_dir / "lexicon_entries.jsonl"
     rule_path = data_dir / "rule_entries.jsonl"
@@ -804,7 +827,8 @@ def compile_runtime_artifacts(data_dir: Path = DATA_DIR, fail_on_mask: bool = Fa
         allowlist_items,
         identity_passthrough_terms=identity_passthrough_terms,
     )
-    entries = list({entry.entry_id: entry for entry in (source_entries + core_entries)}.values())
+    entries = source_entries + core_entries
+    _validate_unique_entry_ids(entries)
     rules = _expand_rules_with_tokens([RuleEntry.from_dict(row) for row in load_jsonl(rule_path)])
 
     runtime_entries: list[LexiconEntry] = []

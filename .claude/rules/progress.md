@@ -7,15 +7,23 @@
 
 | 類型 | 數量 |
 |------|------|
-| 總詞條（active runtime） | 20,492 |
-| 人工驗證（trust: human active rows） | 13,042 |
+| 總詞條（active runtime） | 20,493 |
+| 人工驗證（trust: human active rows） | 13,041 |
 | base seed（trust: seed，低信任） | source 仍有短詞 active；runtime 以 policy 過濾高風險 seed |
-| 最新資料 round | round522 |
+| 最新資料 round | round523 |
 
 所有迴歸測試全部通過（共 4179 筆）：
 bus 549、medical 220、transport 269、conversation 1911、restaurant 98、shopping 188、hotel 171、taxi 83、bank 146、school 110、family 88、workplace 346。
 
 ## 最近重要變更
+
+### 2026-07-28：合併前套件一致性與詞條 ID 完整性修正（round523）
+
+- 將根目錄 `converter.py` 的 post-rule protected-term re-mask 邏輯同步到 `taigi_converter/converter.py`，修正安裝套件 API 的 14 筆既有回歸差異。
+- 清除 3 組重複 `entry_id`；保留但停用會破壞既有語境的 `再過來→閣過來`，並重新編譯兩份 runtime artifacts。
+- artifact compiler 新增重複 `entry_id` fail-fast 驗證，避免日後靜默覆寫詞條。
+- 新增 `scripts/run_package_parity_regression.py`，同時驗證 root 與公開套件 API 的 4179 筆輸出。
+- 實際建置 wheel、確認 10 個套件 data/artifact 檔案皆被納入，並在隔離 Python 3.12 環境安裝後完成 smoke test。
 
 ### 2026-06-12：CTS 今日司法詞界與正式商業角色修正（round522）
 
