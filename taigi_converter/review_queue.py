@@ -2,11 +2,18 @@ from __future__ import annotations
 
 import hashlib
 import json
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
-from .artifact_compiler import load_jsonl, write_jsonl
+from .artifact_compiler import load_jsonl
+from .io_utils import (
+    append_bytes_durable,
+    atomic_write_json,
+    atomic_write_jsonl,
+    durable_unlink,
+    exclusive_file_lock,
+)
 from .lexicon_policy import normalize_trust
 
 ALLOWED_DECISIONS = {"add_override", "disable_base_entry", "reject"}
@@ -14,7 +21,7 @@ DEFAULT_REVIEW_OWNER = "reviewer"
 
 
 def _now_iso() -> str:
-    return datetime.now(timezone.utc).isoformat()
+    return datetime.now(UTC).isoformat()
 
 
 def _new_review_id(payload: dict[str, Any]) -> str:
@@ -24,7 +31,7 @@ def _new_review_id(payload: dict[str, Any]) -> str:
 
 
 def _new_entry_id(src: str, tgt: str, level: str, tier: str, source: str) -> str:
-    raw = f"{src}|{tgt}|{level}|{tier}|{source}".encode("utf-8")
+    raw = f"{src}|{tgt}|{level}|{tier}|{source}".encode()
     digest = hashlib.sha1(raw).hexdigest()[:12]
     return f"lx_{digest}"
 
@@ -41,20 +48,61 @@ def _audit_path(data_dir: Path) -> Path:
     return data_dir / "review_audit.jsonl"
 
 
+def _transaction_path(data_dir: Path) -> Path:
+    return data_dir / ".review_transaction.json"
+
+
+def _recover_transaction_unlocked(data_dir: Path) -> None:
+    journal_path = _transaction_path(data_dir)
+    if not journal_path.exists():
+        return
+    try:
+        journal = json.loads(journal_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        raise RuntimeError(f"review transaction journal 損毀: {journal_path}") from exc
+    files = journal.get("files")
+    if journal.get("version") != 1 or not isinstance(files, dict):
+        raise RuntimeError(f"review transaction journal 格式錯誤: {journal_path}")
+    for name, rows in files.items():
+        if (
+            not isinstance(name, str)
+            or Path(name).name != name
+            or not isinstance(rows, list)
+            or any(not isinstance(row, dict) for row in rows)
+        ):
+            raise RuntimeError(f"review transaction journal 內容不合法: {journal_path}")
+        atomic_write_jsonl(data_dir / name, rows)
+    durable_unlink(journal_path, missing_ok=True)
+
+
+def _commit_transaction_unlocked(
+    data_dir: Path,
+    files: dict[str, list[dict[str, Any]]],
+) -> None:
+    journal_path = _transaction_path(data_dir)
+    atomic_write_json(
+        journal_path,
+        {"version": 1, "created_at": _now_iso(), "files": files},
+        indent=None,
+    )
+    _recover_transaction_unlocked(data_dir)
+
+
 def append_review_item(data_dir: Path, item: dict[str, Any]) -> dict[str, Any]:
     queue_path = _queue_path(data_dir)
     queue_path.parent.mkdir(parents=True, exist_ok=True)
 
     payload = {
+        **item,
         "review_id": item.get("review_id") or _new_review_id(item),
         "created_at": _now_iso(),
         "status": "pending",
-        **item,
     }
 
-    with queue_path.open("a", encoding="utf-8") as f:
-        f.write(json.dumps(payload, ensure_ascii=False))
-        f.write("\n")
+    encoded = (json.dumps(payload, ensure_ascii=False) + "\n").encode("utf-8")
+    with exclusive_file_lock(data_dir / ".review_queue.lock"):
+        _recover_transaction_unlocked(data_dir)
+        append_bytes_durable(queue_path, encoded)
 
     return payload
 
@@ -92,10 +140,10 @@ def import_unresolved_entries(
     return imported
 
 
-def ensure_review_ids(data_dir: Path) -> int:
+def _ensure_review_ids_unlocked(data_dir: Path) -> int:
     queue_path = _queue_path(data_dir)
     if not queue_path.exists():
-        queue_path.touch(exist_ok=True)
+        atomic_write_jsonl(queue_path, [])
         return 0
 
     rows = load_jsonl(queue_path)
@@ -107,13 +155,21 @@ def ensure_review_ids(data_dir: Path) -> int:
         changed += 1
 
     if changed:
-        write_jsonl(queue_path, rows)
+        atomic_write_jsonl(queue_path, rows)
     return changed
 
 
+def ensure_review_ids(data_dir: Path) -> int:
+    with exclusive_file_lock(data_dir / ".review_queue.lock"):
+        _recover_transaction_unlocked(data_dir)
+        return _ensure_review_ids_unlocked(data_dir)
+
+
 def load_review_queue(data_dir: Path) -> list[dict[str, Any]]:
-    ensure_review_ids(data_dir)
-    return load_jsonl(_queue_path(data_dir))
+    with exclusive_file_lock(data_dir / ".review_queue.lock"):
+        _recover_transaction_unlocked(data_dir)
+        _ensure_review_ids_unlocked(data_dir)
+        return load_jsonl(_queue_path(data_dir))
 
 
 def export_pending_reviews(
@@ -125,11 +181,7 @@ def export_pending_reviews(
     pending = [row for row in rows if row.get("status", "pending") == "pending"]
     pending = pending[:limit]
 
-    output_path.parent.mkdir(parents=True, exist_ok=True)
-    with output_path.open("w", encoding="utf-8") as f:
-        for row in pending:
-            f.write(json.dumps(row, ensure_ascii=False))
-            f.write("\n")
+    atomic_write_jsonl(output_path, pending)
     return len(pending)
 
 
@@ -252,14 +304,15 @@ def _apply_disable_base_entry(
     return {"disabled_count": disabled_count, "op": "disable_base_entry"}
 
 
-def apply_review_decisions(
+def _apply_review_decisions_unlocked(
     data_dir: Path,
     decisions_path: Path,
     *,
     dry_run: bool = False,
     owner: str = DEFAULT_REVIEW_OWNER,
 ) -> dict[str, Any]:
-    ensure_review_ids(data_dir)
+    _recover_transaction_unlocked(data_dir)
+    _ensure_review_ids_unlocked(data_dir)
 
     queue_rows = load_jsonl(_queue_path(data_dir))
     lexicon_rows = load_jsonl(_lexicon_path(data_dir))
@@ -340,14 +393,36 @@ def apply_review_decisions(
     if dry_run:
         return summary
 
-    write_jsonl(_queue_path(data_dir), queue_rows)
-    write_jsonl(_lexicon_path(data_dir), lexicon_rows)
-
-    if audit_rows:
-        audit_path = _audit_path(data_dir)
-        with audit_path.open("a", encoding="utf-8") as f:
-            for row in audit_rows:
-                f.write(json.dumps(row, ensure_ascii=False))
-                f.write("\n")
+    existing_audit_rows = load_jsonl(_audit_path(data_dir))
+    _commit_transaction_unlocked(
+        data_dir,
+        {
+            _queue_path(data_dir).name: queue_rows,
+            _lexicon_path(data_dir).name: lexicon_rows,
+            _audit_path(data_dir).name: existing_audit_rows + audit_rows,
+        },
+    )
 
     return summary
+
+
+def apply_review_decisions(
+    data_dir: Path,
+    decisions_path: Path,
+    *,
+    dry_run: bool = False,
+    owner: str = DEFAULT_REVIEW_OWNER,
+) -> dict[str, Any]:
+    """Apply a decision batch under one cross-process lock.
+
+    Full-file updates use atomic replacement; the lock
+    prevents concurrent reviewers from overwriting each other's snapshots.
+    """
+
+    with exclusive_file_lock(data_dir / ".review_queue.lock"):
+        return _apply_review_decisions_unlocked(
+            data_dir,
+            decisions_path,
+            dry_run=dry_run,
+            owner=owner,
+        )

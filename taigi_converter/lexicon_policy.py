@@ -97,6 +97,30 @@ def is_sentence_manual_override(entry: Any) -> bool:
     )
 
 
+def runtime_layer_rank(entry: Any) -> int:
+    """Return the actual precedence layer used by runtime candidate selection."""
+
+    tier = getattr(entry, "tier", None)
+    level = getattr(entry, "level", None)
+    if tier == "blocked":
+        return 0
+    if is_sentence_manual_override(entry):
+        return 1
+    if is_trusted_manual_entry(entry):
+        return 2
+    if tier == "core" and level in {"phrase", "sentence"}:
+        return 3
+    if tier == "domain" and level in {"phrase", "sentence"}:
+        return 4
+    if tier == "base" and level in {"phrase", "sentence"}:
+        return 5
+    if is_machine_generated_override(entry) and level in {"phrase", "sentence"}:
+        return 6
+    if level == "char":
+        return 7
+    return 99
+
+
 def is_noop_manual_hotfix(entry: Any) -> bool:
     return (
         getattr(entry, "tier", None) == "manual_hotfix"

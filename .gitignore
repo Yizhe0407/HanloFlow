@@ -30,3 +30,8 @@ data/review_batch1_records.jsonl
 # Claude Code 本地設定（個人，不 commit）
 .claude/settings.local.json
 CLAUDE.local.md
+
+# Persistent process-lock and recovery files
+**/.artifact-build.lock
+**/.review_queue.lock
+**/.review_transaction.json

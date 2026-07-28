@@ -3,17 +3,17 @@ from __future__ import annotations
 import hashlib
 import json
 import re
+import threading
 import time
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-from .artifact_compiler import ensure_runtime_ready
-from .lexicon_policy import is_machine_generated_override, is_sentence_manual_override, is_trusted_manual_entry
+from .artifact_compiler import ARTIFACT_FILES, COMPILER_VERSION, MANIFEST_VERSION, ensure_runtime_ready
+from .lexicon_policy import runtime_layer_rank
 from .models import PASS_ORDER, ConversionResult, LexiconEntry, MatchTrace, RuleEntry, RuleTrace
 from .normalize import normalize_text
 from .review_queue import append_review_item
-
 
 BASE_DIR = Path(__file__).resolve().parent
 DATA_DIR = BASE_DIR / "data"
@@ -45,28 +45,135 @@ class RuntimeRule:
     required_literal: str | None
 
 
+class _ArtifactGenerationMismatch(RuntimeError):
+    pass
+
+
 class TaigiConverter:
+    ARTIFACT_LOAD_RETRIES = 60
+    ARTIFACT_RETRY_INTERVAL_SECONDS = 0.05
+
+    _runtime_cache: dict[tuple[str, str], dict[str, Any]] = {}
+    _runtime_cache_lock = threading.RLock()
+
     def __init__(
         self,
         data_dir: Path | str | None = None,
         *,
         fail_on_mask: bool = False,
-        auto_prepare: bool = True,
+        auto_prepare: bool = False,
+        source_data_dir: Path | str | None = None,
+        review_data_dir: Path | str | None = None,
     ):
         self.data_dir = Path(data_dir) if data_dir else DATA_DIR
         self.artifact_dir = self.data_dir / "artifacts"
+        self.review_data_dir = Path(review_data_dir) if review_data_dir is not None else None
 
         if auto_prepare:
-            ensure_runtime_ready(self.data_dir, fail_on_mask=fail_on_mask)
+            source_dir = Path(source_data_dir) if source_data_dir else self.data_dir
+            ensure_runtime_ready(
+                source_dir,
+                output_data_dir=self.data_dir,
+                fail_on_mask=fail_on_mask,
+            )
 
-        self._load_artifacts()
+        manifest_path = self.artifact_dir / "manifest.json"
+        last_mismatch: Exception | None = None
+        for _ in range(self.ARTIFACT_LOAD_RETRIES):
+            if not manifest_path.exists():
+                raise FileNotFoundError(
+                    f"找不到 runtime artifacts: {manifest_path}。"
+                    "請先執行 scripts/build_runtime_artifacts.py。"
+                )
+            manifest_bytes = manifest_path.read_bytes()
+            artifact_root = str(self.artifact_dir.resolve())
+            cache_key = (artifact_root, hashlib.sha256(manifest_bytes).hexdigest())
+            with self._runtime_cache_lock:
+                cached = self._runtime_cache.get(cache_key)
+            if cached is not None:
+                self.__dict__.update(cached)
+                self.data_dir = Path(data_dir) if data_dir else DATA_DIR
+                self.artifact_dir = self.data_dir / "artifacts"
+                self.review_data_dir = Path(review_data_dir) if review_data_dir is not None else None
+                return
 
-    def _load_artifacts(self) -> None:
-        entry_table = self._read_json(self.artifact_dir / "entry_table.json")
-        phrase_trie_doc = self._read_json(self.artifact_dir / "phrase_trie.json")
-        char_map_doc = self._read_json(self.artifact_dir / "char_map.json")
-        rule_plan = self._read_json(self.artifact_dir / "rule_plan.json")
-        override_index = self._read_json(self.artifact_dir / "override_index.json")
+            try:
+                self._load_artifacts(manifest_bytes)
+            except _ArtifactGenerationMismatch as exc:
+                last_mismatch = exc
+                time.sleep(self.ARTIFACT_RETRY_INTERVAL_SECONDS)
+                continue
+
+            runtime_state = {
+                key: value
+                for key, value in self.__dict__.items()
+                if key not in {"data_dir", "artifact_dir", "review_data_dir"}
+            }
+            with self._runtime_cache_lock:
+                # Keep only the newest generation for each artifact directory;
+                # repeated development rebuilds must not leak full runtimes.
+                stale_keys = [key for key in self._runtime_cache if key[0] == artifact_root]
+                for stale_key in stale_keys:
+                    self._runtime_cache.pop(stale_key, None)
+                self._runtime_cache[cache_key] = runtime_state
+            return
+
+        detail = f"：{last_mismatch}" if last_mismatch is not None else ""
+        raise RuntimeError(
+            "runtime artifacts 正在更新或內容不一致；請等待建置完成後重試" + detail
+        ) from last_mismatch
+
+    def _load_artifacts(self, manifest_bytes: bytes) -> None:
+        try:
+            manifest = json.loads(manifest_bytes)
+        except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+            raise RuntimeError("runtime manifest 不是有效 JSON") from exc
+        manifest_version = manifest.get("v", manifest.get("version"))
+        compiler_version = manifest.get("cv", manifest.get("compiler_version"))
+        source_digest = manifest.get("sd", manifest.get("source_digest"))
+        if manifest_version != MANIFEST_VERSION or compiler_version != COMPILER_VERSION:
+            raise RuntimeError(
+                "runtime artifacts 版本不相容；"
+                "請重新執行 scripts/build_runtime_artifacts.py"
+            )
+        if (
+            not isinstance(source_digest, str)
+            or len(source_digest) != 64
+            or any(ch not in "0123456789abcdef" for ch in source_digest)
+        ):
+            raise RuntimeError("runtime manifest 缺少有效的 source_digest")
+
+        artifact_hashes = manifest.get("ah", manifest.get("artifact_hashes"))
+        required_artifacts = ARTIFACT_FILES
+        if not isinstance(artifact_hashes, dict) or any(
+            not isinstance(artifact_hashes.get(name), str)
+            or len(artifact_hashes[name]) != 64
+            for name in required_artifacts
+        ):
+            raise RuntimeError("runtime manifest 缺少 artifact checksums")
+
+        documents: dict[str, dict[str, Any]] = {}
+        for name in required_artifacts:
+            path = self.artifact_dir / name
+            try:
+                payload = path.read_bytes()
+            except FileNotFoundError as exc:
+                raise _ArtifactGenerationMismatch(f"runtime artifact 暫時缺失: {path}") from exc
+            if hashlib.sha256(payload).hexdigest() != artifact_hashes[name]:
+                raise _ArtifactGenerationMismatch(f"runtime artifact checksum 不符: {path}")
+            try:
+                document = json.loads(payload)
+            except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+                raise RuntimeError(f"runtime artifact 不是有效 JSON: {path}") from exc
+            if not isinstance(document, dict):
+                raise RuntimeError(f"runtime artifact 根節點必須是 object: {path}")
+            documents[name] = document
+
+        entry_table = documents["entry_table.json"]
+        phrase_trie_doc = documents["phrase_trie.json"]
+        char_map_doc = documents["char_map.json"]
+        rule_plan = documents["rule_plan.json"]
+        override_index = documents["override_index.json"]
 
         self.entries, self.entries_by_index, self.entry_index_by_id = self._load_entry_table(entry_table)
         self.max_phrase_src_len = max(
@@ -211,7 +318,7 @@ class TaigiConverter:
 
     @staticmethod
     def _runtime_rule_id(pass_name: str, pattern: str, replacement: str) -> str:
-        raw = f"{pass_name}|{pattern}|{replacement}".encode("utf-8")
+        raw = f"{pass_name}|{pattern}|{replacement}".encode()
         return f"{RULE_ID_PREFIX}{hashlib.sha1(raw).hexdigest()[:RUNTIME_ID_SUFFIX_LEN]}"
 
     def _load_entry_table(
@@ -263,7 +370,7 @@ class TaigiConverter:
 
         entries_by_index: list[LexiconEntry] = []
         entries: dict[str, LexiconEntry] = {}
-        for entry_id, raw_row in zip(entry_ids, raw_rows):
+        for entry_id, raw_row in zip(entry_ids, raw_rows, strict=True):
             if not isinstance(raw_row, list) or len(raw_row) < 3:
                 raise ValueError("Invalid compact entry row")
             src = str(raw_row[0])
@@ -373,7 +480,7 @@ class TaigiConverter:
         if "r" in rule_plan:
             grouped_rows = rule_plan.get("r", [])
             rules_by_pass: dict[str, list[RuleEntry]] = {pass_name: [] for pass_name in PASS_ORDER}
-            for pass_name, rows in zip(PASS_ORDER, grouped_rows):
+            for pass_name, rows in zip(PASS_ORDER, grouped_rows, strict=True):
                 parsed_rules: list[RuleEntry] = []
                 for item in rows:
                     if not isinstance(item, list) or len(item) < 2:
@@ -434,24 +541,9 @@ class TaigiConverter:
         )
         return sentence_override_map, contextual_override_entry_indexes
 
-    def _layer_rank(self, entry: LexiconEntry) -> int:
-        if entry.tier == "blocked":
-            return 0
-        if is_sentence_manual_override(entry):
-            return 1
-        if is_trusted_manual_entry(entry):
-            return 2
-        if entry.tier == "core" and entry.level in {"phrase", "sentence"}:
-            return 3
-        if entry.tier == "domain" and entry.level in {"phrase", "sentence"}:
-            return 4
-        if entry.tier == "base" and entry.level in {"phrase", "sentence"}:
-            return 5
-        if is_machine_generated_override(entry) and entry.level in {"phrase", "sentence"}:
-            return 6
-        if entry.level == "char":
-            return 7
-        return 99
+    @staticmethod
+    def _layer_rank(entry: LexiconEntry) -> int:
+        return runtime_layer_rank(entry)
 
     def _candidate_key(self, candidate: Candidate) -> tuple[int, int, int, float, int, str]:
         entry = candidate.entry
@@ -1161,8 +1253,13 @@ class TaigiConverter:
         if not low_confidence:
             return
 
+        if self.review_data_dir is None:
+            raise RuntimeError(
+                "enqueue_review 需要明確設定 review_data_dir；不得寫入唯讀 runtime 目錄"
+            )
+
         append_review_item(
-            self.data_dir,
+            self.review_data_dir,
             {
                 "kind": "online_low_confidence",
                 "action": "add_override",

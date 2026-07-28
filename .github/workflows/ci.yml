@@ -1,0 +1,52 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      UV_PYTHON: ${{ matrix.python-version }}
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: "0.11.32"
+          enable-cache: true
+      - name: Install Python
+        run: uv python install ${{ matrix.python-version }}
+      - name: Install project and development tools
+        run: uv sync --frozen --extra dev --python ${{ matrix.python-version }}
+      - name: Compile Python sources
+        run: uv run python -m compileall -q taigi_converter scripts tests
+      - name: Lint
+        run: uv run ruff check taigi_converter scripts tests
+      - name: Unit tests
+        run: uv run pytest
+      - name: Rebuild runtime artifacts
+        run: uv run python scripts/build_runtime_artifacts.py --fail-on-mask
+      - name: Verify committed artifacts are current
+        run: git diff --exit-code -- taigi_converter/data/artifacts
+      - name: Full regressions
+        run: uv run python scripts/run_all_regressions.py
+      - name: Build distributions
+        run: uv run --with hatchling python -m build --no-isolation
+      - name: Verify wheel content and read-only runtime
+        run: uv run python scripts/run_package_parity_regression.py --wheel "$(find dist -name '*.whl' -print -quit)"
+      - name: Verify installed wheel console script
+        shell: bash
+        run: |
+          wheel="$(find dist -name '*.whl' -print -quit)"
+          uv venv --python "${UV_PYTHON}" .wheel-venv
+          uv pip install --python .wheel-venv/bin/python "${wheel}"
+          output="$(cd /tmp && "${GITHUB_WORKSPACE}/.wheel-venv/bin/taigi-converter" "你在做什麼？")"
+          grep -F "你咧做啥物？" <<<"${output}"

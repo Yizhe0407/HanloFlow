@@ -1,6 +1,5 @@
 import re
 
-
 _CJK_CHAR_CLASS = r"\u3400-\u9fff\uf900-\ufaff\U00020000-\U0002FA1F"
 _CJK_PUNCT_CLASS = "，。！？；：、"
 _DIGITS = "零一二三四五六七八九"

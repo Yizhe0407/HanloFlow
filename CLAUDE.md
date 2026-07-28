@@ -1,49 +1,27 @@
-# Hanloflow — Claude Code 工作指引
+# HanloFlow — Claude Code 工作指引
 
-這是一個**華語 → 台語漢字**轉換器專案（hanloflow）。
+本專案是**繁體華語 → 台語漢字**轉換器。主要規範以 `AGENT.md` 為準，詞條與驗證細節見：
 
-@AGENT.md
+- `.claude/rules/curation.md`
+- `.claude/rules/validation.md`
+- `.claude/rules/progress.md`
 
-@.claude/rules/progress.md
-
-## 常用指令速查
+## 快速入口
 
 ```bash
-# 單句轉換
 python3 app.py "你在做什麼？"
-
-# 附 trace
 python3 app.py --trace "你在做什麼？"
-
-# 重編 artifacts（改完資料後必跑）
-python3 scripts/build_runtime_artifacts.py --data-dir data
-
-# 語法健康檢查
-python3 -m py_compile artifact_compiler.py converter.py app.py scripts/build_runtime_artifacts.py
-
-# Regression tests
-python3 scripts/run_bus_regression.py
-python3 scripts/run_medical_regression.py
-python3 scripts/run_transport_regression.py
-python3 scripts/run_conversation_regression.py
-python3 scripts/run_restaurant_regression.py
-python3 scripts/run_shopping_regression.py
-python3 scripts/run_hotel_regression.py
-python3 scripts/run_taxi_regression.py
-python3 scripts/run_bank_regression.py
-python3 scripts/run_school_regression.py
-python3 scripts/run_family_regression.py
-python3 scripts/run_workplace_regression.py
-python3 scripts/run_package_parity_regression.py
+python3 scripts/build_runtime_artifacts.py --fail-on-mask
+python3 scripts/run_all_regressions.py
+uv run pytest
 ```
 
-## 資料修正優先順序
+## 重要限制
 
-1. `data/lexicon_entries.jsonl` — 最常改的地方，優先調整詞條
-2. `data/rule_entries.jsonl` — 確認 pattern 夠穩定再動
-3. **不要手動編輯** `data/artifacts/*`（由 build script 生成）
+- 只在 `taigi_converter/` 實作正式程式。
+- 只在 `data/` 編輯 source data。
+- `taigi_converter/data/artifacts/` 必須由 build script 產生。
+- 一般 runtime 不得寫入安裝目錄或自動編譯。
+- 修改資料、compiler、converter、封裝設定後，需跑 `AGENT.md` 的完整完成定義。
 
-## 回應語言
-
-除非使用者明確要求，一律用**繁體中文**回應。
-程式碼、指令、檔案路徑、識別符保持原形。
+除非使用者另有要求，一律使用繁體中文回覆。

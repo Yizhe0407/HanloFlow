@@ -60,7 +60,7 @@ print('lx_' + hashlib.sha1(raw).hexdigest()[:12])
 
 ## Round 編號慣例
 
-- 目前最新：`round463`，下一個新增用 `round464`
+- 目前資料最高為 `round523`；新增前先從 source data 重新查最大 round，再使用下一號，勿只依文件猜測
 - `source` 格式：`curation:round<N>_<英文描述>`，例如 `curation:round112_daily_speech_refresh`
 - `updated_by` 格式：`curation_round<N>_codex`
 - 每次新增一批相關詞條共用同一個 round 號，不同主題用不同 round

@@ -26,7 +26,7 @@ class LexiconEntry:
     updated_at: str = ""
 
     @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> "LexiconEntry":
+    def from_dict(cls, data: dict[str, Any]) -> LexiconEntry:
         return cls(
             entry_id=data["entry_id"],
             src=data["src"],
@@ -64,7 +64,7 @@ class RuleEntry:
     note: str = ""
 
     @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> "RuleEntry":
+    def from_dict(cls, data: dict[str, Any]) -> RuleEntry:
         return cls(
             rule_id=data["rule_id"],
             pass_name=data["pass_name"],

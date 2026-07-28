@@ -1,31 +1,23 @@
-# taigi-converter（華語 -> 台語漢字）
+# taigi-converter（HanloFlow）
 
-將繁體中文轉換為台語漢字/漢羅的 Python 套件，內建詞典、規則與 runtime artifacts 編譯流程。
+確定性、離線的**繁體華語 → 台語漢字**轉換器。核心 runtime 只讀取預先編譯的 JSON artifacts，不在匯入或初始化時修改安裝目錄。
 
 ## 安裝
 
 ```bash
-# 從 GitHub 安裝
-pip install git+https://github.com/Yizhe0407/HanloFlow.git
-
-# 或用 uv
-uv add "taigi-converter @ git+https://github.com/Yizhe0407/HanloFlow.git"
-
-# 本機開發（editable，改完即時生效）
-pip install -e /path/to/HanloFlow
-uv add --editable /path/to/HanloFlow
+pip install "taigi-converter @ git+https://github.com/Yizhe0407/HanloFlow.git"
 ```
 
-## 更新
+核心轉換器沒有第三方 runtime dependency。若要接 Taibun 羅馬字整合，可安裝 optional extra：
 
 ```bash
-# git URL 安裝的用戶：pull 最新 commit
-pip install --upgrade git+https://github.com/Yizhe0407/HanloFlow.git
+pip install "taigi-converter[taibun] @ git+https://github.com/Yizhe0407/HanloFlow.git"
+```
 
-# uv 用戶
-uv sync --upgrade-package taigi-converter
+本機開發建議使用 `uv`：
 
-# editable 本機安裝的用戶：不需任何指令，改完直接生效
+```bash
+uv sync --extra dev
 ```
 
 ## Python API
@@ -33,79 +25,123 @@ uv sync --upgrade-package taigi-converter
 ```python
 from taigi_converter import TaigiConverter
 
-c = TaigiConverter()
+converter = TaigiConverter()  # 建議重用；後續 instance 會共用已驗證的 runtime cache
+print(converter.convert("你在做什麼？"))
+# 你咧做啥物？
 
-# 基本轉換（回傳台語漢羅字串）
-print(c.convert("你在做什麼？"))
-# -> 你咧做啥物？
+result = converter.convert("公車到站了", trace=True)
+print(result.output)
+print(result.matches)
+print(result.rules_applied)
+```
 
-print(c.convert("公車到站了"))
-# -> 公車到站矣
+保留原始空白排版：
+
+```python
+converter.convert(text, profile={"preserve_spacing": True})
 ```
 
 ## CLI
 
+安裝後：
+
 ```bash
-# 單句轉換
+taigi-converter "你在做什麼？"
+taigi-converter --trace "你在做什麼？"
+taigi-converter --explain "你在做什麼？"
+taigi-converter --preserve-spacing "  你   好  "
+taigi-converter --enqueue-review "待確認的輸入"
+```
+
+`--enqueue-review` 不會寫入 wheel 或 `site-packages`。CLI 預設寫到使用者 state 目錄；可用
+`--review-data-dir` 或 `TAIGI_CONVERTER_STATE_DIR` 明確指定。Python API 若要 enqueue，必須傳入獨立的可寫目錄：
+
+```python
+converter = TaigiConverter(review_data_dir="var/taigi-review")
+converter.convert(text, profile={"enqueue_review": True, "owner": "service"})
+```
+
+Repo 內也可執行相容入口：
+
+```bash
 python3 app.py "你在做什麼？"
-
-# 輸出完整 trace（JSON）
-python3 app.py --trace "你在做什麼？"
-
-# 人類可讀模式
-python3 app.py --explain "你在做什麼？"
-
-# 互動模式
-python3 app.py
 ```
 
-## 字典與規則維護
+## 專案架構與單一來源
 
-先判斷要改的是哪一層：
+```text
+taigi_converter/                   # 唯一正式 Python 實作
+  data/artifacts/*.json            # wheel/runtime 唯一資料；唯讀、已編譯
+data/                              # 唯一原始資料來源，不放進 wheel
+  lexicon_entries.jsonl
+  rule_entries.jsonl
+  core_lexicon.json
+  char_verified_allowlist.txt
+scripts/
+  build_runtime_artifacts.py
+  regression_runner.py
+  run_all_regressions.py
+  run_package_parity_regression.py
+```
 
-| 檔案 | 用途 | 適合處理的問題 |
-|---|---|---|
-| `data/core_lexicon.json` | 核心高優先級常用詞 | 代名詞、疑問詞、位置詞、固定常用說法 |
-| `data/lexicon_entries.jsonl` | 主詞典，含人工詞條與停用紀錄 | 單詞、片語、整句翻錯，且需要精準指定轉法 |
-| `data/rule_entries.jsonl` | regex/literal 規則 | 同一類句型反覆轉錯，需要批次修正 |
-| `data/char_verified_allowlist.txt` | 保護詞與 char 驗證白名單 | 詞不該被拆開、短詞或 regex 不該誤傷 |
+根目錄的 `converter.py`、`artifact_compiler.py` 等檔案只保留舊 import 的相容 wrapper；新程式一律從 `taigi_converter` 匯入。
 
-建議順序：
+## Runtime 與 artifacts
 
-1. 單一句子或片語錯誤，先查 `data/lexicon_entries.jsonl`。
-2. 高頻基礎詞要固定轉法，再查 `data/core_lexicon.json`。
-3. 同一種語法或句型反覆出錯，才改 `data/rule_entries.jsonl`。
-4. 詞被拆壞或專有名詞被誤改，再補 `data/char_verified_allowlist.txt`。
+- 一般 `TaigiConverter()` **不會**自動重編資料，也不會寫入 site-packages。
+- manifest 以 compiler version、source SHA-256 與每個 artifact 的 SHA-256 驗證完整性。開發模式會重建損毀或缺失的 artifact。
+- 建置時先替換資料檔，最後原子替換 manifest；reader 若撞到建置中的混合世代會重試，不會靜默載入半套資料。
+- 開發工具需要自動準備時，才明確使用 `auto_prepare=True` 並分開指定 source/output：
 
-不要直接手改 `data/artifacts/*`。那是編譯後產物，來源資料變更後重建即可。
+```python
+TaigiConverter(
+    data_dir="build/runtime-data",
+    auto_prepare=True,
+    source_data_dir="data",
+)
+```
 
-## 重編 artifacts
+## 修改詞典或規則
 
-修改 `data/core_lexicon.json`、`data/lexicon_entries.jsonl`、`data/rule_entries.jsonl` 或 `data/char_verified_allowlist.txt` 後都要重編：
+1. 只修改 `data/` 下的 source data。
+2. 不手動修改 `taigi_converter/data/artifacts/*.json`。
+3. 重建並啟用衝突檢查：
 
 ```bash
-python3 scripts/build_runtime_artifacts.py --data-dir data
+python3 scripts/build_runtime_artifacts.py --fail-on-mask
 ```
 
-## 專案結構
+Compiler 會 fail-fast 檢查 schema、重複 ID、重複 rule pattern、regex 語法，以及同順位卻指向不同 target 的 active 詞條。
 
-```
-taigi_converter/          ← 可安裝的 Python 套件
-├── __init__.py           ← 對外只需 from taigi_converter import TaigiConverter
-├── converter.py          ← 轉換核心
-├── pipeline.py           ← 函式管線
-├── artifact_compiler.py  ← 詞條/規則編譯器
-├── models.py             ← 資料模型
-├── normalize.py          ← 正規化
-├── lexicon_policy.py     ← 詞條信任策略
-├── review_queue.py       ← 低信心回填佇列
-└── data/
-    ├── lexicon_entries.jsonl  ← 詞條主資料
-    ├── rule_entries.jsonl     ← 規則主資料
-    └── artifacts/             ← 執行期編譯產物
-app.py                    ← CLI 入口（不需安裝直接執行）
-scripts/                  ← 工具腳本
-docs/                     ← 開發文件
+## 驗證
+
+```bash
+# 語法、lint、unit tests
+python3 -m compileall -q taigi_converter scripts tests
+uv run ruff check taigi_converter scripts tests
+uv run pytest
+
+# 4,179 筆 exact-match regressions
+python3 scripts/run_all_regressions.py
+
+# 確認 artifacts 可重現
+python3 scripts/build_runtime_artifacts.py --fail-on-mask
+git diff --exit-code -- taigi_converter/data/artifacts
+
+# wheel 與唯讀 runtime 驗證
+uv run --with hatchling python -m build --no-isolation
+python3 scripts/run_package_parity_regression.py --wheel dist/taigi_converter-0.1.0-py3-none-any.whl
 ```
 
-> 若你是接手的 AI/code agent，先看 `AGENTS.md`。
+單一情境 runner 仍可直接執行，並支援 `--category`、`--rounds`、`--fail-fast` 等參數。
+
+## Review queue 一致性
+
+Review queue 使用作業系統管理的跨 process advisory lock；程序異常退出時鎖會自動釋放，不使用有 stale-reclaim 競態的刪檔式鎖。append 採單筆完整寫入與 `fsync`。批次決策會在同一把鎖下更新 queue、lexicon、audit，並透過 durable transaction journal 在程序中斷後自動重播，避免遺失已接受的決策。runtime 與 review state 必須分離，避免嘗試寫入唯讀安裝目錄。
+
+## 維護文件
+
+- `AGENT.md`：工作流程與必跑驗證
+- `.claude/rules/curation.md`：詞條策略
+- `.claude/rules/validation.md`：驗證規範
+- `.claude/rules/progress.md`：目前狀態摘要

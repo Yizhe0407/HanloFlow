@@ -1,46 +1,35 @@
-# 驗證流程規則
+# 驗證規範
 
-每次修改資料後，**必須**依序執行以下步驟。
-
-## 標準驗證流程
+## 必跑順序
 
 ```bash
-# 1. 重編 artifacts
-python3 scripts/build_runtime_artifacts.py --data-dir data
-
-# 2. 語法健康檢查
-python3 -m py_compile artifact_compiler.py converter.py app.py scripts/build_runtime_artifacts.py
-
-# 3. 測試目標句子
-python3 app.py "原本失敗的句子"
-
-# 4. Smoke test（至少跑這四種）
-python3 app.py "短語本身"
-python3 app.py "包含短語的短句"
-python3 app.py "包含短語的長句，帶標點。"
-python3 app.py "結合兩個近期新增短語的句子"
+python3 scripts/build_runtime_artifacts.py --fail-on-mask
+python3 -m compileall -q taigi_converter scripts tests
+uv run ruff check taigi_converter scripts tests
+uv run pytest
+python3 scripts/run_all_regressions.py
 ```
 
-## Regression Tests（重要改動後跑）
+修改 package、runtime loader、compiler、artifact 格式或 `pyproject.toml` 時，另跑：
 
 ```bash
-python3 scripts/run_bus_regression.py
-python3 scripts/run_medical_regression.py
-python3 scripts/run_transport_regression.py
+uv run --with hatchling python -m build --no-isolation
+python3 scripts/run_package_parity_regression.py --wheel dist/taigi_converter-0.1.0-py3-none-any.whl
 ```
 
-## 效能守則
+## 驗收條件
 
-- 暖路徑（warm-path）轉換需 < 0.05 秒
-- 避免在 runtime 增加重計算邏輯
-- 詞條資料調整比演算法改動更安全
+- compiler：schema、duplicate ID/pattern、regex、同順位 target conflict 全部通過。
+- artifacts：重建可重現；manifest source digest 與逐檔 checksum 完整。
+- unit tests：唯讀 runtime、cache、trace、spacing、review queue 併發與 journal recovery 全綠。
+- regressions：12 suites、4,179 cases，exact match 0 failures。
+- wheel：包含六個 runtime JSON，不包含四份約 10 MB source data。
+- isolated runtime：repo 外、唯讀 package tree 可初始化並完成全部 parity cases。
+- Git diff：只能保留本次有意變更；不得混入 `__pycache__`、build、dist 或暫存 lock/journal。
 
-## Debug 工具
+## 資料變更注意事項
 
-```bash
-# 取得 trace JSON
-python3 app.py --trace "問題句子"
-
-# 人類可讀 explain
-python3 app.py --explain "問題句子"
-```
+- 不用整份 JSONL reformat；只改必要行，降低 review 噪音。
+- 停用詞條而非刪除，保留 `updated_by`、`updated_at` 與原因。
+- source data 改完只重建 package artifacts，不再維護第二份 source data。
+- regression case 應放在對應 suite；runner 邏輯集中於 `scripts/regression_runner.py`。

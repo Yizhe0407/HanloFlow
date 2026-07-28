@@ -1,53 +1,59 @@
-# Hanloflow 工作指引
+# HanloFlow 工作指引
 
-這是一個**華語 → 台語漢字**轉換器專案（hanloflow）。
+HanloFlow 是**繁體華語 → 台語漢字**的確定性轉換器。除非使用者明確要求，回覆一律使用繁體中文；程式碼、識別符與路徑維持原文。
 
-@AGENT.md
+## 單一來源原則
 
-@.claude/rules/progress.md
+- 正式程式碼：`taigi_converter/`
+- 原始資料：`data/`
+- 可發布 runtime：`taigi_converter/data/artifacts/`
+- 根目錄同名 Python 檔只做 backward-compatible wrapper，不新增實作。
+- 不複製 source data 到 package，不手動修改 artifacts。
 
-## 常用指令速查
+## 常用指令
 
 ```bash
-# 單句轉換
 python3 app.py "你在做什麼？"
-
-# 附 trace
 python3 app.py --trace "你在做什麼？"
 
-# 重編 artifacts（改完資料後必跑）
-python3 scripts/build_runtime_artifacts.py --data-dir data
+python3 scripts/build_runtime_artifacts.py --fail-on-mask
+python3 -m compileall -q taigi_converter scripts tests
+uv run ruff check taigi_converter scripts tests
+uv run pytest
+python3 scripts/run_all_regressions.py
 
-# 語法健康檢查
-python3 -m py_compile artifact_compiler.py converter.py app.py scripts/build_runtime_artifacts.py
-
-# Regression tests
-python3 scripts/run_bus_regression.py
-python3 scripts/run_medical_regression.py
-python3 scripts/run_transport_regression.py
-python3 scripts/run_conversation_regression.py
-python3 scripts/run_restaurant_regression.py
-python3 scripts/run_shopping_regression.py
-python3 scripts/run_hotel_regression.py
-python3 scripts/run_taxi_regression.py
-python3 scripts/run_bank_regression.py
-python3 scripts/run_school_regression.py
-python3 scripts/run_family_regression.py
-python3 scripts/run_workplace_regression.py
-python3 scripts/run_package_parity_regression.py
+uv run --with hatchling python -m build --no-isolation
+python3 scripts/run_package_parity_regression.py --wheel dist/taigi_converter-0.1.0-py3-none-any.whl
 ```
 
-## 資料修正優先順序
+## 資料修改優先順序
 
-1. `data/lexicon_entries.jsonl` — 最常改的地方，優先調整詞條
-   - 固定句型或常見說法：優先補 `sentence` 或長 `phrase`
-   - 可重用穩定片段：補 `phrase`，這是日常優化的主要層級
-   - 單字 `char` 最後才補；影響面最大，容易誤傷地名、人名與複合詞
-2. `data/rule_entries.jsonl` — 只有多句共享同一個穩定文法模式時才動
-3. **不要手動編輯** `data/artifacts/*`（由 build script 生成）
-4. 修改根目錄 `data/` 後，同步 `taigi_converter/data/` 並重編兩邊 artifacts
+1. `data/lexicon_entries.jsonl`
+   - 可重用穩定片段優先用 `phrase`
+   - 高耦合完整句才用 `sentence`
+   - `char` 影響面最大，最後才用
+2. `data/rule_entries.jsonl`
+   - 只有多句共享同一穩定文法模式時才新增
+3. 修改資料後必須重建 artifacts 並跑完整 regressions。
 
-## 回應語言
+## Runtime 原則
 
-除非使用者明確要求，一律用**繁體中文**回應。
-程式碼、指令、檔案路徑、識別符保持原形。
+- 正常 runtime 必須唯讀，`TaigiConverter()` 不得隱式編譯或寫入 package。
+- 只允許開發/build 工具明確使用 `auto_prepare=True`。
+- manifest/compiler/source/artifact checksum 不符必須 fail-fast 或等待一致世代，不能容忍半套資料。
+- 重用 converter；runtime cache 不可因轉換操作被 mutation，也不可快取 instance-specific 的 review 路徑。
+- Review queue 必須使用獨立可寫 state 目錄，不得回寫 package runtime。
+
+## 完成定義
+
+涉及程式或資料的工作，在回報完成前至少執行：
+
+1. `python3 scripts/build_runtime_artifacts.py --fail-on-mask`
+2. `python3 -m compileall -q taigi_converter scripts tests`
+3. `uv run ruff check taigi_converter scripts tests`
+4. `uv run pytest`
+5. `python3 scripts/run_all_regressions.py`
+6. 若動到 package/runtime：建 wheel 並執行 package parity/read-only 驗證
+7. 重建後確認 tracked artifacts 沒有未解釋的 diff
+
+不得只跑單一 smoke test後宣稱全部完成。

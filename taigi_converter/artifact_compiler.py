@@ -2,15 +2,22 @@ from __future__ import annotations
 
 import hashlib
 import json
+import math
 import re
 from collections import Counter
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
-from .lexicon_policy import VALID_TRUSTS, is_sentence_manual_override, is_trusted_manual_entry, runtime_exclusion_reason
+from .io_utils import atomic_write_json, atomic_write_jsonl, atomic_write_text, exclusive_file_lock
+from .lexicon_policy import (
+    VALID_TRUSTS,
+    is_sentence_manual_override,
+    is_trusted_manual_entry,
+    runtime_exclusion_reason,
+    runtime_layer_rank,
+)
 from .models import PASS_ORDER, TIER_ORDER, LexiconEntry, RuleEntry
-
 
 BASE_DIR = Path(__file__).resolve().parent
 DATA_DIR = BASE_DIR / "data"
@@ -20,6 +27,20 @@ CHAR_ALLOWLIST_FILE = "char_verified_allowlist.txt"
 RUNTIME_FILTER_CORE_IDENTITY_PROTECTED = "core_identity_protected_term"
 RUNTIME_FILTER_IDENTITY_PASSTHROUGH_MASKED = "identity_passthrough_masked"
 LEXICON_STAGE = "split_char_after_rules"
+COMPILER_VERSION = 3
+MANIFEST_VERSION = 3
+SOURCE_FILES = ("lexicon_entries.jsonl", "rule_entries.jsonl", CORE_LEXICON_FILE, CHAR_ALLOWLIST_FILE)
+ARTIFACT_FILES = (
+    "entry_table.json",
+    "phrase_trie.json",
+    "char_map.json",
+    "rule_plan.json",
+    "override_index.json",
+)
+VALID_LEVELS = {"sentence", "phrase", "char"}
+VALID_STATUSES = {"active", "disabled"}
+VALID_RULE_TYPES = {"literal", "regex"}
+VALID_CONTEXT_FIELDS = {"left_regex", "right_regex", "full_regex", "left_literal", "right_literal"}
 
 TIER_INDEX = {tier: i for i, tier in enumerate(TIER_ORDER)}
 PASS_INDEX = {name: i for i, name in enumerate(PASS_ORDER)}
@@ -41,7 +62,8 @@ RUNTIME_CONTEXT_RIGHT_REGEX = "r"
 RUNTIME_CONTEXT_LEFT_LITERAL = "l"
 MANIFEST_SHORT_KEYS = {
     "version": "v",
-    "generated_at": "g",
+    "compiler_version": "cv",
+    "source_digest": "sd",
     "entry_count": "e",
     "runtime_entry_count": "re",
     "runtime_excluded_entry_count": "rx",
@@ -58,12 +80,13 @@ MANIFEST_SHORT_KEYS = {
     "lexicon_stage": "ls",
     "core_identity_protected_entry_count": "ci",
     "identity_passthrough_protected_entry_count": "ip",
+    "artifact_hashes": "ah",
 }
 MANIFEST_LONG_KEYS = {short_key: long_key for long_key, short_key in MANIFEST_SHORT_KEYS.items()}
 
 
 def _now_iso() -> str:
-    return datetime.now(timezone.utc).isoformat()
+    return datetime.now(UTC).isoformat()
 
 
 def _read_json(path: Path) -> Any:
@@ -72,12 +95,7 @@ def _read_json(path: Path) -> Any:
 
 
 def _write_json(path: Path, data: Any, *, indent: int | None = 2) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    with path.open("w", encoding="utf-8") as f:
-        if indent is None:
-            json.dump(data, f, ensure_ascii=False, separators=(",", ":"))
-        else:
-            json.dump(data, f, ensure_ascii=False, indent=indent)
+    atomic_write_json(path, data, indent=indent, mode=0o644)
 
 
 def load_jsonl(path: Path) -> list[dict[str, Any]]:
@@ -85,30 +103,159 @@ def load_jsonl(path: Path) -> list[dict[str, Any]]:
     if not path.exists():
         return rows
     with path.open("r", encoding="utf-8") as f:
-        for line in f:
+        for line_number, line in enumerate(f, start=1):
             line = line.strip()
             if not line or line.startswith("#"):
                 continue
-            rows.append(json.loads(line))
+            try:
+                row = json.loads(line)
+            except json.JSONDecodeError as exc:
+                raise ValueError(f"{path}:{line_number}: JSON 格式錯誤: {exc.msg}") from exc
+            if not isinstance(row, dict):
+                raise ValueError(f"{path}:{line_number}: JSONL 每列必須是 object")
+            rows.append(row)
     return rows
 
 
 def write_jsonl(path: Path, rows: list[dict[str, Any]]) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    with path.open("w", encoding="utf-8") as f:
-        for row in rows:
-            f.write(json.dumps(row, ensure_ascii=False))
-            f.write("\n")
+    atomic_write_jsonl(path, rows)
 
+
+def _source_digest(data_dir: Path) -> str:
+    digest = hashlib.sha256()
+    digest.update(f"compiler={COMPILER_VERSION}\n".encode("ascii"))
+    for name in SOURCE_FILES:
+        path = data_dir / name
+        if not path.exists():
+            digest.update(f"{name}:missing\n".encode())
+            continue
+        digest.update(name.encode("utf-8"))
+        digest.update(b"\0")
+        digest.update(path.read_bytes())
+        digest.update(b"\0")
+    return digest.hexdigest()
+
+
+def _validate_lexicon_rows(rows: list[dict[str, Any]]) -> None:
+    errors: list[str] = []
+    for index, row in enumerate(rows, start=1):
+        prefix = f"lexicon line {index}"
+        for field in ("entry_id", "src", "level", "tier"):
+            if not isinstance(row.get(field), str) or not row.get(field):
+                errors.append(f"{prefix}: {field} 必須是非空字串")
+        if not isinstance(row.get("tgt", ""), str):
+            errors.append(f"{prefix}: tgt 必須是字串")
+        if row.get("level") not in VALID_LEVELS:
+            errors.append(f"{prefix}: level={row.get('level')!r} 不合法")
+        if row.get("level") == "char" and len(row.get("src", "")) != 1:
+            errors.append(f"{prefix}: char 詞條的 src 必須恰為一個字元")
+        if row.get("tier") not in TIER_INDEX:
+            errors.append(f"{prefix}: tier={row.get('tier')!r} 不合法")
+        if row.get("status", "active") not in VALID_STATUSES:
+            errors.append(f"{prefix}: status={row.get('status')!r} 不合法")
+        if row.get("trust") not in VALID_TRUSTS:
+            errors.append(f"{prefix}: trust={row.get('trust')!r} 不合法")
+
+        score_value = row.get("score", 0.0)
+        if isinstance(score_value, bool) or not isinstance(score_value, (int, float)):
+            errors.append(f"{prefix}: score 必須是數字")
+        else:
+            score = float(score_value)
+            if not math.isfinite(score) or not 0.0 <= score <= 1.0:
+                errors.append(f"{prefix}: score 必須是 0 到 1 的有限數字")
+
+        priority = row.get("priority", 0)
+        if isinstance(priority, bool) or not isinstance(priority, int):
+            errors.append(f"{prefix}: priority 必須是整數")
+
+        context = row.get("context")
+        if context is not None and not isinstance(context, dict):
+            errors.append(f"{prefix}: context 必須是 object 或 null")
+        elif isinstance(context, dict):
+            unknown = set(context) - VALID_CONTEXT_FIELDS
+            if unknown:
+                errors.append(f"{prefix}: context 含未知欄位 {sorted(unknown)}")
+            for field, value in context.items():
+                if not isinstance(value, str) or not value:
+                    errors.append(f"{prefix}: context.{field} 必須是非空字串")
+                    continue
+                if field.endswith("_regex"):
+                    try:
+                        re.compile(value)
+                    except re.error as exc:
+                        errors.append(f"{prefix}: context.{field} regex 無法編譯: {exc}")
+    if errors:
+        raise ValueError("詞典 schema 驗證失敗:\n" + "\n".join(errors[:50]))
+
+
+def _validate_rule_rows(rows: list[dict[str, Any]]) -> None:
+    errors: list[str] = []
+    seen_ids: set[str] = set()
+    seen_patterns: set[tuple[str, str, str]] = set()
+    for index, row in enumerate(rows, start=1):
+        prefix = f"rule line {index}"
+        for field in ("rule_id", "pass_name", "pattern"):
+            if not isinstance(row.get(field), str) or not row.get(field):
+                errors.append(f"{prefix}: {field} 必須是非空字串")
+        if not isinstance(row.get("replacement", ""), str):
+            errors.append(f"{prefix}: replacement 必須是字串")
+        if row.get("pass_name") not in PASS_INDEX:
+            errors.append(f"{prefix}: pass_name={row.get('pass_name')!r} 不合法")
+        if row.get("type", "literal") not in VALID_RULE_TYPES:
+            errors.append(f"{prefix}: type={row.get('type')!r} 不合法")
+        if not isinstance(row.get("enabled", True), bool):
+            errors.append(f"{prefix}: enabled 必須是 boolean")
+        priority = row.get("priority", 0)
+        if isinstance(priority, bool) or not isinstance(priority, int):
+            errors.append(f"{prefix}: priority 必須是整數")
+        if not isinstance(row.get("note", ""), str):
+            errors.append(f"{prefix}: note 必須是字串")
+        rule_id = row.get("rule_id")
+        if isinstance(rule_id, str):
+            if rule_id in seen_ids:
+                errors.append(f"{prefix}: rule_id={rule_id!r} 重複")
+            seen_ids.add(rule_id)
+        key = (str(row.get("pass_name")), str(row.get("type", "literal")), str(row.get("pattern")))
+        if key in seen_patterns:
+            errors.append(f"{prefix}: pass/type/pattern 重複: {key!r}")
+        seen_patterns.add(key)
+        if row.get("type", "literal") == "regex" and isinstance(row.get("pattern"), str):
+            try:
+                re.compile(_expand_rule_tokens(row["pattern"]))
+            except re.error as exc:
+                errors.append(f"{prefix}: regex 無法編譯: {exc}")
+    if errors:
+        raise ValueError("規則 schema 驗證失敗:\n" + "\n".join(errors[:50]))
+
+
+def _validate_entry_target_conflicts(entries: list[LexiconEntry]) -> None:
+    grouped: dict[tuple[Any, ...], list[LexiconEntry]] = {}
+    for entry in entries:
+        if entry.status != "active":
+            continue
+        key = (
+            entry.src,
+            runtime_layer_rank(entry),
+            entry.priority,
+            entry.score,
+        )
+        grouped.setdefault(key, []).append(entry)
+    conflicts = [items for items in grouped.values() if len({entry.tgt for entry in items}) > 1]
+    if not conflicts:
+        return
+    details = []
+    for items in conflicts[:20]:
+        details.append(f"{items[0].src!r}: " + ", ".join(f"{item.entry_id}->{item.tgt!r}" for item in items))
+    raise ValueError("詞典存在同順位但不同目標的 active 詞條:\n" + "\n".join(details))
 
 def _entry_id(src: str, tgt: str, level: str, tier: str, source: str) -> str:
-    raw = f"{src}|{tgt}|{level}|{tier}|{source}".encode("utf-8")
+    raw = f"{src}|{tgt}|{level}|{tier}|{source}".encode()
     digest = hashlib.sha1(raw).hexdigest()[:12]
     return f"lx_{digest}"
 
 
 def _rule_id(pass_name: str, pattern: str, replacement: str) -> str:
-    raw = f"{pass_name}|{pattern}|{replacement}".encode("utf-8")
+    raw = f"{pass_name}|{pattern}|{replacement}".encode()
     digest = hashlib.sha1(raw).hexdigest()[:12]
     return f"rl_{digest}"
 
@@ -254,7 +401,7 @@ def _compress_phrase_trie_node(node: dict[str, Any]) -> dict[str, Any]:
     out: dict[str, Any] = {}
     if "" in node:
         out[""] = node[""]
-    for label in sorted(key for key in node.keys() if key):
+    for label in sorted(key for key in node if key):
         child = node[label]
         merged_label = label
         merged_child = child
@@ -701,10 +848,10 @@ def detect_masked_rules(rules: list[RuleEntry]) -> list[str]:
                     continue
                 if later.pattern.startswith(earlier.pattern):
                     warnings.append(
-                        (
+
                             f"[{pass_name}] rule {earlier.rule_id} ({earlier.pattern!r} -> {earlier.replacement!r}) "
                             f"可能遮蔽 {later.rule_id} ({later.pattern!r} -> {later.replacement!r})"
-                        )
+
                     )
     return warnings
 
@@ -753,10 +900,10 @@ def detect_pipeline_conflicts(rules: list[RuleEntry]) -> list[str]:
                     and earlier.replacement != later.replacement
                 ):
                     warnings.append(
-                        (
+
                             f"[{pass_name}] rule {earlier.rule_id}（短詞 {earlier.pattern!r}）"
                             f"可能先命中，導致長詞規則 {later.rule_id}（{later.pattern!r}）失效。"
-                        )
+
                     )
                 if (
                     earlier.replacement
@@ -764,10 +911,10 @@ def detect_pipeline_conflicts(rules: list[RuleEntry]) -> list[str]:
                     and earlier.replacement != later.replacement
                 ):
                     warnings.append(
-                        (
+
                             f"[{pass_name}] rule {earlier.rule_id} 的 replacement 會觸發"
                             f" {later.rule_id}，可能形成連鎖改寫：{earlier.replacement!r}。"
-                        )
+
                     )
     return warnings
 
@@ -795,7 +942,13 @@ def _validate_unique_entry_ids(entries: list[LexiconEntry]) -> None:
     )
 
 
-def compile_runtime_artifacts(data_dir: Path = DATA_DIR, fail_on_mask: bool = False) -> dict[str, Any]:
+def _compile_runtime_artifacts_unlocked(
+    data_dir: Path = DATA_DIR,
+    fail_on_mask: bool = False,
+    *,
+    output_data_dir: Path | None = None,
+) -> dict[str, Any]:
+    source_digest_before = _source_digest(data_dir)
     lexicon_path = data_dir / "lexicon_entries.jsonl"
     rule_path = data_dir / "rule_entries.jsonl"
 
@@ -805,18 +958,9 @@ def compile_runtime_artifacts(data_dir: Path = DATA_DIR, fail_on_mask: bool = Fa
         raise FileNotFoundError("找不到 data/rule_entries.jsonl")
 
     source_rows = load_jsonl(lexicon_path)
-    invalid_trust_rows: list[str] = []
-    for idx, row in enumerate(source_rows, start=1):
-        trust = row.get("trust")
-        if trust not in VALID_TRUSTS:
-            entry_id = row.get("entry_id", f"line_{idx}")
-            invalid_trust_rows.append(f"{entry_id}:{trust!r}")
-    if invalid_trust_rows:
-        sample = ", ".join(invalid_trust_rows[:10])
-        raise ValueError(
-            "lexicon_entries.jsonl 存在非法 trust（需為 human/machine/seed）: "
-            f"{sample}"
-        )
+    _validate_lexicon_rows(source_rows)
+    rule_rows = load_jsonl(rule_path)
+    _validate_rule_rows(rule_rows)
 
     source_entries = [LexiconEntry.from_dict(row) for row in source_rows]
     allowlist_items = _load_allowlist(data_dir / CHAR_ALLOWLIST_FILE)
@@ -829,7 +973,8 @@ def compile_runtime_artifacts(data_dir: Path = DATA_DIR, fail_on_mask: bool = Fa
     )
     entries = source_entries + core_entries
     _validate_unique_entry_ids(entries)
-    rules = _expand_rules_with_tokens([RuleEntry.from_dict(row) for row in load_jsonl(rule_path)])
+    _validate_entry_target_conflicts(entries)
+    rules = _expand_rules_with_tokens([RuleEntry.from_dict(row) for row in rule_rows])
 
     runtime_entries: list[LexiconEntry] = []
     runtime_excluded: dict[str, str] = {}
@@ -892,32 +1037,9 @@ def compile_runtime_artifacts(data_dir: Path = DATA_DIR, fail_on_mask: bool = Fa
             sections.append("pipeline conflicts:\n" + "\n".join(pipeline_conflicts))
         raise ValueError("偵測到規則風險：\n" + "\n\n".join(sections))
 
-    artifacts_dir = data_dir / ARTIFACT_DIR_NAME
+    target_data_dir = output_data_dir or data_dir
+    artifacts_dir = target_data_dir / ARTIFACT_DIR_NAME
     artifacts_dir.mkdir(parents=True, exist_ok=True)
-
-    _write_json(
-        artifacts_dir / "entry_table.json",
-        entry_table_doc,
-        indent=None,
-    )
-
-    _write_json(
-        artifacts_dir / "phrase_trie.json",
-        {
-            "v": 5,
-            "t": phrase_trie,
-        },
-        indent=None,
-    )
-
-    _write_json(
-        artifacts_dir / "char_map.json",
-        {
-            "v": 2,
-            "m": _serialize_runtime_char_map(char_map, entry_index_by_id=entry_index_by_id),
-        },
-        indent=None,
-    )
 
     rules_by_pass: list[list[list[Any]]] = [[] for _ in PASS_ORDER]
     for rule in sorted_rules:
@@ -937,28 +1059,45 @@ def compile_runtime_artifacts(data_dir: Path = DATA_DIR, fail_on_mask: bool = Fa
     if pipeline_conflicts:
         rule_plan_doc["pc"] = pipeline_conflicts
 
-    _write_json(
-        artifacts_dir / "rule_plan.json",
-        rule_plan_doc,
-        indent=None,
-    )
-
-    _write_json(
-        artifacts_dir / "override_index.json",
-        {
+    artifact_documents: dict[str, Any] = {
+        "entry_table.json": entry_table_doc,
+        "phrase_trie.json": {"v": 5, "t": phrase_trie},
+        "char_map.json": {
+            "v": 2,
+            "m": _serialize_runtime_char_map(char_map, entry_index_by_id=entry_index_by_id),
+        },
+        "rule_plan.json": rule_plan_doc,
+        "override_index.json": {
             "v": 3,
             "s": _serialize_runtime_sentence_overrides(
                 sentence_override_map,
                 entry_index_by_id=entry_index_by_id,
             ),
-            "c": [entry_index_by_id[entry_id] for entry_id in contextual_override_ids if entry_id in entry_index_by_id],
+            "c": [
+                entry_index_by_id[entry_id]
+                for entry_id in contextual_override_ids
+                if entry_id in entry_index_by_id
+            ],
         },
-        indent=None,
-    )
+    }
+    artifact_texts = {
+        name: json.dumps(document, ensure_ascii=False, separators=(",", ":"))
+        for name, document in artifact_documents.items()
+    }
+    artifact_hashes = {
+        name: hashlib.sha256(text.encode("utf-8")).hexdigest()
+        for name, text in artifact_texts.items()
+    }
+
+    source_digest_after = _source_digest(data_dir)
+    if source_digest_after != source_digest_before:
+        raise RuntimeError("source data 在 artifact 建置期間發生變更；請重試")
 
     manifest = {
-        "version": 1,
-        "generated_at": _now_iso(),
+        "version": MANIFEST_VERSION,
+        "compiler_version": COMPILER_VERSION,
+        "source_digest": source_digest_after,
+        "artifact_hashes": artifact_hashes,
         "entry_count": len(entries),
         "runtime_entry_count": len(runtime_entries),
         "runtime_excluded_entry_count": len(runtime_excluded),
@@ -976,6 +1115,12 @@ def compile_runtime_artifacts(data_dir: Path = DATA_DIR, fail_on_mask: bool = Fa
         "core_identity_protected_entry_count": len(core_identity_entry_ids),
         "identity_passthrough_protected_entry_count": len(identity_passthrough_entry_ids),
     }
+
+    # Data files are replaced first and the checksummed manifest is the commit
+    # marker. Readers reject/retry any mixed generation instead of silently
+    # loading a partially rebuilt runtime.
+    for name, text in artifact_texts.items():
+        atomic_write_text(artifacts_dir / name, text, mode=0o644)
     _write_json(
         artifacts_dir / "manifest.json",
         _serialize_runtime_manifest(manifest),
@@ -985,34 +1130,89 @@ def compile_runtime_artifacts(data_dir: Path = DATA_DIR, fail_on_mask: bool = Fa
     return manifest
 
 
-def ensure_runtime_ready(data_dir: Path = DATA_DIR, fail_on_mask: bool = False) -> dict[str, Any]:
-    lexicon_entries = data_dir / "lexicon_entries.jsonl"
-    rule_entries = data_dir / "rule_entries.jsonl"
-    core_lexicon = data_dir / CORE_LEXICON_FILE
-    char_allowlist = data_dir / CHAR_ALLOWLIST_FILE
-    manifest_path = data_dir / ARTIFACT_DIR_NAME / "manifest.json"
+def _artifact_build_lock_path(target_data_dir: Path) -> Path:
+    return target_data_dir / ".artifact-build.lock"
+
+
+def compile_runtime_artifacts(
+    data_dir: Path = DATA_DIR,
+    fail_on_mask: bool = False,
+    *,
+    output_data_dir: Path | None = None,
+) -> dict[str, Any]:
+    """Compile one checksummed runtime generation under a process lock."""
+
+    target_data_dir = output_data_dir or data_dir
+    with exclusive_file_lock(_artifact_build_lock_path(target_data_dir)):
+        return _compile_runtime_artifacts_unlocked(
+            data_dir=data_dir,
+            output_data_dir=target_data_dir,
+            fail_on_mask=fail_on_mask,
+        )
+
+
+def ensure_runtime_ready(
+    data_dir: Path = DATA_DIR,
+    fail_on_mask: bool = False,
+    *,
+    output_data_dir: Path | None = None,
+) -> dict[str, Any]:
+    """Prepare development artifacts using locked, content-hash validation."""
+
+    target_data_dir = output_data_dir or data_dir
+    manifest_path = target_data_dir / ARTIFACT_DIR_NAME / "manifest.json"
+
+    def current_manifest() -> dict[str, Any]:
+        if not manifest_path.exists():
+            return {}
+        try:
+            document = _read_json(manifest_path)
+        except (OSError, UnicodeDecodeError, json.JSONDecodeError):
+            return {}
+        if not isinstance(document, dict):
+            return {}
+        return _inflate_runtime_manifest(document)
+
+    def artifact_hashes_match(candidate: dict[str, Any]) -> bool:
+        hashes = candidate.get("artifact_hashes")
+        if not isinstance(hashes, dict):
+            return False
+        for name in ARTIFACT_FILES:
+            expected_hash = hashes.get(name)
+            if not isinstance(expected_hash, str) or len(expected_hash) != 64:
+                return False
+            try:
+                payload = (target_data_dir / ARTIFACT_DIR_NAME / name).read_bytes()
+            except OSError:
+                return False
+            if hashlib.sha256(payload).hexdigest() != expected_hash:
+                return False
+        return True
 
     migrated_stats: dict[str, int] | None = None
-    if not lexicon_entries.exists():
-        migrated_stats = migrate_legacy_data(data_dir)
-    elif not rule_entries.exists():
-        write_jsonl(rule_entries, [r.to_dict() for r in default_rule_entries()])
+    with exclusive_file_lock(_artifact_build_lock_path(target_data_dir)):
+        lexicon_entries = data_dir / "lexicon_entries.jsonl"
+        rule_entries = data_dir / "rule_entries.jsonl"
+        if not lexicon_entries.exists():
+            migrated_stats = migrate_legacy_data(data_dir)
+        elif not rule_entries.exists():
+            write_jsonl(rule_entries, [rule.to_dict() for rule in default_rule_entries()])
 
-    must_compile = not manifest_path.exists()
-    if not must_compile:
-        source_mtimes = [lexicon_entries.stat().st_mtime, rule_entries.stat().st_mtime]
-        if core_lexicon.exists():
-            source_mtimes.append(core_lexicon.stat().st_mtime)
-        if char_allowlist.exists():
-            source_mtimes.append(char_allowlist.stat().st_mtime)
-        latest_source_mtime = max(source_mtimes)
-        must_compile = manifest_path.stat().st_mtime < latest_source_mtime
-
-    manifest = _inflate_runtime_manifest(_read_json(manifest_path)) if manifest_path.exists() else {}
-    if manifest and manifest.get("lexicon_stage") != LEXICON_STAGE:
-        must_compile = True
-    if must_compile:
-        manifest = compile_runtime_artifacts(data_dir=data_dir, fail_on_mask=fail_on_mask)
+        expected_digest = _source_digest(data_dir)
+        manifest = current_manifest()
+        is_current = bool(manifest) and (
+            manifest.get("version") == MANIFEST_VERSION
+            and manifest.get("compiler_version") == COMPILER_VERSION
+            and manifest.get("source_digest") == expected_digest
+            and manifest.get("lexicon_stage") == LEXICON_STAGE
+            and artifact_hashes_match(manifest)
+        )
+        if not is_current:
+            manifest = _compile_runtime_artifacts_unlocked(
+                data_dir=data_dir,
+                output_data_dir=target_data_dir,
+                fail_on_mask=fail_on_mask,
+            )
 
     if migrated_stats:
         manifest["migration"] = migrated_stats
