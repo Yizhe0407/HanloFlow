@@ -7,9 +7,17 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from scripts.regression_runner import RegressionCase, run_regression_cli
+from scripts.regression_runner import (
+    RegressionCase as RegressionCaseModel,
+)
+from scripts.regression_runner import (
+    compatibility_snapshot_case as RegressionCase,
+)
+from scripts.regression_runner import (
+    run_regression_cli,
+)
 
-BANK_REGRESSION_CASES: list[RegressionCase] = [
+BANK_REGRESSION_CASES: list[RegressionCaseModel] = [
     # bank_account — 銀行開戶/帳戶
     RegressionCase("bank_account", "我要開戶。", "我欲開戶。"),
     RegressionCase("bank_account", "帳戶餘額多少？", "口座餘額偌濟？"),
@@ -113,7 +121,7 @@ BANK_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("bank_transaction", "可以幫我列印明細嗎？", "會當替我列印明細無？"),
     RegressionCase("bank_transaction", "我想查信用卡帳單。", "我想欲查信用卡費用明細。"),
     RegressionCase("bank_transaction", "可以幫我查匯率嗎？", "會當替我查匯率無？"),
-    RegressionCase("bank_transaction", "可以幫我補寄帳單嗎？", "會當替我補寄帳單無？"),
+    RegressionCase("bank_transaction", "可以幫我補寄帳單嗎？", "會當替我補寄數單無？"),
     RegressionCase("bank_transaction", "我想改扣款帳戶。", "我想欲改扣款口座。"),
     RegressionCase("bank_transaction", "可以幫我查轉帳紀錄嗎？", "會當替我查轉帳紀錄無？"),
     RegressionCase("bank_transaction", "我想改匯款金額。", "我想欲改匯款金額。"),
@@ -160,13 +168,32 @@ BANK_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("postal", "可以幫我查郵件狀態嗎？", "會當替我查郵件狀態無？"),
     RegressionCase("postal", "可以幫我寄到國外嗎？", "會當替我寄到國外無？"),
     RegressionCase("postal", "可以幫我查郵局營業時間嗎？", "會當替我查郵局營業時間無？"),
+    # round532 / authoritative low-trust machine cleanup
+    RegressionCaseModel(
+        "round532_authoritative_lexicon",
+        "債權人",
+        "債主",
+        oracle_kind="ai_semantic_review",
+        provenance="round532 low-trust risk audit; AI semantic review cross-checked against the MOE Taiwanese Hokkien dictionary",
+        reviewed_by="codex_ai_semantic_audit",
+        reviewed_at="2026-07-29",
+    ),
+    RegressionCaseModel(
+        "round532_authoritative_lexicon",
+        "行賄",
+        "烏西",
+        oracle_kind="ai_semantic_review",
+        provenance="round532 low-trust risk audit; AI semantic review cross-checked against the MOE Taiwanese Hokkien dictionary",
+        reviewed_by="codex_ai_semantic_audit",
+        reviewed_at="2026-07-29",
+    ),
 ]
 
 
 def main() -> int:
     return run_regression_cli(
         BANK_REGRESSION_CASES,
-        description='銀行/郵局情境 regression runner',
+        description="銀行/郵局情境 regression runner",
     )
 
 

@@ -7,9 +7,17 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from scripts.regression_runner import RegressionCase, run_regression_cli
+from scripts.regression_runner import (
+    RegressionCase as RegressionCaseModel,
+)
+from scripts.regression_runner import (
+    compatibility_snapshot_case as RegressionCase,
+)
+from scripts.regression_runner import (
+    run_regression_cli,
+)
 
-SHOPPING_REGRESSION_CASES: list[RegressionCase] = [
+SHOPPING_REGRESSION_CASES: list[RegressionCaseModel] = [
     # browsing — 選購
     RegressionCase("browsing", "這個多少錢？", "這个偌濟錢？"),
     RegressionCase("browsing", "有沒有其他顏色？", "敢有其他顏色？"),
@@ -51,10 +59,22 @@ SHOPPING_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("purchase", "可以幫我查庫存門市嗎？", "會當替我查庫存門市無？"),
     # payment — 付款
     RegressionCase("payment", "請問收現金嗎？", "借問收現錢無？"),
-    RegressionCase("payment", "可以刷卡嗎？", "會當刷卡無？"),
+    RegressionCase(
+        "payment",
+        "可以刷卡嗎？",
+        "會當刷卡無？",
+        duplicate_group="cross_domain_payment_intent",
+        duplicate_reason="餐飲、購物與計程車產品面共用付款意圖，但需各自保留端到端覆蓋。",
+    ),
     RegressionCase("payment", "可以用手機支付嗎？", "會當用手機付錢無？"),
     RegressionCase("payment", "我要找零。", "我欲找錢。"),
-    RegressionCase("payment", "可以用電子支付嗎？", "會當用電子付錢無？"),
+    RegressionCase(
+        "payment",
+        "可以用電子支付嗎？",
+        "會當用電子支付無？",
+        duplicate_group="cross_domain_payment_intent",
+        duplicate_reason="餐飲、購物與計程車產品面共用付款意圖，但需各自保留端到端覆蓋。",
+    ),
     RegressionCase("payment", "可以分期付款嗎？", "會當分期付錢無？"),
     RegressionCase("payment", "有會員折扣嗎？", "有會員拍折無？"),
     RegressionCase("payment", "可以開統一編號嗎？", "會當開統一編號無？"),
@@ -134,7 +154,7 @@ SHOPPING_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("comparative", "可以給我多一點嗎？", "會當予我加一寡無？"),
     RegressionCase("comparative", "有更便宜的嗎？", "有閣較俗的無？"),
     RegressionCase("comparative", "這個比較耐用嗎？", "這个較耐用無？"),
-    RegressionCase("comparative", "有不同大小嗎？", "敢有大細無仝無？"),
+    RegressionCase("comparative", "有不同大小嗎？", "敢有寸尺無仝無？"),
     RegressionCase("comparative", "同款有別的顏色嗎？", "同款有別款顏色無？"),
     RegressionCase("comparative", "哪一個比較划算？", "佗一个較合算？"),
     # after_sales — 售後
@@ -204,13 +224,32 @@ SHOPPING_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("after_sales", "顧客請先排隊。", "人客請先排隊。"),
     RegressionCase("after_sales", "請幫顧客確認付款狀態。", "請替人客確認付款狀態。"),
     RegressionCase("after_sales", "可不可以幫顧客換貨？", "敢會當替人客換貨？"),
+    # v2 independent AI semantic audit — baseline failures promoted to development audit cases
+    RegressionCaseModel(
+        "v2_ai_semantic_audit",
+        "你要刷卡還是付現金？",
+        "你欲刷卡抑是付現錢？",
+        oracle_kind="ai_semantic_review",
+        provenance="v2 frozen evaluation audit; independent AI oracle review, then Codex root-cause verification",
+        reviewed_by="codex_and_independent_subagent",
+        reviewed_at="2026-07-28",
+    ),
+    RegressionCaseModel(
+        "v2_ai_semantic_audit",
+        "請把統一編號打在發票上。",
+        "請共統一編號拍佇發票頂面。",
+        oracle_kind="ai_semantic_review",
+        provenance="v2 frozen evaluation audit; independent AI oracle review, then Codex root-cause verification",
+        reviewed_by="codex_and_independent_subagent",
+        reviewed_at="2026-07-28",
+    ),
 ]
 
 
 def main() -> int:
     return run_regression_cli(
         SHOPPING_REGRESSION_CASES,
-        description='購物情境 regression runner',
+        description="購物情境 regression runner",
     )
 
 

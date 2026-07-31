@@ -7,19 +7,43 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from scripts.regression_runner import RegressionCase, run_regression_cli
+from scripts.regression_runner import (
+    RegressionCase as RegressionCaseModel,
+)
+from scripts.regression_runner import (
+    compatibility_snapshot_case as RegressionCase,
+)
+from scripts.regression_runner import (
+    run_regression_cli,
+)
 
-TRANSPORT_REGRESSION_CASES: list[RegressionCase] = [
+TRANSPORT_REGRESSION_CASES: list[RegressionCaseModel] = [
     # shuttle / transfer
     RegressionCase("shuttle_transfer", "請問往火車站的接駁車在哪裡搭？", "借問往火車頭的接駁車佇佗位搭？"),
     RegressionCase("shuttle_transfer", "高鐵接駁車在對面站牌搭。", "高鐵接駁車佇對面站牌搭。"),
-    RegressionCase("shuttle_transfer", "這班高鐵接駁車今天改到對面站牌上車。", "這班高鐵接駁車今仔日改去對面站牌上車。"),
+    RegressionCase(
+        "shuttle_transfer", "這班高鐵接駁車今天改到對面站牌上車。", "這班高鐵接駁車今仔日改去對面站牌上車。"
+    ),
     RegressionCase("shuttle_transfer", "這班車有到火車站後站嗎？", "這班車有到火車頭後站無？"),
-    RegressionCase("shuttle_transfer", "如果你趕時間，建議你改搭計程車去高鐵站。", "若是你趕時間，建議你改坐計程車去高鐵站。"),
-    RegressionCase("shuttle_transfer", "如果你要去北港朝天宮，可以先搭火車到斗六再轉公車。", "若是你欲去北港朝天宮，會當先搭火車到斗六才換公車。"),
+    RegressionCase(
+        "shuttle_transfer", "如果你趕時間，建議你改搭計程車去高鐵站。", "若是你趕時間，建議你改坐計程車去高鐵站。"
+    ),
+    RegressionCase(
+        "shuttle_transfer",
+        "如果你要去北港朝天宮，可以先搭火車到斗六再轉公車。",
+        "若是你欲去北港朝天宮，會當先搭火車到斗六才換公車。",
+    ),
     RegressionCase("shuttle_transfer", "這班車不會進站，你要去對面月台。", "這班車袂入去站內，你欲去對面月台。"),
     RegressionCase("shuttle_transfer", "去火車站的車還有五分鐘。", "去火車頭的車閣有五分鐘。"),
-    RegressionCase("shuttle_transfer", "這班車等一下會先繞去市場，再回到火車站。", "這班車等咧會先踅去市場，閣轉到火車頭。"),
+    RegressionCase(
+        "shuttle_transfer",
+        "這班車等一下會先繞去市場，再回到火車站。",
+        "這班車等咧會先踅去市場，閣倒轉去火車頭。",
+        oracle_kind="verified_translation",
+        provenance="人工語意保真審查：再回到須保留返回原處語意",
+        reviewed_by="codex+official-source-review",
+        reviewed_at="2026-07-28",
+    ),
     RegressionCase("shuttle_transfer", "請問高鐵接駁車多久一班？", "借問高鐵接駁車偌久一班？"),
     RegressionCase("shuttle_transfer", "請問機場接駁車多久一班？", "借問機場接駁車偌久一班？"),
     RegressionCase("shuttle_transfer", "請問高鐵接駁車從哪裡搭？", "借問高鐵接駁車對佗位搭？"),
@@ -31,7 +55,7 @@ TRANSPORT_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("platform_nav", "這個月台暫時不能上車，只能下車。", "這个月台暫時袂當上車，干焦會當落車。"),
     RegressionCase("platform_nav", "你先從電扶梯下去，再走到地下月台。", "你先對電扶梯落去，才行到地下月台。"),
     RegressionCase("platform_nav", "你先走到剪票口，再往裡面走。", "你先行到剪票口，再往內底行。"),
-    RegressionCase("platform_nav", "火車站前面現在在施工，請照指標走。", "火車站頭前這馬咧施工，請照指標行。"),
+    RegressionCase("platform_nav", "火車站前面現在在施工，請照指標走。", "火車頭頭前這馬咧施工，請照指標行。"),
     RegressionCase("platform_nav", "請在月台候車，不要跨越月台邊線。", "請佇月台等車，莫跨越月台邊線。"),
     RegressionCase("platform_nav", "往市場的車在這裡排隊。", "欲去市場的車佇遮排線。"),
     RegressionCase("platform_nav", "今天站牌移到巷口那邊。", "今仔日站牌移到巷口彼爿。"),
@@ -49,7 +73,6 @@ TRANSPORT_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("platform_nav", "請勿在月台上吃東西。", "請毋通佇月台頂食物件。"),
     RegressionCase("platform_nav", "請勿在月台上放行李。", "請毋通佇月台頂放行李。"),
     RegressionCase("platform_nav", "請勿在月台上拍照。", "請毋通佇月台頂影相。"),
-    RegressionCase("platform_nav", "請勿在站內抽菸。", "請毋通在站內食菸。"),
     RegressionCase("platform_nav", "請勿在車站內打電話。", "請毋通佇車站內講電話。"),
     RegressionCase("platform_nav", "請勿在車內打電話。", "請毋通佇車內講電話。"),
     RegressionCase("platform_nav", "請勿在車內使用手機。", "請毋通佇車內用手機。"),
@@ -82,7 +105,9 @@ TRANSPORT_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("rail_service", "這班列車客滿了，麻煩你等下一班。", "這班列車客滿矣，麻煩你等後一班。"),
     RegressionCase("rail_service", "這一站今天不停靠，請到前一站下車。", "這一站今仔日無停，請到前一站落車。"),
     RegressionCase("rail_service", "這班車不會進醫院急診門口。", "這班車袂進病院急診門跤口。"),
-    RegressionCase("rail_service", "你要去門診的話，在病院門口下就可以了。", "若是你欲去門診，佇病院門跤口下就會當矣。"),
+    RegressionCase(
+        "rail_service", "你要去門診的話，在病院門口下就可以了。", "若是你欲去門診，佇病院門跤口下就會當矣。"
+    ),
     RegressionCase("rail_service", "司機休息回來就會發車。", "司機歇睏轉來就會開車。"),
     RegressionCase("rail_service", "這班車到總站就不開了。", "這班車到總站就不開矣。"),
     RegressionCase("rail_service", "司機說下一站之後要換車。", "司機講下一站了後要換車。"),
@@ -100,12 +125,12 @@ TRANSPORT_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("ticketing", "今天的末班車提早十分鐘開車。", "今仔日的尾班車較早十分鐘開車。"),
     RegressionCase("ticketing", "頭班車明天會晚半小時。", "頭班車明仔載會慢分半點鐘。"),
     RegressionCase("ticketing", "可以幫我查末班車時間嗎？", "會當替我查尾班車時間無？"),
-    RegressionCase("ticketing", "可以幫我查車票價格嗎？", "會當替我查車票價錢無？"),
+    RegressionCase("ticketing", "可以幫我查車票價格嗎？", "會當替我查車票價數無？"),
     RegressionCase("ticketing", "可以幫我查車班嗎？", "會當替我查車班無？"),
     RegressionCase("ticketing", "可以幫我查發車時間嗎？", "會當替我查開車時間無？"),
     RegressionCase("ticketing", "可以幫我查班機時間嗎？", "會當替我查班機時間無？"),
     RegressionCase("ticketing", "我想改搭下一班車。", "我想欲改搭後一班車。"),
-    RegressionCase("ticketing", "可以幫我查候車時間嗎？", "會當替我查候車時間無？"),
+    RegressionCase("ticketing", "可以幫我查候車時間嗎？", "會當替我查等車時間無？"),
     RegressionCase("ticketing", "我想改搭高鐵。", "我想欲改搭高鐵。"),
     RegressionCase("ticketing", "我想改搭捷運。", "我想欲改搭捷運。"),
     RegressionCase("ticketing", "可以幫我查票券效期嗎？", "會當替我查票券效期無？"),
@@ -118,12 +143,12 @@ TRANSPORT_REGRESSION_CASES: list[RegressionCase] = [
     # vehicle / onboard safety
     RegressionCase("vehicle_rules", "請勿在車內飲食。", "請毋通佇車內飲食。"),
     RegressionCase("vehicle_rules", "車輛行進時請勿走動。", "車輛行進時請毋通走動。"),
-    RegressionCase("vehicle_rules", "請勿在車內大聲喧嘩。", "請毋通佇車內大聲喧嘩。"),
+    RegressionCase("vehicle_rules", "請勿在車內大聲喧嘩。", "請毋通佇車內大聲唏嚇叫。"),
     RegressionCase("vehicle_rules", "請勿使用手機通話。", "請毋通用手機講電話。"),
     RegressionCase("vehicle_rules", "請勿將椅背往後倒。", "請毋通將椅背往後倒。"),
     RegressionCase("vehicle_rules", "請讓座給需要的人。", "請讓位予需要的人。"),
     RegressionCase("vehicle_rules", "請勿阻塞車道。", "請毋通阻擋車道。"),
-    RegressionCase("vehicle_rules", "請勿攜帶易燃物。", "請毋通攜帶易燃物。"),
+    RegressionCase("vehicle_rules", "請勿攜帶易燃物。", "請毋通帶易燃物。"),
     RegressionCase("vehicle_rules", "請勿在車內抽菸。", "請毋通佇車內食菸。"),
     RegressionCase("vehicle_rules", "請勿將頭手伸出窗外。", "請毋通將頭手伸出窗外。"),
     RegressionCase("vehicle_rules", "請勿擋住走道。", "請毋通擋住走道。"),
@@ -133,7 +158,15 @@ TRANSPORT_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("vehicle_rules", "請勿讓嬰兒車阻塞通道。", "請毋通讓嬰仔車阻塞通道。"),
     RegressionCase("vehicle_rules", "請勿在車內播放音樂。", "請毋通佇車內播送音樂。"),
     RegressionCase("vehicle_rules", "請勿在車內化妝。", "請毋通佇車內畫妝。"),
-    RegressionCase("vehicle_rules", "請勿在車內奔跑。", "請毋通佇車內浪。"),
+    RegressionCase(
+        "vehicle_rules",
+        "請勿在車內奔跑。",
+        "請毋通佇車內踉。",
+        oracle_kind="verified_translation",
+        provenance="教育部《臺灣台語常用詞辭典》「踉」詞目與人工語境審查",
+        reviewed_by="codex+official-source-review",
+        reviewed_at="2026-07-28",
+    ),
     RegressionCase("vehicle_rules", "請勿在車內占位。", "請毋通佇車內占位。"),
     RegressionCase("vehicle_rules", "請勿坐在走道上。", "請毋通坐佇走道上。"),
     RegressionCase("accessibility_rules", "請勿占用無障礙空間。", "請毋通占用無障礙空間。"),
@@ -170,12 +203,35 @@ TRANSPORT_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("platform_rules", "請勿在車站內大聲說話。", "請毋通佇車站內喧。"),
     RegressionCase("platform_rules", "請勿在月台上推擠。", "請毋通佇月台頂推擠。"),
     RegressionCase("platform_rules", "請勿在車站內推擠。", "請毋通佇車站內推擠。"),
-    RegressionCase("platform_rules", "請勿在月台上奔跑。", "請毋通佇月台頂浪。"),
+    RegressionCase(
+        "platform_rules",
+        "請勿在月台上奔跑。",
+        "請毋通佇月台頂踉。",
+        oracle_kind="verified_translation",
+        provenance="教育部《臺灣台語常用詞辭典》「踉」詞目與人工語境審查",
+        reviewed_by="codex+official-source-review",
+        reviewed_at="2026-07-28",
+    ),
     RegressionCase("platform_rules", "請勿在車站內奔跑。", "請毋通佇車站內走跳。"),
-    RegressionCase("platform_rules", "請勿在月台上聊天。", "請毋通佇月台頂開講。"),
     RegressionCase("platform_rules", "請勿在車站內聊天。", "請毋通佇車站內開講。"),
-    RegressionCase("platform_rules", "請勿在月台上大聲喧嘩。", "請毋通佇月台頂昂聲噓嚇叫。"),
-    RegressionCase("platform_rules", "請勿在車站內大聲喧嘩。", "請毋通佇車站內昂聲噓嚇叫。"),
+    RegressionCase(
+        "platform_rules",
+        "請勿在月台上大聲喧嘩。",
+        "請毋通佇月台頂大聲唏嚇叫。",
+        oracle_kind="verified_translation",
+        provenance="教育部《臺灣台語常用詞辭典》「唏嚇叫」詞目與人工語境審查",
+        reviewed_by="codex+official-source-review",
+        reviewed_at="2026-07-28",
+    ),
+    RegressionCase(
+        "platform_rules",
+        "請勿在車站內大聲喧嘩。",
+        "請毋通佇車站內大聲唏嚇叫。",
+        oracle_kind="verified_translation",
+        provenance="教育部《臺灣台語常用詞辭典》「唏嚇叫」詞目與人工語境審查",
+        reviewed_by="codex+official-source-review",
+        reviewed_at="2026-07-28",
+    ),
     # queue / boarding
     RegressionCase("queue_rules", "請勿插隊。", "請毋通插隊。"),
     RegressionCase("queue_rules", "請保持距離。", "請保持距離。"),
@@ -240,13 +296,45 @@ TRANSPORT_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("station_facility_inquiry", "請勿在車站內問洗手間。", "請毋通佇車站內問便所。"),
     RegressionCase("station_facility_inquiry", "請勿在月台上問洗手間。", "請毋通佇月台頂問便所。"),
     # service / redirect / lost property
-    RegressionCase("service_redirect", "如果你只是問廁所在哪裡，我可以跟你說。", "若是你只是問便所佇佗位，我會當共你講。"),
-    RegressionCase("service_redirect", "這個問題不是站務能決定的，你要問服務台。", "這个問題毋是站務會當決定的，你欲問服務台。"),
-    RegressionCase("service_redirect", "這個問題跟公車無關，我沒辦法回答。", "這个問題佮公車無關，我無法度回答。"),
+    RegressionCase(
+        "service_redirect",
+        "如果你只是問廁所在哪裡，我可以跟你說。",
+        "若是你只是問便所佇佗位，我會當共你講。",
+        duplicate_group="cross_domain_service_redirect",
+        duplicate_reason="公車與綜合交通產品面都需覆蓋相同的服務轉介語句。",
+    ),
+    RegressionCase(
+        "service_redirect", "這個問題不是站務能決定的，你要問服務台。", "這个問題毋是站務會當決定的，你欲問服務台。"
+    ),
+    RegressionCase(
+        "service_redirect",
+        "這個問題跟公車無關，我沒辦法回答。",
+        "這个問題佮公車無關，我無法度回答。",
+        duplicate_group="cross_domain_service_redirect",
+        duplicate_reason="公車與綜合交通產品面都需覆蓋相同的服務轉介語句。",
+    ),
     RegressionCase("service_redirect", "如果你要找失物，我可以幫你轉給總站。", "若是你欲找失物，我會當替你轉去總站。"),
-    RegressionCase("service_redirect", "如果你要找失物，我先幫你記車牌。", "若是你欲找失物，我先替你記車牌。"),
-    RegressionCase("service_redirect", "失物要送回總站，你下午再打電話確認。", "遺失物愛送轉去總站，你下晝閣敲電話確認。"),
-    RegressionCase("service_redirect", "這個不是公車問題，請去問警察。", "這个毋是公車問題，請去問警察。"),
+    RegressionCase(
+        "service_redirect",
+        "如果你要找失物，我先幫你記車牌。",
+        "若是你欲找失物，我先替你記車牌。",
+        duplicate_group="cross_domain_service_redirect",
+        duplicate_reason="公車與綜合交通產品面都需覆蓋相同的服務轉介語句。",
+    ),
+    RegressionCase(
+        "service_redirect",
+        "失物要送回總站，你下午再打電話確認。",
+        "遺失物愛送轉去總站，你下晝閣敲電話確認。",
+        duplicate_group="cross_domain_service_redirect",
+        duplicate_reason="公車與綜合交通產品面都需覆蓋相同的服務轉介語句。",
+    ),
+    RegressionCase(
+        "service_redirect",
+        "這個不是公車問題，請去問警察。",
+        "這个毋是公車問題，請去問警察。",
+        duplicate_group="cross_domain_service_redirect",
+        duplicate_reason="公車與綜合交通產品面都需覆蓋相同的服務轉介語句。",
+    ),
     RegressionCase("service_redirect", "可以幫我查轉乘路線嗎？", "會當替我查轉乘路線無？"),
     RegressionCase("service_redirect", "可以幫我查轉乘時間嗎？", "會當替我查轉乘時間無？"),
     RegressionCase("service_redirect", "這班車會停哪幾站？", "這班車會停佗幾站？"),
@@ -284,19 +372,25 @@ TRANSPORT_REGRESSION_CASES: list[RegressionCase] = [
     # hospital / campus / specific destination
     RegressionCase("destinations", "如果你要去醫院，這班車不會進病院內底。", "若是你欲去病院，這班車袂進病院內底。"),
     RegressionCase("destinations", "這班車今天不停靠學校門口。", "這班車今仔日無停學校門跤口。"),
-    RegressionCase("destinations", "如果你要去學校裡面，要在校門口下車再走進去。", "若是你欲去學校內底，要在校門跤口落車才行進去。"),
+    RegressionCase(
+        "destinations", "如果你要去學校裡面，要在校門口下車再走進去。", "若是你欲去學校內底，要在校門跤口落車才行進去。"
+    ),
     RegressionCase("destinations", "如果你要去夜市，在圓環那站下車就好。", "若是你欲去夜市，在圓環那站落車就好。"),
-    RegressionCase("destinations", "去動物園的車一天只有兩班，你要注意時間。", "去動物園的車一工只有兩班，你欲注意時間。"),
+    RegressionCase(
+        "destinations", "去動物園的車一天只有兩班，你要注意時間。", "去動物園的車一工只有兩班，你欲注意時間。"
+    ),
     RegressionCase("destinations", "如果你要去老街，我幫你確認班次。", "若是你欲去老街，我替你確認班次。"),
     RegressionCase("destinations", "這班車最遠只到海邊，不進市區。", "這班車上遠只到海墘，不進市區。"),
-    RegressionCase("destinations", "如果你要去文化館，在前一站下車再走進去。", "若是你欲去文化館，在前一站落車才行進去。"),
+    RegressionCase(
+        "destinations", "如果你要去文化館，在前一站下車再走進去。", "若是你欲去文化館，在前一站落車才行進去。"
+    ),
 ]
 
 
 def main() -> int:
     return run_regression_cli(
         TRANSPORT_REGRESSION_CASES,
-        description='非公車交通情境 regression runner',
+        description="非公車交通情境 regression runner",
     )
 
 

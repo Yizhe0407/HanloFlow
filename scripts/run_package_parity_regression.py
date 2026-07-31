@@ -14,7 +14,7 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from scripts.regression_runner import REGRESSION_SCRIPT_NAMES, load_suite_cases
+from scripts.regression_runner import load_all_regression_cases
 
 REQUIRED_ARTIFACTS = {
     "char_map.json",
@@ -42,26 +42,19 @@ def _set_tree_read_only(root: Path) -> None:
         if path.is_file():
             path.chmod(stat.S_IRUSR | stat.S_IRGRP | stat.S_IROTH)
         elif path.is_dir():
-            path.chmod(
-                stat.S_IRUSR
-                | stat.S_IXUSR
-                | stat.S_IRGRP
-                | stat.S_IXGRP
-                | stat.S_IROTH
-                | stat.S_IXOTH
-            )
+            path.chmod(stat.S_IRUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IXOTH)
     root.chmod(0o555)
 
 
 def _run_extracted_package(package_root: Path, sources: list[str]) -> list[str]:
-    child = r'''
+    child = r"""
 import json
 import sys
 sys.path.insert(0, sys.argv[1])
 from taigi_converter import TaigiConverter
 converter = TaigiConverter()
 print(json.dumps([converter.convert(text) for text in json.load(sys.stdin)], ensure_ascii=False))
-'''
+"""
     completed = subprocess.run(
         [sys.executable, "-I", "-c", child, str(package_root)],
         input=json.dumps(sources, ensure_ascii=False),
@@ -72,11 +65,7 @@ print(json.dumps([converter.convert(text) for text in json.load(sys.stdin)], ens
         env={"PATH": os.environ.get("PATH", "")},
     )
     if completed.returncode:
-        raise RuntimeError(
-            "wheel isolated smoke 失敗\n"
-            f"stdout:\n{completed.stdout}\n"
-            f"stderr:\n{completed.stderr}"
-        )
+        raise RuntimeError(f"wheel isolated smoke 失敗\nstdout:\n{completed.stdout}\nstderr:\n{completed.stderr}")
     return json.loads(completed.stdout)
 
 
@@ -87,11 +76,7 @@ def main() -> int:
     if args.wheel is None or not args.wheel.exists():
         parser.error("找不到 wheel；請先執行 `python3 -m build --wheel` 或傳入 --wheel")
 
-    cases = [
-        case
-        for script_name in REGRESSION_SCRIPT_NAMES
-        for case in load_suite_cases(REPO_ROOT / "scripts" / script_name)
-    ]
+    cases = [located.case for located in load_all_regression_cases(REPO_ROOT / "scripts")]
 
     with zipfile.ZipFile(args.wheel) as archive:
         names = set(archive.namelist())

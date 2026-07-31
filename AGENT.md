@@ -21,6 +21,8 @@ python3 -m compileall -q taigi_converter scripts tests
 uv run ruff check taigi_converter scripts tests
 uv run pytest
 python3 scripts/run_all_regressions.py
+python3 scripts/audit_regression_expectations.py --sample-limit 0 --fail-on-findings
+python3 scripts/audit_runtime_fixed_points.py --fail-on-non-idempotent
 
 uv run --with hatchling python -m build --no-isolation
 python3 scripts/run_package_parity_regression.py --wheel dist/taigi_converter-0.1.0-py3-none-any.whl
@@ -53,7 +55,10 @@ python3 scripts/run_package_parity_regression.py --wheel dist/taigi_converter-0.
 3. `uv run ruff check taigi_converter scripts tests`
 4. `uv run pytest`
 5. `python3 scripts/run_all_regressions.py`
-6. 若動到 package/runtime：建 wheel 並執行 package parity/read-only 驗證
-7. 重建後確認 tracked artifacts 沒有未解釋的 diff
+6. `python3 scripts/audit_regression_expectations.py --sample-limit 0 --fail-on-findings`
+7. `python3 scripts/audit_lexicon_risk_dispositions.py --fail-on-findings`
+8. `python3 scripts/audit_runtime_fixed_points.py --fail-on-non-idempotent`
+9. 若動到 package/runtime：建 wheel 並執行 package parity/read-only 驗證
+10. 重建後確認 tracked artifacts 沒有未解釋的 diff
 
 不得只跑單一 smoke test後宣稱全部完成。

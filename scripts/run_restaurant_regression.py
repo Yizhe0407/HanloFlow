@@ -7,9 +7,17 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from scripts.regression_runner import RegressionCase, run_regression_cli
+from scripts.regression_runner import (
+    RegressionCase as RegressionCaseModel,
+)
+from scripts.regression_runner import (
+    compatibility_snapshot_case as RegressionCase,
+)
+from scripts.regression_runner import (
+    run_regression_cli,
+)
 
-RESTAURANT_REGRESSION_CASES: list[RegressionCase] = [
+RESTAURANT_REGRESSION_CASES: list[RegressionCaseModel] = [
     # ordering — 點餐
     RegressionCase("ordering", "我要點餐。", "我欲點餐。"),
     RegressionCase("ordering", "請給我菜單。", "請予我菜單。"),
@@ -55,7 +63,15 @@ RESTAURANT_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("spice_dietary", "有沒有素食？", "敢有素食？"),
     RegressionCase("spice_dietary", "不要香菜。", "莫芫荽。"),
     RegressionCase("spice_dietary", "可以少鹽嗎？", "會當少鹽無？"),
-    RegressionCase("spice_dietary", "我對花生過敏。", "我食塗豆會過敏。"),
+    RegressionCaseModel(
+        "spice_dietary",
+        "我對花生過敏。",
+        "我對塗豆過敏。",
+        oracle_kind="ai_semantic_review",
+        provenance="round531 AI semantic review; preserved general allergy status rather than narrowing it to ingestion",
+        reviewed_by="Codex AI semantic review",
+        reviewed_at="2026-07-28",
+    ),
     RegressionCase("spice_dietary", "我不能吃牛肉。", "我袂當食牛肉。"),
     RegressionCase("spice_dietary", "可以不要放蔥嗎？", "會當免放蔥無？"),
     RegressionCase("spice_dietary", "這個可以不要辣嗎？", "這个會當免辣無？"),
@@ -82,10 +98,22 @@ RESTAURANT_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("payment", "麻煩結帳。", "麻煩結數。"),
     RegressionCase("payment", "總共多少錢？", "總共偌濟錢？"),
     RegressionCase("payment", "這個多少錢？", "這个偌濟錢？"),
-    RegressionCase("payment", "可以刷卡嗎？", "會當刷卡無？"),
+    RegressionCase(
+        "payment",
+        "可以刷卡嗎？",
+        "會當刷卡無？",
+        duplicate_group="cross_domain_payment_intent",
+        duplicate_reason="餐飲、購物與計程車產品面共用付款意圖，但需各自保留端到端覆蓋。",
+    ),
     RegressionCase("payment", "可以分開結帳嗎？", "會當分開結數無？"),
     RegressionCase("payment", "我要用現金付。", "我欲付現錢。"),
-    RegressionCase("payment", "可以開發票嗎？", "會當開發票無？"),
+    RegressionCase(
+        "payment",
+        "可以開發票嗎？",
+        "會當開發票無？",
+        duplicate_group="cross_domain_payment_intent",
+        duplicate_reason="餐飲、購物與計程車產品面共用付款意圖，但需各自保留端到端覆蓋。",
+    ),
     RegressionCase("payment", "可以幫我開發票嗎？", "會當替我開發票無？"),
     RegressionCase("payment", "發票可以用載具嗎？", "發票會當用載具無？"),
     RegressionCase("payment", "我想改用信用卡付款。", "我想欲改用信用卡付款。"),
@@ -113,13 +141,51 @@ RESTAURANT_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("service", "可以幫我查餐點狀態嗎？", "會當替我查餐點狀態無？"),
     RegressionCase("service", "可以幫我查取餐時間嗎？", "會當替我查取餐時間無？"),
     RegressionCase("service", "可以幫我查桌號嗎？", "會當替我查桌號無？"),
+    # round524 / AI semantic blind pilot (kept separate from human verification)
+    RegressionCaseModel(
+        "ai_semantic_pilot_food",
+        "這碗湯太燙了，先放涼再喝。",
+        "這碗湯太燙矣，先囥冷再啉。",
+        oracle_kind="ai_semantic_review",
+        provenance="100-case zero-overlap blind pilot; MOE dictionary example supports 囥予冷 for cooling food",
+        reviewed_by="codex_ai_semantic_audit",
+        reviewed_at="2026-07-28",
+    ),
+    RegressionCaseModel(
+        "ai_semantic_pilot_food",
+        "咖啡不要糖，牛奶少一點。",
+        "咖啡毋愛糖，牛奶少一寡。",
+        oracle_kind="ai_semantic_review",
+        provenance="100-case zero-overlap blind pilot; ordering preference reviewed as 毋愛 rather than prohibitive 莫",
+        reviewed_by="codex_ai_semantic_audit",
+        reviewed_at="2026-07-28",
+    ),
+    RegressionCaseModel(
+        "ai_semantic_pilot_food",
+        "你要內用還是外帶？",
+        "你欲內用抑是外帶？",
+        oracle_kind="ai_semantic_review",
+        provenance="independent 100-case output review; choice 還是 maps to 抑是 rather than continuative 猶是",
+        reviewed_by="codex_and_independent_subagent",
+        reviewed_at="2026-07-28",
+    ),
+    # round532 / authoritative low-trust machine cleanup
+    RegressionCaseModel(
+        "round532_authoritative_lexicon",
+        "鹹稀飯",
+        "鹹糜",
+        oracle_kind="ai_semantic_review",
+        provenance="round532 low-trust risk audit; AI semantic review cross-checked against the MOE Taiwanese Hokkien dictionary",
+        reviewed_by="codex_ai_semantic_audit",
+        reviewed_at="2026-07-29",
+    ),
 ]
 
 
 def main() -> int:
     return run_regression_cli(
         RESTAURANT_REGRESSION_CASES,
-        description='餐廳點餐情境 regression runner',
+        description="餐廳點餐情境 regression runner",
     )
 
 

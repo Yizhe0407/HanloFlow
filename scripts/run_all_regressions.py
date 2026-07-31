@@ -9,9 +9,8 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 from scripts.regression_runner import (
-    REGRESSION_SCRIPT_NAMES,
     latency_summary,
-    load_suite_cases,
+    load_all_regression_cases,
     run_cases,
 )
 from taigi_converter import TaigiConverter
@@ -26,8 +25,10 @@ def main() -> int:
     total_cases = 0
     all_latencies: list[float] = []
     failed_suites = 0
-    for script_name in REGRESSION_SCRIPT_NAMES:
-        cases = load_suite_cases(REPO_ROOT / "scripts" / script_name)
+    suite_cases: dict[str, list] = {}
+    for located in load_all_regression_cases(REPO_ROOT / "scripts"):
+        suite_cases.setdefault(located.script, []).append(located.case)
+    for script_name, cases in suite_cases.items():
         failures, latencies = run_cases(cases, converter=converter, fail_fast=args.fail_fast)
         total_cases += len(cases)
         all_latencies.extend(latencies)
@@ -49,7 +50,7 @@ def main() -> int:
     print(
         {
             "status": "ok" if failed_suites == 0 else "failed",
-            "suite_count": len(REGRESSION_SCRIPT_NAMES),
+            "suite_count": len(suite_cases),
             "case_count": total_cases,
             "failed_suites": failed_suites,
             **latency_summary(all_latencies),

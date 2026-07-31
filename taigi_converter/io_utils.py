@@ -55,6 +55,7 @@ def exclusive_file_lock(
     path: Path,
     *,
     timeout: float = 30.0,
+    mode: int = 0o644,
 ) -> Iterator[None]:
     """Acquire an OS-managed cross-process advisory lock.
 
@@ -64,9 +65,14 @@ def exclusive_file_lock(
     """
 
     path.parent.mkdir(parents=True, exist_ok=True)
-    fd = os.open(path, os.O_CREAT | os.O_RDWR, 0o644)
+    fd = os.open(path, os.O_CREAT | os.O_RDWR, mode)
     acquired = False
     try:
+        if hasattr(os, "fchmod"):
+            os.fchmod(fd, mode)
+        else:  # pragma: no cover - Windows
+            os.chmod(path, mode)
+
         # Windows byte-range locking requires a byte to exist. This is harmless
         # on POSIX and happens before any process can depend on lock metadata.
         if os.fstat(fd).st_size == 0:
@@ -135,6 +141,10 @@ def append_bytes_durable(path: Path, payload: bytes, *, mode: int = 0o644) -> No
     existed = path.exists()
     fd = os.open(path, os.O_CREAT | os.O_APPEND | os.O_WRONLY, mode)
     try:
+        if hasattr(os, "fchmod"):
+            os.fchmod(fd, mode)
+        else:  # pragma: no cover - Windows
+            os.chmod(path, mode)
         _write_all(fd, payload)
         os.fsync(fd)
     finally:
@@ -185,7 +195,7 @@ def atomic_write_json(
     indent: int | None = 2,
     mode: int | None = None,
 ) -> None:
-    kwargs: dict[str, Any] = {"ensure_ascii": False}
+    kwargs: dict[str, Any] = {"allow_nan": False, "ensure_ascii": False}
     if indent is None:
         kwargs["separators"] = (",", ":")
     else:
@@ -193,6 +203,11 @@ def atomic_write_json(
     atomic_write_text(path, json.dumps(data, **kwargs), mode=mode)
 
 
-def atomic_write_jsonl(path: Path, rows: list[dict[str, Any]]) -> None:
-    text = "".join(f"{json.dumps(row, ensure_ascii=False)}\n" for row in rows)
-    atomic_write_text(path, text)
+def atomic_write_jsonl(
+    path: Path,
+    rows: list[dict[str, Any]],
+    *,
+    mode: int | None = None,
+) -> None:
+    text = "".join(f"{json.dumps(row, ensure_ascii=False, allow_nan=False)}\n" for row in rows)
+    atomic_write_text(path, text, mode=mode)

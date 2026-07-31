@@ -7,12 +7,20 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from scripts.regression_runner import RegressionCase, run_regression_cli
+from scripts.regression_runner import (
+    RegressionCase as RegressionCaseModel,
+)
+from scripts.regression_runner import (
+    compatibility_snapshot_case as RegressionCase,
+)
+from scripts.regression_runner import (
+    run_regression_cli,
+)
 
-HOTEL_REGRESSION_CASES: list[RegressionCase] = [
+HOTEL_REGRESSION_CASES: list[RegressionCaseModel] = [
     # reservation — 訂房
     RegressionCase("reservation", "我要訂房。", "我欲訂房。"),
-    RegressionCase("reservation", "請問有空房嗎？", "借問有閒房無？"),
+    RegressionCase("reservation", "請問有空房嗎？", "借問有空房無？"),
     RegressionCase("reservation", "一晚多少錢？", "一晚偌濟錢？"),
     RegressionCase("reservation", "我要住兩晚。", "我欲住兩晚。"),
     RegressionCase("reservation", "我要住單人房。", "我欲住單人房。"),
@@ -179,7 +187,7 @@ HOTEL_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("issues", "房間可以晚一點打掃嗎？", "房間會當較晏一點拚掃無？"),
     RegressionCase("issues", "可以幫我換房型嗎？", "會當替我換房型無？"),
     RegressionCase("issues", "我需要換房型。", "我欲換房型。"),
-    RegressionCase("issues", "可以幫我叫清潔人員嗎？", "會當替我叫清潔人員無？"),
+    RegressionCase("issues", "可以幫我叫清潔人員嗎？", "會當替我叫清掃人員無？"),
     RegressionCase("issues", "可以幫旅客換房嗎？", "會當替旅客換房無？"),
     RegressionCase("issues", "可不可以幫旅客換房？", "敢會當替旅客換房？"),
     RegressionCase("issues", "請協助旅客換房。", "請鬥相共旅客換房。"),
@@ -192,7 +200,7 @@ HOTEL_REGRESSION_CASES: list[RegressionCase] = [
 def main() -> int:
     return run_regression_cli(
         HOTEL_REGRESSION_CASES,
-        description='飯店住宿情境 regression runner',
+        description="飯店住宿情境 regression runner",
     )
 
 

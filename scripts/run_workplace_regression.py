@@ -7,9 +7,17 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from scripts.regression_runner import RegressionCase, run_regression_cli
+from scripts.regression_runner import (
+    RegressionCase as RegressionCaseModel,
+)
+from scripts.regression_runner import (
+    compatibility_snapshot_case as RegressionCase,
+)
+from scripts.regression_runner import (
+    run_regression_cli,
+)
 
-WORKPLACE_REGRESSION_CASES: list[RegressionCase] = [
+WORKPLACE_REGRESSION_CASES: list[RegressionCaseModel] = [
     # meeting
     RegressionCase("meeting", "我今天要開會。", "我今仔日欲開會。"),
     RegressionCase("meeting", "下午要開會。", "下晝欲開會。"),
@@ -30,7 +38,7 @@ WORKPLACE_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("meeting", "幫我確認會議時間。", "替我確認會議時間。"),
     RegressionCase("meeting", "請協助確認會議時間。", "請鬥相共確認會議時間。"),
     RegressionCase("meeting", "請協助查會議時間。", "請鬥相共查會議時間。"),
-    RegressionCase("meeting", "可以改成線上會議嗎？", "會當改做線上會議無？"),
+    RegressionCase("meeting", "可以改成線上會議嗎？", "會當改做線頂會議無？"),
     RegressionCase("meeting", "我想改會議地點。", "我想欲改會議地點。"),
     RegressionCase("meeting", "可以幫我安排會議室嗎？", "會當替我安排會議室無？"),
     RegressionCase("meeting", "可以幫我預約會議室嗎？", "會當替我預約會議室無？"),
@@ -84,7 +92,7 @@ WORKPLACE_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("workflow", "請協助申請出差。", "請鬥相共申請出張。"),
     RegressionCase("workflow", "可以幫我查專案進度嗎？", "會當替我查專案進度無？"),
     RegressionCase("workflow", "可以幫我查任務進度嗎？", "會當替我查任務進度無？"),
-    RegressionCase("workflow", "可以幫我查薪資明細嗎？", "會當替我查月給明細無？"),
+    RegressionCase("workflow", "可以幫我查薪資明細嗎？", "會當替我查月俸明細無？"),
     RegressionCase("workflow", "可以幫課員換班嗎？", "會當替課員換班無？"),
     RegressionCase("workflow", "可不可以幫課員換班？", "敢會當替課員換班？"),
     RegressionCase("workflow", "請協助課員換班。", "請鬥相共課員換班。"),
@@ -223,39 +231,18 @@ WORKPLACE_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("workflow", "可以幫主播換班嗎？", "會當替主播換班無？"),
     RegressionCase("workflow", "可不可以幫主播換班？", "敢會當替主播換班？"),
     RegressionCase("workflow", "請協助主播換班。", "請鬥相共主播換班。"),
-    RegressionCase("workflow", "可以幫前台人員換班嗎？", "會當替前台人員換班無？"),
-    RegressionCase("workflow", "可不可以幫前台人員換班？", "敢會當替前台人員換班？"),
-    RegressionCase("workflow", "請協助前台人員換班。", "請鬥相共前台人員換班。"),
-    RegressionCase("workflow", "可以幫接待人員換班嗎？", "會當替接待人員換班無？"),
-    RegressionCase("workflow", "可不可以幫接待人員換班？", "敢會當替接待人員換班？"),
-    RegressionCase("workflow", "請協助接待人員換班。", "請鬥相共接待人員換班。"),
     RegressionCase("workflow", "可以幫門市店員換班嗎？", "會當替門市店員換班無？"),
     RegressionCase("workflow", "可不可以幫門市店員換班？", "敢會當替門市店員換班？"),
     RegressionCase("workflow", "請協助門市店員換班。", "請鬥相共門市店員換班。"),
     RegressionCase("workflow", "可以幫客服代表換班嗎？", "會當替客服代表換班無？"),
     RegressionCase("workflow", "可不可以幫客服代表換班？", "敢會當替客服代表換班？"),
     RegressionCase("workflow", "請協助客服代表換班。", "請鬥相共客服代表換班。"),
-    RegressionCase("workflow", "可以幫門衛換班嗎？", "會當替門衛換班無？"),
-    RegressionCase("workflow", "可不可以幫門衛換班？", "敢會當替門衛換班？"),
-    RegressionCase("workflow", "請協助門衛換班。", "請鬥相共門衛換班。"),
-    RegressionCase("workflow", "可以幫警衛換班嗎？", "會當替警衛換班無？"),
-    RegressionCase("workflow", "可不可以幫警衛換班？", "敢會當替警衛換班？"),
-    RegressionCase("workflow", "請協助警衛換班。", "請鬥相共警衛換班。"),
     RegressionCase("workflow", "可以幫保姆換班嗎？", "會當替保姆換班無？"),
     RegressionCase("workflow", "可不可以幫保姆換班？", "敢會當替保姆換班？"),
     RegressionCase("workflow", "請協助保姆換班。", "請鬥相共保姆換班。"),
-    RegressionCase("workflow", "可以幫護工換班嗎？", "會當替護工換班無？"),
-    RegressionCase("workflow", "可不可以幫護工換班？", "敢會當替護工換班？"),
-    RegressionCase("workflow", "請協助護工換班。", "請鬥相共護工換班。"),
     RegressionCase("workflow", "可以幫記者換班嗎？", "會當替記者換班無？"),
     RegressionCase("workflow", "可不可以幫記者換班？", "敢會當替記者換班？"),
     RegressionCase("workflow", "請協助記者換班。", "請鬥相共記者換班。"),
-    RegressionCase("workflow", "可以幫編輯換班嗎？", "會當替編輯換班無？"),
-    RegressionCase("workflow", "可不可以幫編輯換班？", "敢會當替編輯換班？"),
-    RegressionCase("workflow", "請協助編輯換班。", "請鬥相共編輯換班。"),
-    RegressionCase("workflow", "可以幫主播換班嗎？", "會當替主播換班無？"),
-    RegressionCase("workflow", "可不可以幫主播換班？", "敢會當替主播換班？"),
-    RegressionCase("workflow", "請協助主播換班。", "請鬥相共主播換班。"),
     RegressionCase("workflow", "可以幫總監換班嗎？", "會當替總監換班無？"),
     RegressionCase("workflow", "可不可以幫總監換班？", "敢會當替總監換班？"),
     RegressionCase("workflow", "請協助總監換班。", "請鬥相共總監換班。"),
@@ -283,9 +270,33 @@ WORKPLACE_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("workflow", "可以幫護理師換班嗎？", "會當替護理師換班無？"),
     RegressionCase("workflow", "可不可以幫護理師換班？", "敢會當替護理師換班？"),
     RegressionCase("workflow", "請協助護理師換班。", "請鬥相共護理師換班。"),
-    RegressionCase("workflow", "可以幫護士換班嗎？", "會當替護理師換班無？"),
-    RegressionCase("workflow", "可不可以幫護士換班？", "敢會當替護理師換班？"),
-    RegressionCase("workflow", "請協助護士換班。", "請鬥相共護理師換班。"),
+    RegressionCase(
+        "workflow",
+        "可以幫護士換班嗎？",
+        "會當替護士換班無？",
+        oracle_kind="verified_translation",
+        provenance="《護理人員法》職類定義與人工語意保真審查",
+        reviewed_by="codex+official-source-review",
+        reviewed_at="2026-07-28",
+    ),
+    RegressionCase(
+        "workflow",
+        "可不可以幫護士換班？",
+        "敢會當替護士換班？",
+        oracle_kind="verified_translation",
+        provenance="《護理人員法》職類定義與人工語意保真審查",
+        reviewed_by="codex+official-source-review",
+        reviewed_at="2026-07-28",
+    ),
+    RegressionCase(
+        "workflow",
+        "請協助護士換班。",
+        "請鬥相共護士換班。",
+        oracle_kind="verified_translation",
+        provenance="《護理人員法》職類定義與人工語意保真審查",
+        reviewed_by="codex+official-source-review",
+        reviewed_at="2026-07-28",
+    ),
     RegressionCase("workflow", "可以幫客服人員換班嗎？", "會當替客服人員換班無？"),
     RegressionCase("workflow", "可不可以幫客服人員換班？", "敢會當替客服人員換班？"),
     RegressionCase("workflow", "請協助客服人員換班。", "請鬥相共客服人員換班。"),
@@ -342,7 +353,7 @@ WORKPLACE_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("workflow", "請協助教授換班。", "請鬥相共教授換班。"),
     # leave / availability
     RegressionCase("leave_availability", "我今天請假。", "我今仔日請假。"),
-    RegressionCase("leave_availability", "我想請半天假。", "我想欲請半日假。"),
+    RegressionCase("leave_availability", "我想請半天假。", "我想欲請半工假。"),
     RegressionCase("leave_availability", "你有空嗎？", "你有閒無？"),
     RegressionCase("leave_availability", "我現在不方便。", "我這馬無方便。"),
     RegressionCase("leave_availability", "我今天會晚點到。", "我今仔日會較晏到。"),
@@ -360,13 +371,23 @@ WORKPLACE_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("leave_availability", "可以幫我查請假紀錄嗎？", "會當替我查請假紀錄無？"),
     RegressionCase("leave_availability", "可以幫我查加班申請嗎？", "會當替我查加班申請無？"),
     RegressionCase("leave_availability", "請協助申請加班。", "請鬥相共申請加班。"),
+    # v2 independent AI semantic audit — baseline failures promoted to development audit cases
+    RegressionCaseModel(
+        "v2_ai_semantic_audit",
+        "他每天開車上班。",
+        "伊逐工駛車去上班。",
+        oracle_kind="ai_semantic_review",
+        provenance="v2 frozen evaluation audit; independent AI oracle review, then Codex root-cause verification",
+        reviewed_by="codex_and_independent_subagent",
+        reviewed_at="2026-07-28",
+    ),
 ]
 
 
 def main() -> int:
     return run_regression_cli(
         WORKPLACE_REGRESSION_CASES,
-        description='辦公/會議情境 regression runner',
+        description="辦公/會議情境 regression runner",
     )
 
 

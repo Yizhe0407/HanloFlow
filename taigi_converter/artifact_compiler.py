@@ -9,15 +9,22 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
+from .context_policy import (
+    RUNTIME_CONTEXT_LEFT_LITERAL,
+    RUNTIME_CONTEXT_RIGHT_REGEX,
+    context_validation_errors,
+    validated_context,
+)
 from .io_utils import atomic_write_json, atomic_write_jsonl, atomic_write_text, exclusive_file_lock
 from .lexicon_policy import (
     VALID_TRUSTS,
     is_sentence_manual_override,
-    is_trusted_manual_entry,
+    is_trusted_context_entry,
     runtime_exclusion_reason,
     runtime_layer_rank,
 )
 from .models import PASS_ORDER, TIER_ORDER, LexiconEntry, RuleEntry
+from .unicode_policy import private_use_code_points
 
 BASE_DIR = Path(__file__).resolve().parent
 DATA_DIR = BASE_DIR / "data"
@@ -26,9 +33,34 @@ CORE_LEXICON_FILE = "core_lexicon.json"
 CHAR_ALLOWLIST_FILE = "char_verified_allowlist.txt"
 RUNTIME_FILTER_CORE_IDENTITY_PROTECTED = "core_identity_protected_term"
 RUNTIME_FILTER_IDENTITY_PASSTHROUGH_MASKED = "identity_passthrough_masked"
+RUNTIME_FILTER_IDENTITY_PASSTHROUGH_UNPROTECTED = "identity_passthrough_unprotected"
 LEXICON_STAGE = "split_char_after_rules"
-COMPILER_VERSION = 3
-MANIFEST_VERSION = 3
+COMPILER_VERSION = 6
+MANIFEST_VERSION = 4
+RULE_PLAN_SCHEMA_VERSION = 8
+RULE_PLAN_LEXICON_STAGE_KEY = "ls"
+RULE_PLAN_STRICT_PROTECTED_TERMS_KEY = "sp"
+PROTECTED_TERM_MAX_LENGTH = 32
+PROTECTED_WORK_TITLE_MAX_LENGTH = 16
+PROTECTED_LEGACY_CATEGORY = "legacy_compatibility"
+PROTECTED_METADATA_CATEGORIES = {
+    "lexical_identity",
+    "organization",
+    "place_name",
+    "product_name",
+    "proper_noun",
+    "technical_term",
+    "work_title",
+}
+PROTECTED_SENTENCE_PUNCTUATION_RE = re.compile(r"[，,。！？!?；;：:\n\r]")
+PROTECTED_WORK_TITLE_FORBIDDEN_PUNCTUATION_RE = re.compile(r"[，,。；;\n\r]")
+ARTIFACT_SCHEMA_VERSIONS = {
+    "entry_table.json": 7,
+    "phrase_trie.json": 5,
+    "char_map.json": 2,
+    "rule_plan.json": RULE_PLAN_SCHEMA_VERSION,
+    "override_index.json": 3,
+}
 SOURCE_FILES = ("lexicon_entries.jsonl", "rule_entries.jsonl", CORE_LEXICON_FILE, CHAR_ALLOWLIST_FILE)
 ARTIFACT_FILES = (
     "entry_table.json",
@@ -40,8 +72,6 @@ ARTIFACT_FILES = (
 VALID_LEVELS = {"sentence", "phrase", "char"}
 VALID_STATUSES = {"active", "disabled"}
 VALID_RULE_TYPES = {"literal", "regex"}
-VALID_CONTEXT_FIELDS = {"left_regex", "right_regex", "full_regex", "left_literal", "right_literal"}
-
 TIER_INDEX = {tier: i for i, tier in enumerate(TIER_ORDER)}
 PASS_INDEX = {name: i for i, name in enumerate(PASS_ORDER)}
 RESIDUAL_MANDARIN_TERMS = ["東西", "什麼", "為什麼", "為何"]
@@ -56,10 +86,8 @@ RUNTIME_ID_SUFFIX_LEN = 12
 RUNTIME_LEVELS = ("sentence", "phrase", "char")
 RUNTIME_LEVEL_INDEX = {name: idx for idx, name in enumerate(RUNTIME_LEVELS)}
 RUNTIME_TIER_INDEX = {name: idx for idx, name in enumerate(TIER_ORDER)}
-RUNTIME_TRUSTS = ("human", "machine", "seed")
+RUNTIME_TRUSTS = ("human", "ai_reviewed", "machine", "seed")
 RUNTIME_TRUST_INDEX = {name: idx for idx, name in enumerate(RUNTIME_TRUSTS)}
-RUNTIME_CONTEXT_RIGHT_REGEX = "r"
-RUNTIME_CONTEXT_LEFT_LITERAL = "l"
 MANIFEST_SHORT_KEYS = {
     "version": "v",
     "compiler_version": "cv",
@@ -76,11 +104,14 @@ MANIFEST_SHORT_KEYS = {
     "regex_hazard_count": "rh",
     "pipeline_conflict_count": "pc",
     "protected_term_count": "pt",
+    "protected_term_lint_count": "pl",
+    "legacy_protected_debt_count": "ld",
     "residual_core_term_count": "rc",
     "lexicon_stage": "ls",
     "core_identity_protected_entry_count": "ci",
     "identity_passthrough_protected_entry_count": "ip",
     "artifact_hashes": "ah",
+    "artifact_schema_versions": "sv",
 }
 MANIFEST_LONG_KEYS = {short_key: long_key for long_key, short_key in MANIFEST_SHORT_KEYS.items()}
 
@@ -136,15 +167,96 @@ def _source_digest(data_dir: Path) -> str:
     return digest.hexdigest()
 
 
-def _validate_lexicon_rows(rows: list[dict[str, Any]]) -> None:
+def _general_protected_policy_violations(row: dict[str, Any]) -> list[str]:
+    src = row.get("src", "")
+    violations: list[str] = []
+    if row.get("level") == "sentence":
+        violations.append("sentence level")
+    elif row.get("level") != "phrase":
+        violations.append("level is not phrase")
+    if isinstance(src, str) and len(src) > PROTECTED_TERM_MAX_LENGTH:
+        violations.append(f"length {len(src)} exceeds {PROTECTED_TERM_MAX_LENGTH}")
+    if isinstance(src, str) and PROTECTED_SENTENCE_PUNCTUATION_RE.search(src):
+        violations.append("contains sentence punctuation")
+    return violations
+
+
+def _protected_metadata_errors(row: dict[str, Any], *, prefix: str) -> list[str]:
+    metadata = row.get("protected")
+    if metadata is None or metadata is False:
+        return []
+    if not isinstance(metadata, dict):
+        return [f"{prefix}: protected 必須是 object、false 或省略"]
+
+    errors: list[str] = []
+    category = metadata.get("category")
+    if category == PROTECTED_LEGACY_CATEGORY:
+        return [f"{prefix}: protected.category='legacy_compatibility' migration 已完成，不可再使用"]
+
+    allowed_fields = {"category", "reason", "enforcement"}
+    unknown = set(metadata) - allowed_fields
+    if unknown:
+        errors.append(f"{prefix}: protected 含未知欄位 {sorted(unknown)}")
+
+    if category not in PROTECTED_METADATA_CATEGORIES:
+        errors.append(
+            f"{prefix}: protected.category={category!r} 不合法；允許值為 {sorted(PROTECTED_METADATA_CATEGORIES)}"
+        )
+    enforcement = metadata.get("enforcement")
+    if enforcement is not None and enforcement != "strict":
+        errors.append(f"{prefix}: protected.enforcement 僅可為 'strict'")
+
+    reason = metadata.get("reason")
+    if not isinstance(reason, str) or not reason.strip():
+        errors.append(f"{prefix}: protected.reason 必須是非空字串")
+    elif len(reason) > 200:
+        errors.append(f"{prefix}: protected.reason 不得超過 200 字元")
+
+    src = row.get("src", "")
+    if row.get("status", "active") != "active":
+        errors.append(f"{prefix}: protected 詞條必須是 active")
+    if row.get("tier") == "blocked":
+        errors.append(f"{prefix}: blocked 詞條不可標記 protected")
+    if row.get("context") is not None:
+        errors.append(f"{prefix}: protected 詞條不可包含 context")
+    if src != row.get("tgt"):
+        errors.append(f"{prefix}: protected 詞條必須符合 src == tgt")
+    if not isinstance(src, str) or len(src) <= 1:
+        errors.append(f"{prefix}: protected 詞條長度必須至少為 2")
+
+    if "migration" in metadata:
+        errors.append(f"{prefix}: 一般 protected category 不得指定 migration")
+    if row.get("level") == "sentence":
+        errors.append(f"{prefix}: sentence identity 不可標記 protected；應改用窄範圍詞條或回歸測試")
+    elif row.get("level") != "phrase":
+        errors.append(f"{prefix}: protected 僅允許 phrase 詞條")
+    if isinstance(src, str) and len(src) > PROTECTED_TERM_MAX_LENGTH:
+        errors.append(f"{prefix}: protected 詞條長度 {len(src)} 超過上限 {PROTECTED_TERM_MAX_LENGTH}")
+    if isinstance(src, str) and PROTECTED_SENTENCE_PUNCTUATION_RE.search(src):
+        if category != "work_title":
+            errors.append(f"{prefix}: protected 詞條含句子標點，不可用來保護完整句或句子片段")
+        elif len(src) > PROTECTED_WORK_TITLE_MAX_LENGTH:
+            errors.append(f"{prefix}: work_title 含標點時長度 {len(src)} 超過上限 {PROTECTED_WORK_TITLE_MAX_LENGTH}")
+        elif PROTECTED_WORK_TITLE_FORBIDDEN_PUNCTUATION_RE.search(src):
+            errors.append(f"{prefix}: work_title 僅允許標題內的驚嘆號、問號或冒號")
+    return errors
+
+
+def validate_lexicon_rows(rows: list[dict[str, Any]]) -> None:
     errors: list[str] = []
     for index, row in enumerate(rows, start=1):
         prefix = f"lexicon line {index}"
         for field in ("entry_id", "src", "level", "tier"):
             if not isinstance(row.get(field), str) or not row.get(field):
                 errors.append(f"{prefix}: {field} 必須是非空字串")
-        if not isinstance(row.get("tgt", ""), str):
+        target = row.get("tgt", "")
+        if not isinstance(target, str):
             errors.append(f"{prefix}: tgt 必須是字串")
+        elif row.get("status", "active") == "active":
+            private_use = private_use_code_points(target)
+            if private_use:
+                rendered = ", ".join(f"U+{code_point:04X}" for code_point in private_use)
+                errors.append(f"{prefix}: active tgt 含 Unicode private-use 字元 ({rendered})")
         if row.get("level") not in VALID_LEVELS:
             errors.append(f"{prefix}: level={row.get('level')!r} 不合法")
         if row.get("level") == "char" and len(row.get("src", "")) != 1:
@@ -168,24 +280,14 @@ def _validate_lexicon_rows(rows: list[dict[str, Any]]) -> None:
         if isinstance(priority, bool) or not isinstance(priority, int):
             errors.append(f"{prefix}: priority 必須是整數")
 
-        context = row.get("context")
-        if context is not None and not isinstance(context, dict):
-            errors.append(f"{prefix}: context 必須是 object 或 null")
-        elif isinstance(context, dict):
-            unknown = set(context) - VALID_CONTEXT_FIELDS
-            if unknown:
-                errors.append(f"{prefix}: context 含未知欄位 {sorted(unknown)}")
-            for field, value in context.items():
-                if not isinstance(value, str) or not value:
-                    errors.append(f"{prefix}: context.{field} 必須是非空字串")
-                    continue
-                if field.endswith("_regex"):
-                    try:
-                        re.compile(value)
-                    except re.error as exc:
-                        errors.append(f"{prefix}: context.{field} regex 無法編譯: {exc}")
+        errors.extend(f"{prefix}: {error}" for error in context_validation_errors(row.get("context")))
+        errors.extend(_protected_metadata_errors(row, prefix=prefix))
     if errors:
         raise ValueError("詞典 schema 驗證失敗:\n" + "\n".join(errors[:50]))
+
+
+# Backward compatibility for callers that used the former private helper.
+_validate_lexicon_rows = validate_lexicon_rows
 
 
 def _validate_rule_rows(rows: list[dict[str, Any]]) -> None:
@@ -248,6 +350,7 @@ def _validate_entry_target_conflicts(entries: list[LexiconEntry]) -> None:
         details.append(f"{items[0].src!r}: " + ", ".join(f"{item.entry_id}->{item.tgt!r}" for item in items))
     raise ValueError("詞典存在同順位但不同目標的 active 詞條:\n" + "\n".join(details))
 
+
 def _entry_id(src: str, tgt: str, level: str, tier: str, source: str) -> str:
     raw = f"{src}|{tgt}|{level}|{tier}|{source}".encode()
     digest = hashlib.sha1(raw).hexdigest()[:12]
@@ -286,13 +389,14 @@ def _expand_rules_with_tokens(rules: list[RuleEntry]) -> list[RuleEntry]:
 
 
 def _pack_runtime_context(context: dict[str, Any] | None) -> list[str] | dict[str, Any] | None:
-    if not context:
+    checked = validated_context(context, error_prefix="Invalid context")
+    if checked is None:
         return None
-    if set(context.keys()) == {"right_regex"}:
-        return [RUNTIME_CONTEXT_RIGHT_REGEX, str(context["right_regex"])]
-    if set(context.keys()) == {"left_literal"}:
-        return [RUNTIME_CONTEXT_LEFT_LITERAL, str(context["left_literal"])]
-    return context
+    if set(checked) == {"right_regex"}:
+        return [RUNTIME_CONTEXT_RIGHT_REGEX, checked["right_regex"]]
+    if set(checked) == {"left_literal"}:
+        return [RUNTIME_CONTEXT_LEFT_LITERAL, checked["left_literal"]]
+    return checked
 
 
 def _serialize_runtime_rule(rule: RuleEntry) -> list[Any]:
@@ -406,7 +510,7 @@ def _compress_phrase_trie_node(node: dict[str, Any]) -> dict[str, Any]:
         merged_label = label
         merged_child = child
         while "" not in merged_child and len(merged_child) == 1:
-            (next_label, next_child), = merged_child.items()
+            ((next_label, next_child),) = merged_child.items()
             merged_label += next_label
             merged_child = next_child
         out[merged_label] = _compress_phrase_trie_node(merged_child)
@@ -424,7 +528,7 @@ def _serialize_runtime_phrase_trie(
             continue
         if is_sentence_manual_override(entry):
             continue
-        if entry.context or entry.status != "active":
+        if entry.context is not None or entry.status != "active":
             continue
         node = root
         for ch in entry.src:
@@ -443,10 +547,7 @@ def _serialize_runtime_phrase_trie(
 
 
 def _serialize_runtime_manifest(manifest: dict[str, Any]) -> dict[str, Any]:
-    return {
-        MANIFEST_SHORT_KEYS.get(key, key): value
-        for key, value in manifest.items()
-    }
+    return {MANIFEST_SHORT_KEYS.get(key, key): value for key, value in manifest.items()}
 
 
 def _inflate_runtime_manifest(manifest_doc: dict[str, Any]) -> dict[str, Any]:
@@ -454,10 +555,97 @@ def _inflate_runtime_manifest(manifest_doc: dict[str, Any]) -> dict[str, Any]:
         return {}
     if "version" in manifest_doc:
         return manifest_doc
-    return {
-        MANIFEST_LONG_KEYS.get(key, key): value
-        for key, value in manifest_doc.items()
+    return {MANIFEST_LONG_KEYS.get(key, key): value for key, value in manifest_doc.items()}
+
+
+def validate_artifact_documents(documents: dict[str, Any]) -> None:
+    errors: list[str] = []
+    expected_names = set(ARTIFACT_SCHEMA_VERSIONS)
+    actual_names = set(documents)
+    missing = sorted(expected_names - actual_names)
+    unknown = sorted(actual_names - expected_names)
+    if missing:
+        errors.append(f"缺少 artifact documents: {missing}")
+    if unknown:
+        errors.append(f"含未知 artifact documents: {unknown}")
+
+    required_keys = {
+        "entry_table.json": {"v", "k", "e", "ih"},
+        "phrase_trie.json": {"v", "t"},
+        "char_map.json": {"v", "m"},
+        "rule_plan.json": {
+            "v",
+            RULE_PLAN_LEXICON_STAGE_KEY,
+            RULE_PLAN_STRICT_PROTECTED_TERMS_KEY,
+            "r",
+            "rt",
+            "rc",
+            "pt",
+        },
+        "override_index.json": {"v", "s", "c"},
     }
+    allowed_keys = {
+        "entry_table.json": required_keys["entry_table.json"] | {"ix"},
+        "phrase_trie.json": required_keys["phrase_trie.json"],
+        "char_map.json": required_keys["char_map.json"],
+        "rule_plan.json": required_keys["rule_plan.json"] | {"mw", "rh", "pc", "pl"},
+        "override_index.json": required_keys["override_index.json"],
+    }
+    required_types: dict[str, dict[str, type[Any] | tuple[type[Any], ...]]] = {
+        "entry_table.json": {"k": list, "e": list, "ih": str, "ix": dict},
+        "phrase_trie.json": {"t": dict},
+        "char_map.json": {"m": dict},
+        "rule_plan.json": {
+            RULE_PLAN_LEXICON_STAGE_KEY: str,
+            "r": list,
+            "rt": list,
+            "rc": list,
+            "pt": str,
+            RULE_PLAN_STRICT_PROTECTED_TERMS_KEY: str,
+            "mw": list,
+            "rh": list,
+            "pc": list,
+            "pl": list,
+        },
+        "override_index.json": {"s": dict, "c": list},
+    }
+    for name, expected_version in ARTIFACT_SCHEMA_VERSIONS.items():
+        document = documents.get(name)
+        if not isinstance(document, dict):
+            errors.append(f"{name}: document 必須是 object")
+            continue
+        if document.get("v") != expected_version:
+            errors.append(f"{name}: schema version={document.get('v')!r}，預期 {expected_version}")
+        missing_keys = sorted(required_keys[name] - set(document))
+        if missing_keys:
+            errors.append(f"{name}: 缺少必要欄位 {missing_keys}")
+        unknown_keys = sorted(set(document) - allowed_keys[name])
+        if unknown_keys:
+            errors.append(f"{name}: 含未知欄位 {unknown_keys}")
+        for field, expected_type in required_types[name].items():
+            if field in document and not isinstance(document[field], expected_type):
+                errors.append(f"{name}: {field} 型別不合法")
+
+    rule_plan = documents.get("rule_plan.json")
+    if isinstance(rule_plan, dict):
+        stage = rule_plan.get(RULE_PLAN_LEXICON_STAGE_KEY)
+        if stage != LEXICON_STAGE:
+            errors.append(f"rule_plan.json: {RULE_PLAN_LEXICON_STAGE_KEY}={stage!r}，預期 {LEXICON_STAGE!r}")
+        grouped_rules = rule_plan.get("r")
+        if isinstance(grouped_rules, list):
+            if len(grouped_rules) != len(PASS_ORDER) or any(not isinstance(group, list) for group in grouped_rules):
+                errors.append("rule_plan.json: r 必須依 PASS_ORDER 提供完整 list groups")
+        for field in ("rt", "rc"):
+            values = rule_plan.get(field)
+            if isinstance(values, list) and any(not isinstance(value, str) or not value for value in values):
+                errors.append(f"rule_plan.json: {field} 只能包含非空字串")
+        for field in ("mw", "rh", "pc", "pl"):
+            values = rule_plan.get(field)
+            if isinstance(values, list) and any(not isinstance(value, str) or not value for value in values):
+                errors.append(f"rule_plan.json: {field} 只能包含非空字串")
+
+    if errors:
+        raise ValueError("artifact schema contract 驗證失敗:\n" + "\n".join(errors))
 
 
 def _entry_sort_key(entry: LexiconEntry) -> tuple[int, int, int, float, str]:
@@ -493,6 +681,13 @@ def _load_core_lexicon_entries(data_dir: Path) -> list[LexiconEntry]:
         if level not in {"sentence", "phrase", "char"}:
             raise ValueError(f"core_lexicon.json 第 {idx} 筆 level 不合法: {level}")
 
+        status = str(item.get("status", "active"))
+        if status == "active":
+            private_use = private_use_code_points(tgt)
+            if private_use:
+                rendered = ", ".join(f"U+{code_point:04X}" for code_point in private_use)
+                raise ValueError(f"core_lexicon.json 第 {idx} 筆 active tgt 含 Unicode private-use 字元 ({rendered})")
+
         priority = int(item.get("priority", 800 if level != "char" else 80))
         source = str(item.get("source", "core:lexicon"))
         updated_by = str(item.get("updated_by", "core_lexicon"))
@@ -508,7 +703,7 @@ def _load_core_lexicon_entries(data_dir: Path) -> list[LexiconEntry]:
                 priority=priority,
                 context=item.get("context"),
                 score=float(item.get("score", 1.0)),
-                status=str(item.get("status", "active")),
+                status=status,
                 source=source,
                 trust=str(item.get("trust", "human")),
                 updated_by=updated_by,
@@ -646,33 +841,67 @@ def _load_allowlist(path: Path) -> set[str]:
     return items
 
 
+def _protected_term_policy_error(term: str) -> str | None:
+    if len(term) <= 1:
+        return "長度必須至少為 2"
+    if len(term) > PROTECTED_TERM_MAX_LENGTH:
+        return f"長度 {len(term)} 超過上限 {PROTECTED_TERM_MAX_LENGTH}"
+    if PROTECTED_SENTENCE_PUNCTUATION_RE.search(term):
+        return "含句子標點"
+    return None
+
+
 def _collect_protected_terms(
-    core_entries: list[LexiconEntry],
+    source_rows: list[dict[str, Any]],
     allowlist_items: set[str],
-    identity_passthrough_terms: set[str] | None = None,
-) -> tuple[list[str], set[str]]:
-    protected_terms = {item for item in allowlist_items if len(item) > 1}
-    if identity_passthrough_terms:
-        protected_terms.update(term for term in identity_passthrough_terms if len(term) > 1)
-    core_identity_entry_ids: set[str] = set()
-    for entry in core_entries:
-        if entry.status != "active":
+) -> tuple[list[str], list[str], set[str], list[str], int]:
+    """Collect only explicitly declared, policy-compliant protected terms.
+
+    Source rows opt in through structured ``protected`` metadata. The legacy
+    multi-character allowlist remains an explicit compatibility source, but
+    unsafe entries are omitted and reported as lint warnings. The manifest's
+    legacy debt field remains as a zero-valued CI invariant; structured
+    ``legacy_compatibility`` metadata is rejected during source validation.
+    """
+
+    protected_terms: set[str] = set()
+    strict_protected_terms: set[str] = set()
+    protected_entry_ids: set[str] = set()
+    lint_warnings: list[str] = []
+    legacy_debt_count = 0
+
+    for item in sorted(allowlist_items):
+        if len(item) <= 1:
             continue
-        if entry.level not in {"phrase", "sentence"}:
+        error = _protected_term_policy_error(item)
+        if error:
+            lint_warnings.append(f"allowlist protected term {item!r}: {error}; 已略過")
             continue
-        if len(entry.src) <= 1:
+        protected_terms.add(item)
+
+    for row in source_rows:
+        metadata = row.get("protected")
+        if not isinstance(metadata, dict):
             continue
-        if entry.src != entry.tgt:
-            continue
-        core_identity_entry_ids.add(entry.entry_id)
-        protected_terms.add(entry.src)
-    return sorted(protected_terms, key=lambda item: (-len(item), item)), core_identity_entry_ids
+        if metadata.get("category") == PROTECTED_LEGACY_CATEGORY:
+            raise ValueError("protected.category='legacy_compatibility' migration 已完成，不可再使用")
+        entry_id = str(row["entry_id"])
+        term = str(row["src"])
+        protected_entry_ids.add(entry_id)
+        protected_terms.add(term)
+        if metadata.get("enforcement") == "strict":
+            strict_protected_terms.add(term)
+
+    return (
+        sorted(protected_terms, key=lambda item: (-len(item), item)),
+        sorted(strict_protected_terms, key=lambda item: (-len(item), item)),
+        protected_entry_ids,
+        lint_warnings,
+        legacy_debt_count,
+    )
 
 
-def _collect_identity_passthrough_entries(
-    entries: list[LexiconEntry],
-) -> tuple[set[str], set[str]]:
-    terms: set[str] = set()
+def _collect_identity_passthrough_entry_ids(entries: list[LexiconEntry]) -> set[str]:
     entry_ids: set[str] = set()
     for entry in entries:
         if entry.status != "active":
@@ -681,14 +910,76 @@ def _collect_identity_passthrough_entries(
             continue
         if entry.level not in {"phrase", "sentence"}:
             continue
-        if entry.context:
+        if entry.context is not None:
             continue
         if not entry.src or entry.src != entry.tgt:
             continue
         entry_ids.add(entry.entry_id)
-        if len(entry.src) > 1:
-            terms.add(entry.src)
-    return terms, entry_ids
+    return entry_ids
+
+
+def _legacy_protected_metadata(row: dict[str, Any]) -> dict[str, str] | None:
+    """Return deterministic one-time metadata for every eligible legacy identity."""
+
+    if row.get("protected") is not None:
+        return None
+    if row.get("status", "active") != "active" or row.get("tier") == "blocked":
+        return None
+    if row.get("level") not in {"phrase", "sentence"} or row.get("context") is not None:
+        return None
+    src = row.get("src")
+    if not isinstance(src, str) or len(src) <= 1 or src != row.get("tgt"):
+        return None
+
+    source = str(row.get("source", "unknown"))
+    violations = _general_protected_policy_violations(row)
+    if violations:
+        # The migration helper may annotate only rows that satisfy the current
+        # general policy; unsafe identities must be resolved manually.
+        return None
+
+    location_markers = ("location", "admin_divisions", "station_names")
+    category = "place_name" if any(marker in source for marker in location_markers) else "lexical_identity"
+    return {
+        "category": category,
+        "reason": f"Legacy identity migration from {source}",
+    }
+
+
+def migrate_explicit_protected_metadata(
+    data_dir: Path = DATA_DIR,
+    *,
+    dry_run: bool = False,
+) -> dict[str, int]:
+    """One-time deterministic migration from all eligible legacy identity rows.
+
+    Compilation never calls this helper implicitly. New protected terms must be
+    reviewed and carry structured metadata in source data.
+    """
+
+    path = data_dir / "lexicon_entries.jsonl"
+    rows = load_jsonl(path)
+    migrated = 0
+    skipped_identity = 0
+    for row in rows:
+        metadata = _legacy_protected_metadata(row)
+        if metadata is not None:
+            row["protected"] = metadata
+            migrated += 1
+        elif (
+            row.get("protected") is None
+            and row.get("status", "active") == "active"
+            and row.get("tier") != "blocked"
+            and row.get("level") in {"phrase", "sentence"}
+            and row.get("context") is None
+            and row.get("src") == row.get("tgt")
+        ):
+            skipped_identity += 1
+
+    validate_lexicon_rows(rows)
+    if not dry_run and migrated:
+        write_jsonl(path, rows)
+    return {"migrated": migrated, "skipped_identity": skipped_identity}
 
 
 def _collect_residual_core_terms(
@@ -699,21 +990,13 @@ def _collect_residual_core_terms(
     if not residual_terms:
         return []
 
-    direct_lexicon_terms = {
-        entry.src
-        for entry in active_entries
-        if entry.src and entry.src != entry.tgt
-    }
+    direct_lexicon_terms = {entry.src for entry in active_entries if entry.src and entry.src != entry.tgt}
     direct_literal_rule_terms = {
         rule.pattern
         for rule in active_rules
         if rule.type == "literal" and rule.pattern and rule.pattern != rule.replacement
     }
-    overlap = {
-        term
-        for term in residual_terms
-        if term in direct_lexicon_terms or term in direct_literal_rule_terms
-    }
+    overlap = {term for term in residual_terms if term in direct_lexicon_terms or term in direct_literal_rule_terms}
     return sorted(overlap)
 
 
@@ -786,9 +1069,6 @@ def migrate_legacy_data(data_dir: Path = DATA_DIR) -> dict[str, int]:
     if not rule_path.exists():
         write_jsonl(rule_path, [r.to_dict() for r in default_rule_entries()])
 
-    review_queue_path = data_dir / "review_queue.jsonl"
-    review_queue_path.touch(exist_ok=True)
-
     return {
         "lexicon_entries": len(rows),
         "phrase_entries": len(phrase_lexicon),
@@ -806,7 +1086,7 @@ def _build_phrase_trie(entries: list[LexiconEntry]) -> dict[str, Any]:
             continue
         # context-aware entries are matched in contextual pass only,
         # so we keep them out of trie to avoid bypassing context checks.
-        if entry.context:
+        if entry.context is not None:
             continue
         if entry.status != "active":
             continue
@@ -848,10 +1128,8 @@ def detect_masked_rules(rules: list[RuleEntry]) -> list[str]:
                     continue
                 if later.pattern.startswith(earlier.pattern):
                     warnings.append(
-
-                            f"[{pass_name}] rule {earlier.rule_id} ({earlier.pattern!r} -> {earlier.replacement!r}) "
-                            f"可能遮蔽 {later.rule_id} ({later.pattern!r} -> {later.replacement!r})"
-
+                        f"[{pass_name}] rule {earlier.rule_id} ({earlier.pattern!r} -> {earlier.replacement!r}) "
+                        f"可能遮蔽 {later.rule_id} ({later.pattern!r} -> {later.replacement!r})"
                     )
     return warnings
 
@@ -865,7 +1143,9 @@ def detect_regex_hazards(rules: list[RuleEntry]) -> list[str]:
         if REGEX_DOT_GREEDY_RE.search(pattern):
             warnings.append(f"[{rule.pass_name}] rule {rule.rule_id} 使用 dot-greedy，可能造成過度捕獲或回溯放大。")
         if REGEX_UNBOUNDED_NEG_CLASS_RE.search(pattern):
-            warnings.append(f"[{rule.pass_name}] rule {rule.rule_id} 使用未設上限的 neg-charclass +，建議改成 bounded quantifier。")
+            warnings.append(
+                f"[{rule.pass_name}] rule {rule.rule_id} 使用未設上限的 neg-charclass +，建議改成 bounded quantifier。"
+            )
         if pattern.count("(?!") >= 8:
             warnings.append(f"[{rule.pass_name}] rule {rule.rule_id} 含大量連鎖 negative lookahead，長文掃描成本偏高。")
         if rule.pass_name != "normalization" and r"\s+" in pattern and rule.replacement == "":
@@ -900,10 +1180,8 @@ def detect_pipeline_conflicts(rules: list[RuleEntry]) -> list[str]:
                     and earlier.replacement != later.replacement
                 ):
                     warnings.append(
-
-                            f"[{pass_name}] rule {earlier.rule_id}（短詞 {earlier.pattern!r}）"
-                            f"可能先命中，導致長詞規則 {later.rule_id}（{later.pattern!r}）失效。"
-
+                        f"[{pass_name}] rule {earlier.rule_id}（短詞 {earlier.pattern!r}）"
+                        f"可能先命中，導致長詞規則 {later.rule_id}（{later.pattern!r}）失效。"
                     )
                 if (
                     earlier.replacement
@@ -911,10 +1189,8 @@ def detect_pipeline_conflicts(rules: list[RuleEntry]) -> list[str]:
                     and earlier.replacement != later.replacement
                 ):
                     warnings.append(
-
-                            f"[{pass_name}] rule {earlier.rule_id} 的 replacement 會觸發"
-                            f" {later.rule_id}，可能形成連鎖改寫：{earlier.replacement!r}。"
-
+                        f"[{pass_name}] rule {earlier.rule_id} 的 replacement 會觸發"
+                        f" {later.rule_id}，可能形成連鎖改寫：{earlier.replacement!r}。"
                     )
     return warnings
 
@@ -925,9 +1201,7 @@ def _validate_unique_entry_ids(entries: list[LexiconEntry]) -> None:
         entries_by_id.setdefault(entry.entry_id, []).append(entry)
 
     duplicates = {
-        entry_id: grouped_entries
-        for entry_id, grouped_entries in entries_by_id.items()
-        if len(grouped_entries) > 1
+        entry_id: grouped_entries for entry_id, grouped_entries in entries_by_id.items() if len(grouped_entries) > 1
     }
     if not duplicates:
         return
@@ -936,10 +1210,7 @@ def _validate_unique_entry_ids(entries: list[LexiconEntry]) -> None:
     for entry_id, grouped_entries in sorted(duplicates.items())[:10]:
         sources = ", ".join(repr(entry.src) for entry in grouped_entries[:3])
         details.append(f"{entry_id}: {sources}")
-    raise ValueError(
-        "詞典存在重複 entry_id；每筆詞條必須使用唯一 ID: "
-        + "; ".join(details)
-    )
+    raise ValueError("詞典存在重複 entry_id；每筆詞條必須使用唯一 ID: " + "; ".join(details))
 
 
 def _compile_runtime_artifacts_unlocked(
@@ -958,20 +1229,25 @@ def _compile_runtime_artifacts_unlocked(
         raise FileNotFoundError("找不到 data/rule_entries.jsonl")
 
     source_rows = load_jsonl(lexicon_path)
-    _validate_lexicon_rows(source_rows)
+    validate_lexicon_rows(source_rows)
     rule_rows = load_jsonl(rule_path)
     _validate_rule_rows(rule_rows)
 
     source_entries = [LexiconEntry.from_dict(row) for row in source_rows]
     allowlist_items = _load_allowlist(data_dir / CHAR_ALLOWLIST_FILE)
     core_entries = _load_core_lexicon_entries(data_dir)
-    identity_passthrough_terms, identity_passthrough_entry_ids = _collect_identity_passthrough_entries(source_entries)
-    protected_terms, core_identity_entry_ids = _collect_protected_terms(
-        core_entries,
+    (
+        protected_terms,
+        strict_protected_terms,
+        protected_entry_ids,
+        protected_term_lints,
+        legacy_protected_debt_count,
+    ) = _collect_protected_terms(
+        source_rows,
         allowlist_items,
-        identity_passthrough_terms=identity_passthrough_terms,
     )
     entries = source_entries + core_entries
+    identity_passthrough_entry_ids = _collect_identity_passthrough_entry_ids(entries)
     _validate_unique_entry_ids(entries)
     _validate_entry_target_conflicts(entries)
     rules = _expand_rules_with_tokens([RuleEntry.from_dict(row) for row in rule_rows])
@@ -979,11 +1255,11 @@ def _compile_runtime_artifacts_unlocked(
     runtime_entries: list[LexiconEntry] = []
     runtime_excluded: dict[str, str] = {}
     for entry in entries:
-        if entry.entry_id in core_identity_entry_ids:
-            runtime_excluded[entry.entry_id] = RUNTIME_FILTER_CORE_IDENTITY_PROTECTED
-            continue
         if entry.entry_id in identity_passthrough_entry_ids and not is_sentence_manual_override(entry):
-            runtime_excluded[entry.entry_id] = RUNTIME_FILTER_IDENTITY_PASSTHROUGH_MASKED
+            if entry.entry_id in protected_entry_ids:
+                runtime_excluded[entry.entry_id] = RUNTIME_FILTER_IDENTITY_PASSTHROUGH_MASKED
+            else:
+                runtime_excluded[entry.entry_id] = RUNTIME_FILTER_IDENTITY_PASSTHROUGH_UNPROTECTED
             continue
         reason = runtime_exclusion_reason(entry)
         if reason:
@@ -1009,9 +1285,9 @@ def _compile_runtime_artifacts_unlocked(
     for entry in ordered_active_entries:
         if is_sentence_manual_override(entry):
             sentence_override_map.setdefault(entry.src, []).append(entry.entry_id)
-        if is_trusted_manual_entry(entry) and entry.context:
+        if is_trusted_context_entry(entry):
             contextual_override_ids.append(entry.entry_id)
-        if entry.level == "char" and not entry.context:
+        if entry.level == "char" and entry.context is None:
             char_map.setdefault(entry.src, []).append(entry.entry_id)
 
     phrase_trie = _serialize_runtime_phrase_trie(
@@ -1046,11 +1322,13 @@ def _compile_runtime_artifacts_unlocked(
         rules_by_pass[PASS_INDEX.get(rule.pass_name, 0)].append(_serialize_runtime_rule(rule))
 
     rule_plan_doc: dict[str, Any] = {
-        "v": 6,
+        "v": RULE_PLAN_SCHEMA_VERSION,
+        RULE_PLAN_LEXICON_STAGE_KEY: LEXICON_STAGE,
         "r": rules_by_pass,
         "rt": RESIDUAL_MANDARIN_TERMS,
         "rc": residual_core_terms,
         "pt": "\n".join(protected_terms),
+        RULE_PLAN_STRICT_PROTECTED_TERMS_KEY: "\n".join(strict_protected_terms),
     }
     if mask_warnings:
         rule_plan_doc["mw"] = mask_warnings
@@ -1058,6 +1336,8 @@ def _compile_runtime_artifacts_unlocked(
         rule_plan_doc["rh"] = regex_hazards
     if pipeline_conflicts:
         rule_plan_doc["pc"] = pipeline_conflicts
+    if protected_term_lints:
+        rule_plan_doc["pl"] = protected_term_lints
 
     artifact_documents: dict[str, Any] = {
         "entry_table.json": entry_table_doc,
@@ -1073,21 +1353,15 @@ def _compile_runtime_artifacts_unlocked(
                 sentence_override_map,
                 entry_index_by_id=entry_index_by_id,
             ),
-            "c": [
-                entry_index_by_id[entry_id]
-                for entry_id in contextual_override_ids
-                if entry_id in entry_index_by_id
-            ],
+            "c": [entry_index_by_id[entry_id] for entry_id in contextual_override_ids if entry_id in entry_index_by_id],
         },
     }
+    validate_artifact_documents(artifact_documents)
     artifact_texts = {
-        name: json.dumps(document, ensure_ascii=False, separators=(",", ":"))
+        name: json.dumps(document, ensure_ascii=False, separators=(",", ":"), allow_nan=False)
         for name, document in artifact_documents.items()
     }
-    artifact_hashes = {
-        name: hashlib.sha256(text.encode("utf-8")).hexdigest()
-        for name, text in artifact_texts.items()
-    }
+    artifact_hashes = {name: hashlib.sha256(text.encode("utf-8")).hexdigest() for name, text in artifact_texts.items()}
 
     source_digest_after = _source_digest(data_dir)
     if source_digest_after != source_digest_before:
@@ -1110,10 +1384,13 @@ def _compile_runtime_artifacts_unlocked(
         "regex_hazard_count": len(regex_hazards),
         "pipeline_conflict_count": len(pipeline_conflicts),
         "protected_term_count": len(protected_terms),
+        "protected_term_lint_count": len(protected_term_lints),
+        "legacy_protected_debt_count": legacy_protected_debt_count,
         "residual_core_term_count": len(residual_core_terms),
         "lexicon_stage": LEXICON_STAGE,
-        "core_identity_protected_entry_count": len(core_identity_entry_ids),
-        "identity_passthrough_protected_entry_count": len(identity_passthrough_entry_ids),
+        "core_identity_protected_entry_count": 0,
+        "identity_passthrough_protected_entry_count": len(protected_entry_ids),
+        "artifact_schema_versions": dict(ARTIFACT_SCHEMA_VERSIONS),
     }
 
     # Data files are replaced first and the checksummed manifest is the commit
@@ -1173,10 +1450,14 @@ def ensure_runtime_ready(
             return {}
         return _inflate_runtime_manifest(document)
 
-    def artifact_hashes_match(candidate: dict[str, Any]) -> bool:
+    def artifact_contract_matches(candidate: dict[str, Any]) -> bool:
         hashes = candidate.get("artifact_hashes")
         if not isinstance(hashes, dict):
             return False
+        if candidate.get("artifact_schema_versions") != ARTIFACT_SCHEMA_VERSIONS:
+            return False
+
+        documents: dict[str, Any] = {}
         for name in ARTIFACT_FILES:
             expected_hash = hashes.get(name)
             if not isinstance(expected_hash, str) or len(expected_hash) != 64:
@@ -1187,6 +1468,14 @@ def ensure_runtime_ready(
                 return False
             if hashlib.sha256(payload).hexdigest() != expected_hash:
                 return False
+            try:
+                documents[name] = json.loads(payload)
+            except (UnicodeDecodeError, json.JSONDecodeError):
+                return False
+        try:
+            validate_artifact_documents(documents)
+        except ValueError:
+            return False
         return True
 
     migrated_stats: dict[str, int] | None = None
@@ -1205,7 +1494,7 @@ def ensure_runtime_ready(
             and manifest.get("compiler_version") == COMPILER_VERSION
             and manifest.get("source_digest") == expected_digest
             and manifest.get("lexicon_stage") == LEXICON_STAGE
-            and artifact_hashes_match(manifest)
+            and artifact_contract_matches(manifest)
         )
         if not is_current:
             manifest = _compile_runtime_artifacts_unlocked(

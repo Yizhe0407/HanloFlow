@@ -7,9 +7,17 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from scripts.regression_runner import RegressionCase, run_regression_cli
+from scripts.regression_runner import (
+    RegressionCase as RegressionCaseModel,
+)
+from scripts.regression_runner import (
+    compatibility_snapshot_case as RegressionCase,
+)
+from scripts.regression_runner import (
+    run_regression_cli,
+)
 
-SCHOOL_REGRESSION_CASES: list[RegressionCase] = [
+SCHOOL_REGRESSION_CASES: list[RegressionCaseModel] = [
     # teacher_class — 教師課堂
     RegressionCase("teacher_class", "老師在上課。", "老師佇咧上課。"),
     RegressionCase("teacher_class", "老師好。", "老師好。"),
@@ -110,14 +118,30 @@ SCHOOL_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("exam", "可以幫我查補考地點嗎？", "會當替我查補考地點無？"),
     RegressionCase("exam", "可以幫我查段考時間嗎？", "會當替我查段考時間無？"),
     # campus — 校園設施
-    RegressionCase("campus", "我去圖書館借書。", "我去圖冊館借冊。"),
+    RegressionCase(
+        "campus",
+        "我去圖書館借書。",
+        "我去圖書館借冊。",
+        oracle_kind="verified_translation",
+        provenance="教育部《臺灣台語常用詞辭典》「圖書館」詞目與人工語境審查",
+        reviewed_by="codex+official-source-review",
+        reviewed_at="2026-07-28",
+    ),
     RegressionCase("campus", "請問廁所在哪裡？", "借問便所佇佗位？"),
     RegressionCase("campus", "這本書借我看看。", "這本冊借我看覓。"),
     RegressionCase("campus", "下課了嗎？", "下課矣無？"),
     RegressionCase("campus", "請問保健室在哪裡？", "借問保健室佇佗位？"),
     RegressionCase("campus", "老師辦公室在二樓。", "老師辦公室佇二樓。"),
     RegressionCase("campus", "操場可以借球嗎？", "操場會當借球無？"),
-    RegressionCase("campus", "我要去圖書館還書。", "我欲去圖冊館還書。"),
+    RegressionCase(
+        "campus",
+        "我要去圖書館還書。",
+        "我欲去圖書館還書。",
+        oracle_kind="verified_translation",
+        provenance="教育部《臺灣台語常用詞辭典》「圖書館」詞目與人工語境審查",
+        reviewed_by="codex+official-source-review",
+        reviewed_at="2026-07-28",
+    ),
     RegressionCase("campus", "我想借這本書。", "我想欲借這本冊。"),
     RegressionCase("campus", "可以幫我查教室位置嗎？", "會當替我查教室位置無？"),
     # ability — 能力表達
@@ -132,7 +156,7 @@ SCHOOL_REGRESSION_CASES: list[RegressionCase] = [
 def main() -> int:
     return run_regression_cli(
         SCHOOL_REGRESSION_CASES,
-        description='學校/教育情境 regression runner',
+        description="學校/教育情境 regression runner",
     )
 
 

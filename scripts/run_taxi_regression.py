@@ -7,9 +7,17 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from scripts.regression_runner import RegressionCase, run_regression_cli
+from scripts.regression_runner import (
+    RegressionCase as RegressionCaseModel,
+)
+from scripts.regression_runner import (
+    compatibility_snapshot_case as RegressionCase,
+)
+from scripts.regression_runner import (
+    run_regression_cli,
+)
 
-TAXI_REGRESSION_CASES: list[RegressionCase] = [
+TAXI_REGRESSION_CASES: list[RegressionCaseModel] = [
     # hailing — 叫車
     RegressionCase("hailing", "我要叫計程車。", "我欲叫計程車。"),
     RegressionCase("hailing", "請問有沒有叫車服務？", "借問敢有叫車服務？"),
@@ -42,7 +50,7 @@ TAXI_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("destination", "到機場要多久？", "到機場愛偌久？"),
     RegressionCase("destination", "我想先去加油站。", "我想欲先去加油站。"),
     RegressionCase("destination", "我想先去便利商店。", "我想欲先去便利店。"),
-    RegressionCase("destination", "可以幫我改上車地點嗎？", "會當替我改上車地點無？"),
+    RegressionCase("destination", "可以幫我改上車地點嗎？", "會當替我改上車所在無？"),
     RegressionCase("destination", "我想改上車時間。", "我想欲改上車時間。"),
     RegressionCase("destination", "我想改下車地點。", "我想欲改落車地點。"),
     RegressionCase("destination", "可以幫我改目的地嗎？", "會當替我改目的地無？"),
@@ -53,7 +61,7 @@ TAXI_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("navigation", "在前面左轉。", "佇頭前倒斡。"),
     RegressionCase("navigation", "直走就到了。", "直走就到矣。"),
     RegressionCase("navigation", "就這裡下車。", "就遮落車。"),
-    RegressionCase("navigation", "麻煩靠邊停一下。", "麻煩靠路邊停一下。"),
+    RegressionCase("navigation", "麻煩靠邊停一下。", "麻煩靠路爿停一下。"),
     RegressionCase("navigation", "前面臨停一下就好。", "頭前暫停一下就好。"),
     RegressionCase("navigation", "靠右邊停。", "靠正手爿停。"),
     RegressionCase("navigation", "靠左邊停。", "靠倒手爿停。"),
@@ -63,10 +71,28 @@ TAXI_REGRESSION_CASES: list[RegressionCase] = [
     # payment — 付款
     RegressionCase("payment", "多少錢？", "偌濟錢？"),
     RegressionCase("payment", "不用找了。", "免找矣。"),
-    RegressionCase("payment", "可以刷卡嗎？", "會當刷卡無？"),
+    RegressionCase(
+        "payment",
+        "可以刷卡嗎？",
+        "會當刷卡無？",
+        duplicate_group="cross_domain_payment_intent",
+        duplicate_reason="餐飲、購物與計程車產品面共用付款意圖，但需各自保留端到端覆蓋。",
+    ),
     RegressionCase("payment", "可以開收據嗎？", "會當開收據無？"),
-    RegressionCase("payment", "可以用電子支付嗎？", "會當用電子付錢無？"),
-    RegressionCase("payment", "可以開發票嗎？", "會當開發票無？"),
+    RegressionCase(
+        "payment",
+        "可以用電子支付嗎？",
+        "會當用電子支付無？",
+        duplicate_group="cross_domain_payment_intent",
+        duplicate_reason="餐飲、購物與計程車產品面共用付款意圖，但需各自保留端到端覆蓋。",
+    ),
+    RegressionCase(
+        "payment",
+        "可以開發票嗎？",
+        "會當開發票無？",
+        duplicate_group="cross_domain_payment_intent",
+        duplicate_reason="餐飲、購物與計程車產品面共用付款意圖，但需各自保留端到端覆蓋。",
+    ),
     RegressionCase("payment", "不用找零了。", "免找錢矣。"),
     RegressionCase("payment", "我想改成現金付款。", "我想欲改做現錢付款。"),
     RegressionCase("payment", "可以幫我查車資嗎？", "會當替我查車錢無？"),
@@ -104,7 +130,7 @@ TAXI_REGRESSION_CASES: list[RegressionCase] = [
 def main() -> int:
     return run_regression_cli(
         TAXI_REGRESSION_CASES,
-        description='計程車情境 regression runner',
+        description="計程車情境 regression runner",
     )
 
 

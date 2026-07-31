@@ -7,9 +7,17 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from scripts.regression_runner import RegressionCase, run_regression_cli
+from scripts.regression_runner import (
+    RegressionCase as RegressionCaseModel,
+)
+from scripts.regression_runner import (
+    compatibility_snapshot_case as RegressionCase,
+)
+from scripts.regression_runner import (
+    run_regression_cli,
+)
 
-FAMILY_REGRESSION_CASES: list[RegressionCase] = [
+FAMILY_REGRESSION_CASES: list[RegressionCaseModel] = [
     # parent_child — 親子日常
     RegressionCase("parent_child", "媽媽在煮飯。", "阿母佇咧煮飯。"),
     RegressionCase("parent_child", "爸爸去上班了。", "阿爸去上班矣。"),
@@ -109,7 +117,7 @@ FAMILY_REGRESSION_CASES: list[RegressionCase] = [
 def main() -> int:
     return run_regression_cli(
         FAMILY_REGRESSION_CASES,
-        description='家庭/親子情境 regression runner',
+        description="家庭/親子情境 regression runner",
     )
 
 

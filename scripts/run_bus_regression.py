@@ -7,17 +7,33 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from scripts.regression_runner import RegressionCase, run_regression_cli
+from scripts.regression_runner import (
+    RegressionCase as RegressionCaseModel,
+)
+from scripts.regression_runner import (
+    compatibility_snapshot_case as RegressionCase,
+)
+from scripts.regression_runner import (
+    run_regression_cli,
+)
 
-BUS_REGRESSION_CASES: list[RegressionCase] = [
+BUS_REGRESSION_CASES: list[RegressionCaseModel] = [
     # stop control / stop status
-    RegressionCase("stop_control", "這班公車恢復停靠本站了，你不用再走去對面。", "這班公車閣停本站矣，你免閣行去對面。"),
+    RegressionCase(
+        "stop_control", "這班公車恢復停靠本站了，你不用再走去對面。", "這班公車閣停本站矣，你免閣行去對面。"
+    ),
     RegressionCase("stop_control", "這班公車只停外圍站，不會開進廟口前面。", "這班公車干焦停外圍站，袂開進廟埕頭前。"),
     RegressionCase("stop_control", "如果你要去醫院院區裡面，這班車沒有進去。", "若是你欲去病院內底，這班車無進去。"),
     RegressionCase("stop_control", "這個站牌已經恢復正常停靠了。", "這个站牌已經閣正常停矣。"),
-    RegressionCase("stop_control", "這個站牌今天恢復停靠，但班次還沒有完全正常。", "這个站牌今仔日閣停，但班次猶未攏正常。"),
-    RegressionCase("stop_control", "這個站牌暫時改成下車專用，上車請到對面。", "這个站牌暫時改成干焦落車，上車請到對面。"),
-    RegressionCase("stop_control", "這一站今天暫停使用，請改到前面臨時站牌。", "這一站今仔日停用，請改去頭前臨時站牌。"),
+    RegressionCase(
+        "stop_control", "這個站牌今天恢復停靠，但班次還沒有完全正常。", "這个站牌今仔日閣停，但班次猶未攏正常。"
+    ),
+    RegressionCase(
+        "stop_control", "這個站牌暫時改成下車專用，上車請到對面。", "這个站牌暫時改成干焦落車，上車請到對面。"
+    ),
+    RegressionCase(
+        "stop_control", "這一站今天暫停使用，請改到前面臨時站牌。", "這一站今仔日停用，請改去頭前臨時站牌。"
+    ),
     RegressionCase("stop_control", "這班公車今天不停靠學校門口。", "這班公車今仔日無停學校門跤口。"),
     RegressionCase("stop_control", "這班車今天不停靠北港朝天宮。", "這班車今仔日無停北港朝天宮。"),
     RegressionCase("stop_control", "這裡不是下車站，你要到前面那一站下。", "遮毋是落車站，你欲到頭前彼站才落。"),
@@ -25,8 +41,14 @@ BUS_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("stop_control", "司機說這一站只下客，不給上車。", "司機講這一站干焦落客，袂予上車。"),
     RegressionCase("stop_control", "這站只讓下車，不讓上車。", "這站干焦落車，無予上車。"),
     RegressionCase("stop_control", "這班公車現在只下客，不載人上車。", "這班公車這馬干焦落客，無予人上車。"),
-    RegressionCase("stop_control", "這班公車現在只停外圍站，你要自己走進去老街。", "這班公車這馬干焦停外圍站，你欲家己行入去老街。"),
-    RegressionCase("stop_control", "今天因為活動，公車只停外圍，不會開進老街裡面。", "今仔日因為活動，公車干焦停外圍，袂開進老街內底。"),
+    RegressionCase(
+        "stop_control", "這班公車現在只停外圍站，你要自己走進去老街。", "這班公車這馬干焦停外圍站，你欲家己行入去老街。"
+    ),
+    RegressionCase(
+        "stop_control",
+        "今天因為活動，公車只停外圍，不會開進老街裡面。",
+        "今仔日因為活動，公車干焦停外圍，袂開進老街內底。",
+    ),
     RegressionCase("stop_control", "這班車回程不會經過這一站。", "這班車回程袂經過這一站。"),
     RegressionCase("stop_control", "你要去對面搭回程車。", "你愛去對面搭回程車。"),
     RegressionCase("stop_control", "高鐵接駁車在對面站牌搭。", "高鐵接駁車佇對面站牌搭。"),
@@ -35,7 +57,9 @@ BUS_REGRESSION_CASES: list[RegressionCase] = [
     # delay / eta / detour
     RegressionCase("delay_eta", "如果你趕時間，我不建議你等這班車。", "若是你趕時間，我無建議你等這班車。"),
     RegressionCase("delay_eta", "如果你趕時間，建議你不要等這班車。", "若是你趕時間，建議你莫等這班車。"),
-    RegressionCase("delay_eta", "因為前面塞車，現在沒有辦法給你很準的到站時間。", "因為頭前窒車，這馬無法度共你報真準的到站時間。"),
+    RegressionCase(
+        "delay_eta", "因為前面塞車，現在沒有辦法給你很準的到站時間。", "因為頭前窒車，這馬無法度共你報真準的到站時間。"
+    ),
     RegressionCase("delay_eta", "前面有交通事故，公車會慢十五分鐘。", "頭前有交通事故，公車會慢十五分鐘。"),
     RegressionCase("delay_eta", "頭班車明天會晚半小時。", "頭班車明仔載會慢分半點鐘。"),
     RegressionCase("delay_eta", "今天的末班車提早十分鐘開車。", "今仔日的尾班車較早十分鐘開車。"),
@@ -172,9 +196,13 @@ BUS_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("bus_time_queries", "可以幫我查首班車時間嗎？", "會當替我查頭班車時間無？"),
     RegressionCase("bus_time_queries", "可以幫我查公車營運時間嗎？", "會當替我查公車營運時間無？"),
     # payment / cards / ticketing
-    RegressionCase("payment_cards", "如果你沒有零錢，可以先投現再去總站補票。", "若是你無零錢，會當先投現錢閣去總站補票。"),
+    RegressionCase(
+        "payment_cards", "如果你沒有零錢，可以先投現再去總站補票。", "若是你無零錢，會當先投現錢閣去總站補票。"
+    ),
     RegressionCase("payment_cards", "如果你的愛心卡刷不過，可以改用投現。", "若是你的愛心卡鑢袂過，會當改用投現錢。"),
-    RegressionCase("payment_cards", "如果刷卡還是不過，我先幫你登記，再請你補票。", "若是鑢卡猶毋過，我先替你登記，再請你補票。"),
+    RegressionCase(
+        "payment_cards", "如果刷卡還是不過，我先幫你登記，再請你補票。", "若是鑢卡猶毋過，我先替你登記，再請你補票。"
+    ),
     RegressionCase("payment_cards", "如果刷卡還是失敗，就先投現金。", "若是刷袂過，就先投現錢。"),
     RegressionCase("payment_cards", "你先上車，補票到總站再處理。", "你先上車，補票到總站再處理。"),
     RegressionCase("payment_cards", "如果你要去總站補票，先跟司機說一聲。", "若是你欲去總站補票，先佮司機講一聲。"),
@@ -185,10 +213,14 @@ BUS_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("payment_cards", "可以幫我查公車票價嗎？", "會當替我查公車票價無？"),
     RegressionCase("payment_cards", "可以幫我查票卡餘額嗎？", "會當替我查票卡餘額無？"),
     # accessibility / boarding
-    RegressionCase("accessibility", "今天這班低底盤公車壞掉了，換成一般車。", "今仔日這班低底盤公車歹去矣，換成一般車。"),
+    RegressionCase(
+        "accessibility", "今天這班低底盤公車壞掉了，換成一般車。", "今仔日這班低底盤公車歹去矣，換成一般車。"
+    ),
     RegressionCase("accessibility", "這班車今天改成小車，所以沒有輪椅斜板。", "這班車今仔日改成小車，所以無輪椅斜板。"),
     RegressionCase("accessibility", "輪椅要上車的話，我先幫你放斜板。", "若是輪椅要上車，我先替你共斜板放落來。"),
-    RegressionCase("accessibility", "你如果要推輪椅上車，等一下我先請大家讓一下。", "你若是要推輪椅上車，等咧我先請逐家讓一下。"),
+    RegressionCase(
+        "accessibility", "你如果要推輪椅上車，等一下我先請大家讓一下。", "你若是欲推輪椅上車，等咧我先請逐家讓一下。"
+    ),
     RegressionCase("accessibility", "你先不要排太前面，讓輪椅乘客先上車。", "你先莫排太頭前，讓坐輪椅的乘客先上車。"),
     RegressionCase("accessibility", "嬰兒車也可以上車，但請先收好。", "嬰仔車也會當上車，但請先收予好。"),
     RegressionCase("accessibility", "這班低底盤公車今天沒有來。", "這班低底盤公車今仔日無來。"),
@@ -230,7 +262,7 @@ BUS_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("bus_rules", "上車後請不要站在門邊。", "上車後請莫徛佇門邊。"),
     RegressionCase("bus_rules", "請不要占用兩個座位。", "請莫佔用兩个座位。"),
     RegressionCase("bus_rules", "行李不要放在走道中間。", "行李莫囥佇行道中央。"),
-    RegressionCase("bus_rules", "車上不提供找零。", "車頂無提供找零。"),
+    RegressionCase("bus_rules", "車上不提供找零。", "車頂無提供找錢。"),
     RegressionCase("bus_rules", "投現請自備零錢。", "投現請家己備零錢。"),
     RegressionCase("bus_rules", "上車後請盡快入座。", "上車後請較緊坐好。"),
     RegressionCase("bus_rules", "車輛行進中請勿站起來。", "車咧行的時陣請毋通徛起來。"),
@@ -280,7 +312,7 @@ BUS_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("bus_rules", "刀械不能帶上車。", "刀械袂當帶上車。"),
     RegressionCase("bus_rules", "請勿攜帶散發異味的物品。", "請毋通帶會發臭味的物件。"),
     RegressionCase("bus_rules", "魚貨要包好才可以上車。", "魚貨愛包予好才會當上車。"),
-    RegressionCase("bus_rules", "請勿在車上大聲喧嘩。", "請毋通佇車頂大聲喧嘩。"),
+    RegressionCase("bus_rules", "請勿在車上大聲喧嘩。", "請毋通佇車頂大聲唏嚇叫。"),
     RegressionCase("bus_rules", "請勿在車上追逐嬉戲。", "請毋通佇車頂走相逐耍鬧。"),
     RegressionCase("bus_rules", "請勿在車廂內奔跑。", "請毋通佇車廂內走跳。"),
     RegressionCase("bus_rules", "請勿將頭伸出車窗。", "請毋通共頭伸出車窗。"),
@@ -293,10 +325,10 @@ BUS_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("bus_rules", "車內空調請勿自行調整。", "車內空調請毋通家己調整。"),
     RegressionCase("bus_rules", "請勿擅自開啟天窗。", "請毋通家己拍開天窗。"),
     RegressionCase("bus_rules", "逃生窗僅供緊急使用。", "逃生窗干焦緊急時使用。"),
-    RegressionCase("bus_rules", "窗簾請勿拉扯。", "窗簾請毋通拉扯。"),
+    RegressionCase("bus_rules", "窗簾請勿拉扯。", "窗仔簾請毋通拉扯。"),
     RegressionCase("bus_rules", "請保管好隨身物品。", "請顧好隨身物件。"),
     RegressionCase("bus_rules", "貴重物品請自行保管。", "貴重物件請家己保管。"),
-    RegressionCase("bus_rules", "請勿把包包掛在扶手上。", "請毋通共包仔掛佇扶手頂。"),
+    RegressionCase("bus_rules", "請勿把包包掛在扶手上。", "請毋通共皮包仔掛佇扶手頂。"),
     RegressionCase("bus_rules", "隨身物品掉落請先告知司機。", "隨身物件落去請先通知司機。"),
     RegressionCase("bus_rules", "請勿把物品放在司機旁邊。", "請毋通共物件囥佇司機邊仔。"),
     RegressionCase("bus_rules", "行李架上物品請放穩。", "行李架頂的物件請囥予穩。"),
@@ -306,7 +338,7 @@ BUS_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("bus_rules", "請依序排隊上車。", "請照順序排隊上車。"),
     RegressionCase("bus_rules", "候車時請站在人行道上。", "等車的時陣請徛佇人行道頂。"),
     RegressionCase("bus_rules", "請勿在站牌前推擠。", "請毋通佇站牌頭前推擠。"),
-    RegressionCase("bus_rules", "請等車停穩後再上下車。", "請等車停好了後才上下車。"),
+    RegressionCase("bus_rules", "請等車停穩後再上下車。", "請等車停好矣後才上下車。"),
     RegressionCase("bus_rules", "下車乘客請先下車。", "欲落車的乘客請先落車。"),
     RegressionCase("bus_rules", "上車乘客請禮讓下車乘客。", "欲上車的乘客請禮讓欲落車的乘客。"),
     RegressionCase("bus_rules", "請勿從車前穿越馬路。", "請毋通對車頭前過大路。"),
@@ -357,7 +389,15 @@ BUS_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("bus_rules", "請勿把手放在車門縫。", "請毋通共手囥佇車門縫。"),
     RegressionCase("bus_rules", "車門開關時請保持距離。", "車門開關的時陣請保持距離。"),
     RegressionCase("bus_rules", "請勿自行移動安全設備。", "請毋通家己徙動安全設備。"),
-    RegressionCase("bus_rules", "需要協助請告知司機。", "需要鬥相共請通知司機。"),
+    RegressionCase(
+        "bus_rules",
+        "需要協助請告知司機。",
+        "若是需要鬥相共，請通知司機。",
+        oracle_kind="verified_translation",
+        provenance="人工句法與語意保真審查：補明條件關係並保留協助義",
+        reviewed_by="codex+official-source-review",
+        reviewed_at="2026-07-28",
+    ),
     RegressionCase("bus_rules", "請勿在車內噴香水。", "請毋通佇車內噴芳水。"),
     RegressionCase("bus_rules", "請勿占用駕駛視線。", "請毋通擋著司機視線。"),
     RegressionCase("bus_rules", "請勿將外套掛在扶手上。", "請毋通共外衫掛佇扶手頂。"),
@@ -391,7 +431,7 @@ BUS_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("bus_rules", "請勿將票卡放在手機後面感應。", "請毋通共票卡囥佇手機後壁感應。"),
     RegressionCase("bus_rules", "下車前請確認票卡已刷。", "落車進前請確認票卡有刷。"),
     RegressionCase("bus_rules", "請勿使用破損票卡。", "請毋通用破損票卡。"),
-    RegressionCase("bus_rules", "票卡遺失請到服務台處理。", "票卡拍無去請到服務台處理。"),
+    RegressionCase("bus_rules", "票卡遺失請到服務台處理。", "票卡拍毋見請到服務台處理。"),
     RegressionCase("bus_rules", "學生票請主動出示證件。", "學生票請主動提出證件。"),
     RegressionCase("bus_rules", "優惠票限本人使用。", "優惠票限本人用。"),
     RegressionCase("bus_rules", "請勿冒用他人票卡。", "請毋通冒用別人的票卡。"),
@@ -424,23 +464,55 @@ BUS_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("bus_rules", "請勿在車內直播。", "請毋通佇車內直播。"),
     RegressionCase("bus_rules", "請勿使用閃光燈。", "請毋通用閃光燈。"),
     RegressionCase("bus_rules", "拍照請勿影響他人。", "影相請毋通影響別人。"),
-    RegressionCase("bus_rules", "請勿拍攝其他乘客。", "請毋通拍攝別的乘客。"),
+    RegressionCase("bus_rules", "請勿拍攝其他乘客。", "請毋通拍攝其他乘客。"),
     RegressionCase("bus_rules", "車內錄影請勿妨礙通行。", "車內錄影請毋通妨礙通行。"),
     RegressionCase("bus_rules", "請勿將手機伸出窗外。", "請毋通共手機伸出窗外。"),
     RegressionCase("bus_rules", "自拍棒請收好。", "自拍棒請收予好。"),
     RegressionCase("bus_rules", "請勿使用自拍棒阻擋走道。", "請毋通用自拍棒擋著行道。"),
     RegressionCase("bus_rules", "請勿在車內大聲視訊。", "請毋通佇車內大聲視訊。"),
     # route / transfer / destinations
-    RegressionCase("route_transfer", "這班車今天不會再往前開，你要在火車站轉車。", "這班車今仔日袂閣往前開，你欲在火車頭轉車。"),
-    RegressionCase("route_transfer", "這班公車會先到高鐵站，再回到斗六火車站。", "這班公車會先到高鐵站，閣轉到斗六火車站。"),
+    RegressionCase(
+        "route_transfer", "這班車今天不會再往前開，你要在火車站轉車。", "這班車今仔日袂閣向前開，你欲在火車頭轉車。"
+    ),
+    RegressionCase(
+        "route_transfer",
+        "這班公車會先到高鐵站，再回到斗六火車站。",
+        "這班公車會先到高鐵站，閣倒轉去斗六火車站。",
+        oracle_kind="verified_translation",
+        provenance="人工語意保真審查：再回到須保留返回原處語意",
+        reviewed_by="codex+official-source-review",
+        reviewed_at="2026-07-28",
+    ),
     RegressionCase("route_transfer", "這班車先到總站，再開去高鐵站。", "這班車先到總站，再開去高鐵站。"),
-    RegressionCase("route_transfer", "這班車等一下會先進醫院，再回到車站。", "這班車等咧會先進病院，閣轉到車站。"),
-    RegressionCase("route_transfer", "這班車等一下會先繞去市場，再回到火車站。", "這班車等咧會先踅去市場，閣轉到火車頭。"),
+    RegressionCase(
+        "route_transfer",
+        "這班車等一下會先進醫院，再回到車站。",
+        "這班車等咧會先進病院，閣倒轉去車站。",
+        oracle_kind="verified_translation",
+        provenance="人工語意保真審查：再回到須保留返回原處語意",
+        reviewed_by="codex+official-source-review",
+        reviewed_at="2026-07-28",
+    ),
+    RegressionCase(
+        "route_transfer",
+        "這班車等一下會先繞去市場，再回到火車站。",
+        "這班車等咧會先踅去市場，閣倒轉去火車頭。",
+        oracle_kind="verified_translation",
+        provenance="人工語意保真審查：再回到須保留返回原處語意",
+        reviewed_by="codex+official-source-review",
+        reviewed_at="2026-07-28",
+    ),
     RegressionCase("route_transfer", "如果你要轉火車，這班車可能來不及。", "若是你欲轉火車，這班車可能袂赴。"),
     RegressionCase("route_transfer", "這班車到總站就不開了。", "這班車到總站就不開矣。"),
     RegressionCase("route_transfer", "這班車不會進醫院急診門口。", "這班車袂進病院急診門跤口。"),
-    RegressionCase("route_transfer", "你要去門診的話，在病院門口下就可以了。", "若是你欲去門診，佇病院門跤口下就會當矣。"),
-    RegressionCase("route_transfer", "如果你要去學校裡面，要在校門口下車再走進去。", "若是你欲去學校內底，要在校門跤口落車才行進去。"),
+    RegressionCase(
+        "route_transfer", "你要去門診的話，在病院門口下就可以了。", "若是你欲去門診，佇病院門跤口下就會當矣。"
+    ),
+    RegressionCase(
+        "route_transfer",
+        "如果你要去學校裡面，要在校門口下車再走進去。",
+        "若是你欲去學校內底，要在校門跤口落車才行進去。",
+    ),
     RegressionCase("route_transfer", "要去老街的話，你在外圍下車再走進去。", "若是欲去老街，你佇外圍落車才行進去。"),
     RegressionCase("route_transfer", "要去朝天宮的話，你在外圍下車就可以。", "若是欲去朝天宮，你佇外圍落車就會當。"),
     RegressionCase("route_transfer", "你去對面坐回火車站那班。", "你去對面坐回火車頭彼班。"),
@@ -451,87 +523,299 @@ BUS_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("route_transfer", "可以幫我查回程班次嗎？", "會當替我查回程班次無？"),
     # Yunlin station names / attractions
     RegressionCase("yunlin_stops_attractions", "這班車會到雲林布袋戲館嗎？", "這班車會到雲林布袋戲館無？"),
-    RegressionCase("yunlin_stops_attractions", "北港朝天宮站牌在水道頭文化園區旁邊嗎？", "北港朝天宮站牌佇水道頭文化園區隔壁無？"),
+    RegressionCase(
+        "yunlin_stops_attractions", "北港朝天宮站牌在水道頭文化園區旁邊嗎？", "北港朝天宮站牌佇水道頭文化園區邊仔無？"
+    ),
     RegressionCase("yunlin_stops_attractions", "我要從高鐵雲林站去虎尾糖廠。", "我欲對高鐵雲林站去虎尾糖廠。"),
     RegressionCase("yunlin_stops_attractions", "這班公車有停西螺延平老街嗎？", "這班公車有停西螺延平老街無？"),
     RegressionCase("yunlin_stops_attractions", "口湖遊客中心到成龍濕地要轉車嗎？", "口湖遊客中心到成龍濕地愛轉車無？"),
-    RegressionCase("yunlin_stops_attractions", "虎尾驛、虎尾鐵橋和合同廳舍都在虎尾嗎？", "虎尾驛、虎尾鐵橋和合同廳舍攏佇虎尾無？"),
-    RegressionCase("yunlin_stops_attractions", "西螺福興宮和丸莊醬油觀光工廠附近有站牌嗎？", "西螺福興宮和丸莊醬油觀光工廠附近有站牌無？"),
-    RegressionCase("yunlin_stops_attractions", "台灣好行會停麥寮拱範宮和三條崙海清宮。", "台灣好行會停麥寮拱範宮和三條崙海清宮。"),
-    RegressionCase("yunlin_stops_attractions", "站牌在高鐵雲林站旁邊嗎？", "站牌佇高鐵雲林站隔壁無？"),
-    RegressionCase("yunlin_shuttle_routes", "斗六古坑線會停雲中街和社口遊客中心嗎？", "斗六古坑線會停雲中街和社口遊客中心無？"),
+    RegressionCase(
+        "yunlin_stops_attractions", "虎尾驛、虎尾鐵橋和合同廳舍都在虎尾嗎？", "虎尾驛、虎尾鐵橋和合同廳舍攏佇虎尾無？"
+    ),
+    RegressionCase(
+        "yunlin_stops_attractions",
+        "西螺福興宮和丸莊醬油觀光工廠附近有站牌嗎？",
+        "西螺福興宮和丸莊醬油觀光工廠附近有站牌無？",
+    ),
+    RegressionCase(
+        "yunlin_stops_attractions", "台灣好行會停麥寮拱範宮和三條崙海清宮。", "台灣好行會停麥寮拱範宮和三條崙海清宮。"
+    ),
+    RegressionCase("yunlin_stops_attractions", "站牌在高鐵雲林站旁邊嗎？", "站牌佇高鐵雲林站邊仔無？"),
+    RegressionCase(
+        "yunlin_shuttle_routes", "斗六古坑線會停雲中街和社口遊客中心嗎？", "斗六古坑線會停雲中街和社口遊客中心無？"
+    ),
     RegressionCase("yunlin_shuttle_routes", "綠色隧道到古坑嘉興宮要多久？", "綠色隧道到古坑嘉興宮要偌久？"),
     RegressionCase("yunlin_shuttle_routes", "福祿壽酒廠和永光故事屋都在古坑嗎？", "福祿壽酒廠和永光故事屋攏佇古坑無？"),
-    RegressionCase("yunlin_shuttle_routes", "劍湖山世界到華山咖啡大街有接駁車嗎？", "劍湖山世界到華山咖啡大街有接駁車無？"),
+    RegressionCase(
+        "yunlin_shuttle_routes", "劍湖山世界到華山咖啡大街有接駁車嗎？", "劍湖山世界到華山咖啡大街有接駁車無？"
+    ),
     RegressionCase("yunlin_shuttle_routes", "雲西線從北港武德宮開到高鐵嘉義站。", "雲西線對北港武德宮開到高鐵嘉義站。"),
-    RegressionCase("yunlin_shuttle_routes", "北港春生活博物館、黃金蝙蝠生態館和戰水鯨湖廣場都在雲西線嗎？", "北港春生活博物館、黃金蝙蝠生態館和戰水鯨湖廣場攏佇雲西線無？"),
-    RegressionCase("yunlin_shuttle_routes", "顏厝寮聚落和北港1911好庫文化產業園區附近有站牌嗎？", "顏厝寮聚落和北港1911好庫文化產業園區附近有站牌無？"),
-    RegressionCase("yunlin_shuttle_routes", "草嶺線會經過鎮西國小、水岸藝術公園和成大醫院嗎？", "草嶺線會經過鎮西國小、水岸藝術公園和成大醫院無？"),
+    RegressionCase(
+        "yunlin_shuttle_routes",
+        "北港春生活博物館、黃金蝙蝠生態館和戰水鯨湖廣場都在雲西線嗎？",
+        "北港春生活博物館、黃金蝙蝠生態館和戰水鯨湖廣場攏佇雲西線無？",
+    ),
+    RegressionCase(
+        "yunlin_shuttle_routes",
+        "顏厝寮聚落和北港1911好庫文化產業園區附近有站牌嗎？",
+        "顏厝寮聚落和北港1911好庫文化產業園區附近有站牌無？",
+    ),
+    RegressionCase(
+        "yunlin_shuttle_routes",
+        "草嶺線會經過鎮西國小、水岸藝術公園和成大醫院嗎？",
+        "草嶺線會經過鎮西國小、水岸藝術公園和成大醫院無？",
+    ),
     RegressionCase("yunlin_shuttle_routes", "荷苞山桐花公園到草嶺公園還要多久？", "荷苞山桐花公園到草嶺公園猶愛偌久？"),
     RegressionCase("yunlin_shuttle_routes", "新草嶺國小站牌在東𤧥山莊前面嗎？", "新草嶺國小站牌佇東𤧥山莊頭前無？"),
-    RegressionCase("yunlin_tourism_attractions", "土庫順天宮、土庫庄役場和源順芝麻觀光油廠都在土庫嗎？", "土庫順天宮、土庫庄役場和源順芝麻觀光油廠攏佇土庫無？"),
-    RegressionCase("yunlin_tourism_attractions", "圖南咖啡故事館、行啟記念館和三小市集都在斗六嗎？", "圖南咖啡故事館、行啟記念館和三小市集攏佇斗六無？"),
-    RegressionCase("yunlin_tourism_attractions", "石榴車站附近有榴中社區、新德豐碾米廠和張氏宗祠嗎？", "石榴車站附近有榴中社區、新德豐米絞和張氏宗祠無？"),
-    RegressionCase("yunlin_tourism_attractions", "蘿莎玫瑰莊園到劍湖山世界幸福摩天輪要轉車嗎？", "蘿莎玫瑰莊園到劍湖山世界幸福摩天輪愛轉車無？"),
-    RegressionCase("yunlin_tourism_attractions", "華山文學步道、幽情谷步道和水濂洞哪一站比較近？", "華山文學步道、幽情谷步道和水濂洞佗一站較近？"),
-    RegressionCase("yunlin_tourism_attractions", "峭壁雄風步道、小天梯、雲嶺之丘和五元二角都在古坑嗎？", "峭壁雄風步道、小天梯、雲嶺之丘和五元二角攏佇古坑無？"),
-    RegressionCase("yunlin_tourism_attractions", "北港義民廟、北港工藝坊和北港春生活博物館附近有站牌嗎？", "北港義民廟、北港工藝坊和北港春生活博物館附近有站牌無？"),
-    RegressionCase("yunlin_tourism_attractions", "馬蹄蛤主題館、台灣鯛生態創意園區和沐藝堂都在口湖嗎？", "馬蹄蛤主題館、台灣鯛生態創意園區和沐藝堂攏佇口湖無？"),
-    RegressionCase("yunlin_tourism_attractions", "椬梧滯洪池到好蝦冏男社和成龍濕地要多久？", "椬梧滯洪池到好蝦冏男社和成龍濕地要偌久？"),
-    RegressionCase("yunlin_coastal_caoling", "斗南他里霧文化園區和斗南圓環附近有公車嗎？", "斗南他里霧文化園區和斗南圓環附近有公車無？"),
-    RegressionCase("yunlin_coastal_caoling", "北港限定早餐、北港巷弄美食和北港美食小吃都在北港嗎？", "北港限定早餐、北港巷弄美食和北港美食小吃攏佇北港無？"),
-    RegressionCase("yunlin_coastal_caoling", "水道頭文化園區遊客中心到北港女兒橋要走多久？", "水道頭文化園區遊客中心到北港女兒橋要走偌久？"),
-    RegressionCase("yunlin_coastal_caoling", "椬梧滯洪池、成龍濕地和金湖沙灘都在雲西線嗎？", "椬梧滯洪池、成龍濕地和金湖沙灘攏佇雲西線無？"),
-    RegressionCase("yunlin_coastal_caoling", "四湖參天宮、三條崙海水浴場和箔子寮漁港有公車嗎？", "四湖參天宮、三條崙海水浴場和箔子寮漁港有公車無？"),
-    RegressionCase("yunlin_coastal_caoling", "草嶺風景區、石壁風景區和草嶺古道在哪裡下車？", "草嶺風景區、石壁風景區和草嶺古道佇佗位落車？"),
-    RegressionCase("yunlin_coastal_caoling", "大飛山、杉林步道和遊龍湖步道今天有接駁車嗎？", "大飛山、杉林步道和遊龍湖步道今仔日有接駁車無？"),
-    RegressionCase("yunlin_coastal_caoling", "雲林記憶Cool和雲林故事館都在虎尾市區嗎？", "雲林記憶Cool和雲林故事館攏佇虎尾市區無？"),
-    RegressionCase("yunlin_coastal_caoling", "虎尾建國一村和北溪剪紙藝術村附近有站牌嗎？", "虎尾建國一村和北溪剪紙藝術村附近有站牌無？"),
-    RegressionCase("yunlin_caoling_minor_stops", "早寮、二坪仔和東內寮附近有站牌嗎？", "早寮、二坪仔和東內寮附近有站牌無？"),
-    RegressionCase("yunlin_caoling_minor_stops", "小旗仔、檳榔宅、外湖和內湖都在草嶺線嗎？", "小旗仔、檳榔宅、外湖和內湖攏佇草嶺線無？"),
-    RegressionCase("yunlin_caoling_minor_stops", "草嶺線會經過東和、受天宮和環球科技大學側門嗎？", "草嶺線會經過東和、受天宮和環球科技大學側門無？"),
+    RegressionCase(
+        "yunlin_tourism_attractions",
+        "土庫順天宮、土庫庄役場和源順芝麻觀光油廠都在土庫嗎？",
+        "土庫順天宮、土庫庄役場和源順芝麻觀光油廠攏佇土庫無？",
+    ),
+    RegressionCase(
+        "yunlin_tourism_attractions",
+        "圖南咖啡故事館、行啟記念館和三小市集都在斗六嗎？",
+        "圖南咖啡故事館、行啟記念館和三小市集攏佇斗六無？",
+    ),
+    RegressionCase(
+        "yunlin_tourism_attractions",
+        "石榴車站附近有榴中社區、新德豐碾米廠和張氏宗祠嗎？",
+        "石榴車站附近有榴中社區、新德豐米絞和張氏宗祠無？",
+    ),
+    RegressionCase(
+        "yunlin_tourism_attractions",
+        "蘿莎玫瑰莊園到劍湖山世界幸福摩天輪要轉車嗎？",
+        "蘿莎玫瑰莊園到劍湖山世界幸福摩天輪愛轉車無？",
+    ),
+    RegressionCase(
+        "yunlin_tourism_attractions",
+        "華山文學步道、幽情谷步道和水濂洞哪一站比較近？",
+        "華山文學步道、幽情谷步道和水濂洞佗一站較近？",
+    ),
+    RegressionCase(
+        "yunlin_tourism_attractions",
+        "峭壁雄風步道、小天梯、雲嶺之丘和五元二角都在古坑嗎？",
+        "峭壁雄風步道、小天梯、雲嶺之丘和五元二角攏佇古坑無？",
+    ),
+    RegressionCase(
+        "yunlin_tourism_attractions",
+        "北港義民廟、北港工藝坊和北港春生活博物館附近有站牌嗎？",
+        "北港義民廟、北港工藝坊和北港春生活博物館附近有站牌無？",
+    ),
+    RegressionCase(
+        "yunlin_tourism_attractions",
+        "馬蹄蛤主題館、台灣鯛生態創意園區和沐藝堂都在口湖嗎？",
+        "馬蹄蛤主題館、台灣鯛生態創意園區和沐藝堂攏佇口湖無？",
+    ),
+    RegressionCase(
+        "yunlin_tourism_attractions",
+        "椬梧滯洪池到好蝦冏男社和成龍濕地要多久？",
+        "椬梧滯洪池到好蝦冏男社和成龍濕地要偌久？",
+    ),
+    RegressionCase(
+        "yunlin_coastal_caoling",
+        "斗南他里霧文化園區和斗南圓環附近有公車嗎？",
+        "斗南他里霧文化園區和斗南圓環附近有公車無？",
+    ),
+    RegressionCase(
+        "yunlin_coastal_caoling",
+        "北港限定早餐、北港巷弄美食和北港美食小吃都在北港嗎？",
+        "北港限定早餐、北港巷弄美食和北港美食小吃攏佇北港無？",
+    ),
+    RegressionCase(
+        "yunlin_coastal_caoling",
+        "水道頭文化園區遊客中心到北港女兒橋要走多久？",
+        "水道頭文化園區遊客中心到北港女兒橋要走偌久？",
+    ),
+    RegressionCase(
+        "yunlin_coastal_caoling",
+        "椬梧滯洪池、成龍濕地和金湖沙灘都在雲西線嗎？",
+        "椬梧滯洪池、成龍濕地和金湖沙灘攏佇雲西線無？",
+    ),
+    RegressionCase(
+        "yunlin_coastal_caoling",
+        "四湖參天宮、三條崙海水浴場和箔子寮漁港有公車嗎？",
+        "四湖參天宮、三條崙海水浴場和箔子寮漁港有公車無？",
+    ),
+    RegressionCase(
+        "yunlin_coastal_caoling",
+        "草嶺風景區、石壁風景區和草嶺古道在哪裡下車？",
+        "草嶺風景區、石壁風景區和草嶺古道佇佗位落車？",
+    ),
+    RegressionCase(
+        "yunlin_coastal_caoling",
+        "大飛山、杉林步道和遊龍湖步道今天有接駁車嗎？",
+        "大飛山、杉林步道和遊龍湖步道今仔日有接駁車無？",
+    ),
+    RegressionCase(
+        "yunlin_coastal_caoling", "雲林記憶Cool和雲林故事館都在虎尾市區嗎？", "雲林記憶Cool和雲林故事館攏佇虎尾市區無？"
+    ),
+    RegressionCase(
+        "yunlin_coastal_caoling",
+        "虎尾建國一村和北溪剪紙藝術村附近有站牌嗎？",
+        "虎尾建國一村和北溪剪紙藝術村附近有站牌無？",
+    ),
+    RegressionCase(
+        "yunlin_caoling_minor_stops", "早寮、二坪仔和東內寮附近有站牌嗎？", "早寮、二坪仔和東內寮附近有站牌無？"
+    ),
+    RegressionCase(
+        "yunlin_caoling_minor_stops",
+        "小旗仔、檳榔宅、外湖和內湖都在草嶺線嗎？",
+        "小旗仔、檳榔宅、外湖和內湖攏佇草嶺線無？",
+    ),
+    RegressionCase(
+        "yunlin_caoling_minor_stops",
+        "草嶺線會經過東和、受天宮和環球科技大學側門嗎？",
+        "草嶺線會經過東和、受天宮和環球科技大學側門無？",
+    ),
     RegressionCase("yunlin_caoling_minor_stops", "站牌在檳榔宅附近嗎？", "站牌佇檳榔宅附近無？"),
     RegressionCase("yunlin_caoling_minor_stops", "外湖到內湖要走多久？", "外湖到內湖要走偌久？"),
-    RegressionCase("yunlin_caoling_minor_stops", "新草嶺國小到草嶺山莊會先經過草嶺嗎？", "新草嶺國小到草嶺山莊會先過草嶺無？"),
-    RegressionCase("yunlin_douliu_xiluo_attractions", "太平老街和聖玫瑰天主堂附近有公車嗎？", "太平老街和聖玫瑰天主堂附近有公車無？"),
-    RegressionCase("yunlin_douliu_xiluo_attractions", "西螺廣福宮、西螺福興宮和西螺大橋都在高鐵雲林站北邊嗎？", "西螺廣福宮、西螺福興宮和西螺大橋攏佇高鐵雲林站北爿無？"),
-    RegressionCase("yunlin_douliu_xiluo_attractions", "斗六棒球場、雲中街和黑膠音樂故事館要在哪裡下車？", "斗六野球場、雲中街和黑膠音樂故事館要佇佗位落車？"),
-    RegressionCase("yunlin_douliu_xiluo_attractions", "凹凸咖啡、猿樂作和貝歐克尼Balcony乾燥花都在雲中街嗎？", "凹凸咖啡、猿樂作和貝歐克尼Balcony焦燥花攏佇雲中街無？"),
-    RegressionCase("yunlin_douliu_xiluo_attractions", "Mr. Lobby Coffee Roaster和劍湖山世界樂園有台灣好行優惠嗎？", "Mr. Lobby Coffee Roaster和劍湖山世界樂園有台灣好行優惠無？"),
-    RegressionCase("yunlin_douliu_xiluo_attractions", "站牌在斗六棒球場旁邊嗎？", "站牌佇斗六野球場隔壁無？"),
+    RegressionCase(
+        "yunlin_caoling_minor_stops", "新草嶺國小到草嶺山莊會先經過草嶺嗎？", "新草嶺國小到草嶺山莊會先過草嶺無？"
+    ),
+    RegressionCase(
+        "yunlin_douliu_xiluo_attractions",
+        "太平老街和聖玫瑰天主堂附近有公車嗎？",
+        "太平老街和聖玫瑰天主堂附近有公車無？",
+    ),
+    RegressionCase(
+        "yunlin_douliu_xiluo_attractions",
+        "西螺廣福宮、西螺福興宮和西螺大橋都在高鐵雲林站北邊嗎？",
+        "西螺廣福宮、西螺福興宮和西螺大橋攏佇高鐵雲林站北爿無？",
+    ),
+    RegressionCase(
+        "yunlin_douliu_xiluo_attractions",
+        "斗六棒球場、雲中街和黑膠音樂故事館要在哪裡下車？",
+        "斗六野球場、雲中街和黑膠音樂故事館要佇佗位落車？",
+    ),
+    RegressionCase(
+        "yunlin_douliu_xiluo_attractions",
+        "凹凸咖啡、猿樂作和貝歐克尼Balcony乾燥花都在雲中街嗎？",
+        "凹凸咖啡、猿樂作和貝歐克尼Balcony焦燥花攏佇雲中街無？",
+    ),
+    RegressionCase(
+        "yunlin_douliu_xiluo_attractions",
+        "Mr. Lobby Coffee Roaster和劍湖山世界樂園有台灣好行優惠嗎？",
+        "Mr. Lobby Coffee Roaster和劍湖山世界樂園有台灣好行優惠無？",
+    ),
+    RegressionCase("yunlin_douliu_xiluo_attractions", "站牌在斗六棒球場旁邊嗎？", "站牌佇斗六野球場邊仔無？"),
     RegressionCase("yunlin_douliu_xiluo_attractions", "西螺媽廟到西螺大橋要轉車嗎？", "西螺媽廟到西螺大橋愛轉車無？"),
-    RegressionCase("yunlin_shuttle_food_stops", "蜜蜂故事館和華山咖啡大街物產館都在斗六古坑線嗎？", "蜜蜂故事館和華山咖啡大街物產館攏佇斗六古坑線無？"),
-    RegressionCase("yunlin_shuttle_food_stops", "鄉村休閒農莊、咖啡大街民宿和莿桐花咖啡附近有站牌嗎？", "鄉村休閒農莊、咖啡大街民宿和莿桐花咖啡附近有站牌無？"),
-    RegressionCase("yunlin_shuttle_food_stops", "石墩庭園咖啡在華山咖啡大街附近嗎？", "石墩庭園咖啡佇華山咖啡大街附近無？"),
-    RegressionCase("yunlin_shuttle_food_stops", "蝦の故鄉興義軒休閒園區和北港當歸鴨都在雲西線嗎？", "蝦の故鄉興義軒休閒園區和北港當歸鴨攏佇雲西線無？"),
+    RegressionCase(
+        "yunlin_shuttle_food_stops",
+        "蜜蜂故事館和華山咖啡大街物產館都在斗六古坑線嗎？",
+        "蜜蜂故事館和華山咖啡大街物產館攏佇斗六古坑線無？",
+    ),
+    RegressionCase(
+        "yunlin_shuttle_food_stops",
+        "鄉村休閒農莊、咖啡大街民宿和莿桐花咖啡附近有站牌嗎？",
+        "鄉村休閒農莊、咖啡大街民宿和莿桐花咖啡附近有站牌無？",
+    ),
+    RegressionCase(
+        "yunlin_shuttle_food_stops", "石墩庭園咖啡在華山咖啡大街附近嗎？", "石墩庭園咖啡佇華山咖啡大街附近無？"
+    ),
+    RegressionCase(
+        "yunlin_shuttle_food_stops",
+        "蝦の故鄉興義軒休閒園區和北港當歸鴨都在雲西線嗎？",
+        "蝦の故鄉興義軒休閒園區和北港當歸鴨攏佇雲西線無？",
+    ),
     RegressionCase("yunlin_shuttle_food_stops", "站牌在蜜蜂故事館前面嗎？", "站牌佇蜜蜂故事館頭前無？"),
-    RegressionCase("yunlin_shuttle_food_stops", "站牌在蝦の故鄉 興義軒休閒園區前面嗎？", "站牌佇蝦の故鄉興義軒休閒園區頭前無？"),
-    RegressionCase("yunlin_shuttle_food_stops", "阿甘薯叔 雲林高鐵門市在高鐵雲林站裡面嗎？", "阿甘薯叔雲林高鐵門市佇高鐵雲林站內底無？"),
+    RegressionCase(
+        "yunlin_shuttle_food_stops", "站牌在蝦の故鄉 興義軒休閒園區前面嗎？", "站牌佇蝦の故鄉興義軒休閒園區頭前無？"
+    ),
+    RegressionCase(
+        "yunlin_shuttle_food_stops",
+        "阿甘薯叔 雲林高鐵門市在高鐵雲林站裡面嗎？",
+        "阿甘薯叔雲林高鐵門市佇高鐵雲林站內底無？",
+    ),
     # destination clarification prompts
     RegressionCase("destination_prompt", "臺北範圍很廣，請問您具體要去哪個地點呢。", "台北真大，借問你欲去佗位？"),
     RegressionCase("destination_prompt", "請問您具體要去哪個地點呢。", "借問你欲去佗位？"),
     RegressionCase("destination_prompt", "您好，請問您要去臺北的哪個地方呢。", "你好，借問你欲去台北佗位？"),
-    RegressionCase("destination_prompt", "只要告訴我目的地，我就能為您查詢最近的公車路線", "只要共我講你欲去佗位，我就會當替你查較近的公車路線"),
-    RegressionCase("destination_prompt", "您好，請問您要去臺北的哪個地方呢。只要告訴我目的地，我就能為您查詢最近的公車路線", "你好，借問你欲去台北佗位？只要共我講你欲去佗位，我就會當替你查較近的公車路線"),
+    RegressionCase(
+        "destination_prompt",
+        "只要告訴我目的地，我就能為您查詢最近的公車路線",
+        "只要共我講你欲去佗位，我就會當替你查較近的公車路線",
+    ),
+    RegressionCase(
+        "destination_prompt",
+        "您好，請問您要去臺北的哪個地方呢。只要告訴我目的地，我就能為您查詢最近的公車路線",
+        "你好，借問你欲去台北佗位？只要共我講你欲去佗位，我就會當替你查較近的公車路線",
+    ),
     RegressionCase("destination_prompt", "您好，請問您是指新莊區嗎。", "你好，借問你是指新莊區無？"),
-    RegressionCase("destination_prompt", "請告訴我您想前往的新莊具體地點，我才能為您查詢", "請共我講你欲去新莊佗位，我才會當替你查"),
-    RegressionCase("destination_prompt", "您好，請問您是指新莊區嗎。請告訴我您想前往的新莊具體地點，我才能為您查詢", "你好，借問你是指新莊區無？請共我講你欲去新莊佗位，我才會當替你查"),
+    RegressionCase(
+        "destination_prompt", "請告訴我您想前往的新莊具體地點，我才能為您查詢", "請共我講你欲去新莊佗位，我才會當替你查"
+    ),
+    RegressionCase(
+        "destination_prompt",
+        "您好，請問您是指新莊區嗎。請告訴我您想前往的新莊具體地點，我才能為您查詢",
+        "你好，借問你是指新莊區無？請共我講你欲去新莊佗位，我才會當替你查",
+    ),
     RegressionCase("destination_prompt", "您要去的是獅崙嗎。", "你欲去的是獅崙無？"),
     RegressionCase("destination_prompt", "請告訴我您想前往獅崙的哪個地點", "請共我講你欲去獅崙佗位"),
-    RegressionCase("destination_prompt", "您要去的是獅崙嗎。請告訴我您想前往獅崙的哪個地點", "你欲去的是獅崙無？請共我講你欲去獅崙佗位"),
+    RegressionCase(
+        "destination_prompt",
+        "您要去的是獅崙嗎。請告訴我您想前往獅崙的哪個地點",
+        "你欲去的是獅崙無？請共我講你欲去獅崙佗位",
+    ),
     # station service / lost property / redirect
-    RegressionCase("service_redirect", "這個問題要問承辦單位，我這邊只能查公車班次。", "這个問題要問承辦單位，我遮干焦會當查公車班次。"),
-    RegressionCase("service_redirect", "這個問題跟公車無關，我沒辦法回答。", "這个問題佮公車無關，我無法度回答。"),
-    RegressionCase("service_redirect", "這不是我們站務可以決定的，你要問總站。", "這毋是阮站務會當決定的，你欲問總站。"),
-    RegressionCase("service_redirect", "這個不是公車問題，請去問警察。", "這个毋是公車問題，請去問警察。"),
-    RegressionCase("service_redirect", "如果你只是問廁所在哪裡，我可以跟你說。", "若是你只是問便所佇佗位，我會當共你講。"),
+    RegressionCase(
+        "service_redirect",
+        "這個問題要問承辦單位，我這邊只能查公車班次。",
+        "這个問題要問承辦單位，我遮干焦會當查公車班次。",
+    ),
+    RegressionCase(
+        "service_redirect",
+        "這個問題跟公車無關，我沒辦法回答。",
+        "這个問題佮公車無關，我無法度回答。",
+        duplicate_group="cross_domain_service_redirect",
+        duplicate_reason="公車與綜合交通產品面都需覆蓋相同的服務轉介語句。",
+    ),
+    RegressionCase(
+        "service_redirect", "這不是我們站務可以決定的，你要問總站。", "這毋是阮站務會當決定的，你欲問總站。"
+    ),
+    RegressionCase(
+        "service_redirect",
+        "這個不是公車問題，請去問警察。",
+        "這个毋是公車問題，請去問警察。",
+        duplicate_group="cross_domain_service_redirect",
+        duplicate_reason="公車與綜合交通產品面都需覆蓋相同的服務轉介語句。",
+    ),
+    RegressionCase(
+        "service_redirect",
+        "如果你只是問廁所在哪裡，我可以跟你說。",
+        "若是你只是問便所佇佗位，我會當共你講。",
+        duplicate_group="cross_domain_service_redirect",
+        duplicate_reason="公車與綜合交通產品面都需覆蓋相同的服務轉介語句。",
+    ),
     RegressionCase("service_redirect", "這裡有公車動態可以查。", "遮有公車動態會當查。"),
-    RegressionCase("service_redirect", "如果你只是要知道公車到哪裡，我可以幫你查動態。", "若是你只是欲知影公車到佗位，我會當替你查動態。"),
+    RegressionCase(
+        "service_redirect",
+        "如果你只是要知道公車到哪裡，我可以幫你查動態。",
+        "若是你只是欲知影公車到佗位，我會當替你查動態。",
+    ),
     RegressionCase("service_redirect", "如果你要查公車到哪裡，我可以幫你看。", "若是你欲查公車到佗位，我會當替你看。"),
-    RegressionCase("service_redirect", "如果你要找失物，我可以幫你轉給總站處理。", "若是你欲找失物，我會當替你轉去總站處理。"),
-    RegressionCase("service_redirect", "如果你要查失物，我可以先幫你記下車牌和時間。", "若是你欲查失物，我會當先幫你記落車牌佮時間。"),
-    RegressionCase("service_redirect", "如果你要找失物，我先幫你記車牌。", "若是你欲找失物，我先替你記車牌。"),
-    RegressionCase("service_redirect", "失物要送回總站，你下午再打電話確認。", "遺失物愛送轉去總站，你下晝閣敲電話確認。"),
+    RegressionCase(
+        "service_redirect", "如果你要找失物，我可以幫你轉給總站處理。", "若是你欲找失物，我會當替你轉去總站處理。"
+    ),
+    RegressionCase(
+        "service_redirect",
+        "如果你要查失物，我可以先幫你記下車牌和時間。",
+        "若是你欲查失物，我會當先幫你記落車牌佮時間。",
+    ),
+    RegressionCase(
+        "service_redirect",
+        "如果你要找失物，我先幫你記車牌。",
+        "若是你欲找失物，我先替你記車牌。",
+        duplicate_group="cross_domain_service_redirect",
+        duplicate_reason="公車與綜合交通產品面都需覆蓋相同的服務轉介語句。",
+    ),
+    RegressionCase(
+        "service_redirect",
+        "失物要送回總站，你下午再打電話確認。",
+        "遺失物愛送轉去總站，你下晝閣敲電話確認。",
+        duplicate_group="cross_domain_service_redirect",
+        duplicate_reason="公車與綜合交通產品面都需覆蓋相同的服務轉介語句。",
+    ),
     RegressionCase("service_redirect", "可以幫我查公車路線嗎？", "會當替我查公車路線無？"),
     RegressionCase("service_redirect", "可以幫我查路線變更嗎？", "會當替我查路線變更無？"),
     RegressionCase("service_redirect", "可以幫我查公車站名嗎？", "會當替我查公車站名無？"),
@@ -554,10 +838,16 @@ BUS_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("service_redirect", "請協助確認公車班次。", "請鬥相共確認公車班次。"),
     # weather / crowd / queue
     RegressionCase("weather_crowd", "如果車子太滿，站牌這邊就先不要再排。", "若是車子太滿，站牌遮就先莫再排。"),
-    RegressionCase("weather_crowd", "等一下如果車子太滿，司機可能不會讓你上車。", "等咧若是車子太滿，司機可能袂予你上車。"),
-    RegressionCase("weather_crowd", "站牌這邊現在人很多，你先到旁邊等比較安全。", "站牌遮這馬人誠濟，你先到邊仔等較安全。"),
+    RegressionCase(
+        "weather_crowd", "等一下如果車子太滿，司機可能不會讓你上車。", "等咧若是車子太滿，司機可能袂予你上車。"
+    ),
+    RegressionCase(
+        "weather_crowd", "站牌這邊現在人很多，你先到旁邊等比較安全。", "站牌遮這馬人誠濟，你先到邊仔等較安全。"
+    ),
     RegressionCase("weather_crowd", "連假人很多，你先排旁邊一點。", "連假人誠濟，你先排較邊仔。"),
-    RegressionCase("weather_crowd", "今天雨比較大，你先到騎樓下等，車到我再叫你。", "今仔日雨較大，你先到亭仔跤等，車到我才叫你。"),
+    RegressionCase(
+        "weather_crowd", "今天雨比較大，你先到騎樓下等，車到我再叫你。", "今仔日雨較大，你先到亭仔跤等，車到我才叫你。"
+    ),
     RegressionCase("weather_crowd", "你先到亭仔跤等，雨停了再過來。", "你先到亭仔跤等，雨停了再過來。"),
     RegressionCase("weather_crowd", "今天雨很大，車班可能不穩定。", "今仔日雨真大，車班可能不穩定。"),
     RegressionCase("weather_crowd", "廟口前面今天不能停車。", "廟埕頭前今仔日袂當停車。"),
@@ -577,7 +867,7 @@ BUS_REGRESSION_CASES: list[RegressionCase] = [
 def main() -> int:
     return run_regression_cli(
         BUS_REGRESSION_CASES,
-        description='公車站務情境 regression runner',
+        description="公車站務情境 regression runner",
     )
 
 

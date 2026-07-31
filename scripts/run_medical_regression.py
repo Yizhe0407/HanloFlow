@@ -7,9 +7,17 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from scripts.regression_runner import RegressionCase, run_regression_cli
+from scripts.regression_runner import (
+    RegressionCase as RegressionCaseModel,
+)
+from scripts.regression_runner import (
+    compatibility_snapshot_case as RegressionCase,
+)
+from scripts.regression_runner import (
+    run_regression_cli,
+)
 
-MEDICAL_REGRESSION_CASES: list[RegressionCase] = [
+MEDICAL_REGRESSION_CASES: list[RegressionCaseModel] = [
     # registration / counters
     RegressionCase("registration", "不好意思，我想改掛號時間。", "歹勢，我想欲改掛號時間。"),
     RegressionCase("registration", "我需要改掛號時間。", "我欲改掛號時間。"),
@@ -21,7 +29,9 @@ MEDICAL_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("registration", "這裡現在只收文件，不辦批價。", "遮這馬干焦收文件，不辦批價。"),
     RegressionCase("registration", "如果你要取消掛號，先抽號碼牌。", "若是你欲取消掛號，先抽號碼牌。"),
     RegressionCase("registration", "這裡今天人很多，你先到旁邊坐一下。", "遮今仔日人誠濟，你先到邊仔坐咧。"),
-    RegressionCase("registration", "這個問題不是我們櫃檯能決定的，要問醫生。", "這个問題毋是阮櫃檯會當決定的，要問醫生。"),
+    RegressionCase(
+        "registration", "這個問題不是我們櫃檯能決定的，要問醫生。", "這个問題毋是阮櫃檯會當決定的，要問醫生。"
+    ),
     RegressionCase("registration", "如果你趕時間，我不建議你等下午門診。", "若是你趕時間，我無建議你等下晝門診。"),
     RegressionCase("registration", "我要去診所掛號。", "我欲去醫生館掛號。"),
     RegressionCase("registration", "第一次來診所要帶健保卡。", "頭擺來醫生館愛帶健保卡。"),
@@ -101,12 +111,78 @@ MEDICAL_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("tests", "可以幫護理師安排時間嗎？", "會當替護理師安排時間無？"),
     RegressionCase("tests", "可不可以幫護理師換班？", "敢會當替護理師換班？"),
     RegressionCase("tests", "可以協助護理師確認排班嗎？", "會當鬥相共護理師確認排班無？"),
-    RegressionCase("tests", "可以幫護士安排時間嗎？", "會當替護理師安排時間無？"),
-    RegressionCase("tests", "可不可以幫護士換班？", "敢會當替護理師換班？"),
-    RegressionCase("tests", "可以協助護士確認排班嗎？", "會當鬥相共護理師確認排班無？"),
-    RegressionCase("tests", "可以幫護理人員安排時間嗎？", "會當替護理師安排時間無？"),
-    RegressionCase("tests", "可不可以幫護理人員換班？", "敢會當替護理師換班？"),
-    RegressionCase("tests", "可以協助護理人員確認排班嗎？", "會當鬥相共護理師確認排班無？"),
+    RegressionCase(
+        "tests",
+        "可以幫護士安排時間嗎？",
+        "會當替護士安排時間無？",
+        oracle_kind="verified_translation",
+        provenance="《護理人員法》職類定義與人工語意保真審查",
+        reviewed_by="codex+official-source-review",
+        reviewed_at="2026-07-28",
+    ),
+    RegressionCase(
+        "tests",
+        "可不可以幫護士換班？",
+        "敢會當替護士換班？",
+        oracle_kind="verified_translation",
+        provenance="《護理人員法》職類定義與人工語意保真審查",
+        reviewed_by="codex+official-source-review",
+        reviewed_at="2026-07-28",
+    ),
+    RegressionCase(
+        "tests",
+        "可以協助護士確認排班嗎？",
+        "會當鬥相共護士確認排班無？",
+        oracle_kind="verified_translation",
+        provenance="《護理人員法》職類定義與人工語意保真審查",
+        reviewed_by="codex+official-source-review",
+        reviewed_at="2026-07-28",
+    ),
+    RegressionCase(
+        "tests",
+        "可以幫護理人員安排時間嗎？",
+        "會當替護理人員安排時間無？",
+        oracle_kind="verified_translation",
+        provenance="《護理人員法》職類定義與人工語意保真審查",
+        reviewed_by="codex+official-source-review",
+        reviewed_at="2026-07-28",
+    ),
+    RegressionCase(
+        "tests",
+        "可不可以幫護理人員換班？",
+        "敢會當替護理人員換班？",
+        oracle_kind="verified_translation",
+        provenance="《護理人員法》職類定義與人工語意保真審查",
+        reviewed_by="codex+official-source-review",
+        reviewed_at="2026-07-28",
+    ),
+    RegressionCase(
+        "tests",
+        "可以協助護理人員確認排班嗎？",
+        "會當鬥相共護理人員確認排班無？",
+        oracle_kind="verified_translation",
+        provenance="《護理人員法》職類定義與人工語意保真審查",
+        reviewed_by="codex+official-source-review",
+        reviewed_at="2026-07-28",
+    ),
+    RegressionCase(
+        "tests",
+        "護士",
+        "護士",
+        oracle_kind="protected_technical_term",
+        provenance="《護理人員法》職類定義：護士與護理師為不同法定職類",
+        reviewed_by="codex+official-source-review",
+        reviewed_at="2026-07-28",
+    ),
+    RegressionCase(
+        "tests",
+        "護理人員",
+        "護理人員",
+        oracle_kind="protected_technical_term",
+        provenance="《護理人員法》第二條：護理人員為護理師及護士之總稱",
+        reviewed_by="codex+official-source-review",
+        reviewed_at="2026-07-28",
+    ),
     RegressionCase("tests", "可以幫醫護人員安排時間嗎？", "會當替醫護人員安排時間無？"),
     RegressionCase("tests", "可不可以幫醫護人員換班？", "敢會當替醫護人員換班？"),
     RegressionCase("tests", "可以協助醫護人員確認排班嗎？", "會當鬥相共醫護人員確認排班無？"),
@@ -130,7 +206,15 @@ MEDICAL_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("doctor_flow", "我剛剛沒有聽清楚醫生的名字。", "我拄仔無聽清楚醫生的名。"),
     RegressionCase("doctor_flow", "如果有結果我會再通知你。", "若是有結果，我會閣共你講。"),
     RegressionCase("doctor_flow", "如果你要看報告，先去門診櫃檯報到。", "若是你欲看報告，先去門診櫃檯報到。"),
-    RegressionCase("doctor_flow", "現在叫號還沒到你，你先坐旁邊等。", "現佇咧叫號猶未到你，你先坐隔壁等。"),
+    RegressionCase(
+        "doctor_flow",
+        "現在叫號還沒到你，你先坐旁邊等。",
+        "這馬叫號猶未到你，你先坐邊仔等。",
+        oracle_kind="verified_translation",
+        provenance="教育部《臺灣台語常用詞辭典》用例與人工語境審查：這馬、邊仔",
+        reviewed_by="codex+official-source-review",
+        reviewed_at="2026-07-28",
+    ),
     RegressionCase("doctor_flow", "報告還沒出來，你晚一點再回來拿。", "報告猶未出來，你較慢閣轉來拿。"),
     RegressionCase("doctor_flow", "醫生現在還在看上一位，你再等一下。", "醫生這馬猶在看上一位，你閣等一下仔。"),
     RegressionCase("doctor_flow", "請問今天看診的醫生是哪一位？", "借問今仔日看診的醫生是佗一位？"),
@@ -184,10 +268,12 @@ MEDICAL_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("doctor_flow", "我想改回診日期。", "我想欲改回診日期。"),
     # pharmacy / payment / cards
     RegressionCase("pharmacy_payment", "如果你要領藥，先去批價再過來。", "若是欲領藥，先去算錢才過來。"),
-    RegressionCase("pharmacy_payment", "你的健保卡刷不過，先去旁邊櫃檯問一下。", "你的健保卡鑢袂過，先去隔壁櫃檯問一下仔。"),
+    RegressionCase(
+        "pharmacy_payment", "你的健保卡刷不過，先去旁邊櫃檯問一下。", "你的健保卡鑢袂過，先去邊仔櫃檯問一下仔。"
+    ),
     RegressionCase("pharmacy_payment", "這張單子你先拿去批價，再回來給我。", "這張單仔你先提去批價，閣轉來予我。"),
     RegressionCase("pharmacy_payment", "這些藥一天吃三次，飯後服用。", "遮的藥一工食三擺，飯後服用。"),
-    RegressionCase("pharmacy_payment", "這個藥要冷藏，你回家記得放冰箱。", "這个藥要寒藏，你轉去厝裡記著放冰箱。"),
+    RegressionCase("pharmacy_payment", "這個藥要冷藏，你回家記得放冰箱。", "這个藥要冷藏，你轉去厝裡記著放冰箱。"),
     RegressionCase("pharmacy_payment", "你的藥袋在這裡，共有三種藥。", "你的藥袋佇遮，共有三種藥。"),
     RegressionCase("pharmacy_payment", "今天藥局到五點，你早一點來拿。", "今仔日藥局到五點，你較早來拿。"),
     RegressionCase("pharmacy_payment", "我要領慢性病藥。", "我欲領慢性病藥。"),
@@ -236,13 +322,32 @@ MEDICAL_REGRESSION_CASES: list[RegressionCase] = [
     RegressionCase("redirect", "急診在另外一棟，你先走出去再左轉。", "急診在另外一棟，你先行出去再倒斡。"),
     RegressionCase("redirect", "投訴要去二樓的服務台，不是我們這裡。", "投訴欲去二樓的服務台，毋是阮遮。"),
     RegressionCase("redirect", "掛號要去一樓，不是這裡。", "掛號欲去一樓，毋是遮。"),
+    # round532 / authoritative low-trust machine cleanup
+    RegressionCaseModel(
+        "round532_authoritative_lexicon",
+        "下疳",
+        "疳瘡",
+        oracle_kind="ai_semantic_review",
+        provenance="round532 low-trust risk audit; AI semantic review cross-checked against the MOE Taiwanese Hokkien dictionary",
+        reviewed_by="codex_ai_semantic_audit",
+        reviewed_at="2026-07-29",
+    ),
+    RegressionCaseModel(
+        "round532_authoritative_lexicon",
+        "驚醒",
+        "拍醒",
+        oracle_kind="ai_semantic_review",
+        provenance="round532 low-trust risk audit; AI semantic review cross-checked against the MOE Taiwanese Hokkien dictionary",
+        reviewed_by="codex_ai_semantic_audit",
+        reviewed_at="2026-07-29",
+    ),
 ]
 
 
 def main() -> int:
     return run_regression_cli(
         MEDICAL_REGRESSION_CASES,
-        description='醫療櫃檯/門診情境 regression runner',
+        description="醫療櫃檯/門診情境 regression runner",
     )
 
 
