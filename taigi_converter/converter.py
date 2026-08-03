@@ -9,6 +9,7 @@ import time
 from collections import OrderedDict
 from collections.abc import Mapping
 from dataclasses import dataclass, fields
+from difflib import SequenceMatcher
 from pathlib import Path
 from types import MappingProxyType
 from typing import Any
@@ -109,6 +110,11 @@ class _ProtectedText:
 @dataclass(frozen=True, slots=True)
 class _ShadowLayout:
     protected_by_marker: tuple[tuple[str, str], ...]
+
+
+@dataclass(slots=True)
+class _ReviewDiagnostics:
+    ambiguous_candidate_count: int = 0
 
 
 @dataclass(frozen=True, slots=True)
@@ -1476,6 +1482,7 @@ class TaigiConverter:
         allow_sentence_override: bool,
         collect_matches: bool,
         collect_warnings: bool,
+        review_diagnostics: _ReviewDiagnostics | None,
     ) -> tuple[_ProtectedText, list[MatchTrace], list[str]]:
         segments: list[_TextSegment] = []
         matches: list[MatchTrace] = []
@@ -1493,6 +1500,7 @@ class TaigiConverter:
                     allow_sentence_override=allow_sentence_override,
                     collect_matches=collect_matches,
                     collect_warnings=collect_warnings,
+                    review_diagnostics=review_diagnostics,
                 )
                 segments.append(_TextSegment(output))
                 if collect_matches:
@@ -1511,6 +1519,7 @@ class TaigiConverter:
         allow_sentence_override: bool = True,
         collect_matches: bool,
         collect_warnings: bool,
+        review_diagnostics: _ReviewDiagnostics | None = None,
     ) -> tuple[_ProtectedText, list[MatchTrace], list[str]]:
         encoded = self._encode_protected(text)
         if encoded is not None:
@@ -1524,6 +1533,7 @@ class TaigiConverter:
                 allow_sentence_override=allow_sentence_override,
                 collect_matches=collect_matches,
                 collect_warnings=collect_warnings,
+                review_diagnostics=review_diagnostics,
             )
             decoded = self._decode_protected(output, layout)
             if decoded is not None:
@@ -1537,6 +1547,7 @@ class TaigiConverter:
                 allow_sentence_override=allow_sentence_override,
                 collect_matches=collect_matches,
                 collect_warnings=collect_warnings,
+                review_diagnostics=review_diagnostics,
             )
             return _ProtectedText.plain(output), matches, warnings
 
@@ -1548,6 +1559,7 @@ class TaigiConverter:
             allow_sentence_override=allow_sentence_override,
             collect_matches=collect_matches,
             collect_warnings=collect_warnings,
+            review_diagnostics=review_diagnostics,
         )
 
     def _apply_rules_by_segment(
@@ -1726,6 +1738,7 @@ class TaigiConverter:
         *,
         collect_matches: bool,
         collect_warnings: bool,
+        review_diagnostics: _ReviewDiagnostics | None = None,
     ) -> tuple[str | None, list[MatchTrace], list[str]]:
         if not text:
             return None, [], []
@@ -1760,6 +1773,13 @@ class TaigiConverter:
             return None, [], warnings
 
         chosen = sentence_selected[0]
+        if review_diagnostics is not None:
+            review_diagnostics.ambiguous_candidate_count += sum(
+                candidate.entry.entry_id != chosen.entry.entry_id
+                and candidate.start == chosen.start
+                and candidate.end == chosen.end
+                for candidate in sentence_candidates
+            )
         if not collect_matches:
             return chosen.entry.tgt, [], warnings
 
@@ -1787,6 +1807,7 @@ class TaigiConverter:
         allow_sentence_override: bool = True,
         collect_matches: bool,
         collect_warnings: bool,
+        review_diagnostics: _ReviewDiagnostics | None = None,
     ) -> tuple[str, list[MatchTrace], list[str]]:
         warnings: list[str] = []
         all_phrase_candidates = (
@@ -1816,6 +1837,13 @@ class TaigiConverter:
                 )
                 if sentence_selected:
                     chosen = sentence_selected[0]
+                    if review_diagnostics is not None:
+                        review_diagnostics.ambiguous_candidate_count += sum(
+                            candidate.entry.entry_id != chosen.entry.entry_id
+                            and candidate.start == chosen.start
+                            and candidate.end == chosen.end
+                            for candidate in sentence_candidates
+                        )
                     if not collect_matches:
                         return chosen.entry.tgt, [], warnings
                     trace = MatchTrace(
@@ -1857,6 +1885,15 @@ class TaigiConverter:
             reserved=blocked_candidates,
             text_length=len(text),
         )
+
+        if review_diagnostics is not None:
+            for chosen in selected:
+                review_diagnostics.ambiguous_candidate_count += sum(
+                    candidate.entry.entry_id != chosen.entry.entry_id
+                    and candidate.start == chosen.start
+                    and candidate.end == chosen.end
+                    for candidate in all_candidates
+                )
 
         if not selected:
             return text, [], warnings
@@ -1964,17 +2001,72 @@ class TaigiConverter:
         self,
         *,
         original_text: str,
+        normalized_text: str,
         output_text: str,
+        protected_input: _ProtectedText,
         matches: list[MatchTrace],
+        rules_applied: list[RuleTrace],
         warnings: list[str],
+        review_diagnostics: _ReviewDiagnostics | None,
         profile: dict[str, Any] | None,
     ) -> None:
         if not profile or not profile.get("enqueue_review"):
             return
 
-        low_confidence = (not matches) or any(w.startswith("華語殘留") or w.startswith("核心漏轉") for w in warnings)
-        if not low_confidence:
+        input_length = len(normalized_text)
+        matched_chars = min(sum(max(match.end - match.start, 0) for match in matches), input_length)
+        protected_segments = [segment.text for segment in protected_input.segments if segment.protected]
+        protected_values = list(dict.fromkeys(protected_segments))
+        protected_chars = min(sum(len(value) for value in protected_segments), input_length)
+        matched_span_ratio = matched_chars / input_length if input_length else 0.0
+        protected_span_ratio = protected_chars / input_length if input_length else 0.0
+        evidence_span_ratio = min(matched_span_ratio + protected_span_ratio, 1.0)
+        identity_ratio = SequenceMatcher(None, normalized_text, output_text, autojunk=False).ratio()
+        residual_terms = list(
+            dict.fromkeys(
+                warning.partition(":")[2]
+                for warning in warnings
+                if warning.startswith(("華語殘留:", "核心漏轉:"))
+            )
+        )
+        blocked_candidates = [warning for warning in warnings if warning.startswith("blocked:")]
+        ambiguous_candidate_count = (
+            review_diagnostics.ambiguous_candidate_count if review_diagnostics is not None else 0
+        )
+
+        low_confidence_reasons: list[str] = []
+        if residual_terms:
+            low_confidence_reasons.append("residual_terms")
+        if blocked_candidates:
+            low_confidence_reasons.append("blocked_candidates")
+        if ambiguous_candidate_count:
+            low_confidence_reasons.append("ambiguous_candidates")
+        if not matches and not rules_applied and not protected_values and identity_ratio >= 0.98:
+            low_confidence_reasons.append("no_transform_evidence")
+        if input_length >= 4 and evidence_span_ratio < 0.35 and identity_ratio >= 0.70:
+            low_confidence_reasons.append("sparse_conversion_coverage")
+        if not low_confidence_reasons:
             return
+
+        confidence_score = 0.15
+        confidence_score += 0.55 * evidence_span_ratio
+        confidence_score += 0.15 * min(len(rules_applied), 1)
+        confidence_score += 0.15 * (1.0 - identity_ratio)
+        confidence_score -= 0.20 * min(len(residual_terms), 2)
+        confidence_score -= 0.05 * min(ambiguous_candidate_count, 2)
+        confidence_score = round(min(max(confidence_score, 0.0), 1.0), 4)
+        review_priority = min(
+            100,
+            max(
+                1,
+                round(
+                    (1.0 - confidence_score) * 80
+                    + 10 * bool(residual_terms)
+                    + 5 * bool(blocked_candidates)
+                    + min(ambiguous_candidate_count * 3, 10)
+                ),
+            ),
+        )
 
         if self.review_data_dir is None:
             raise RuntimeError("enqueue_review 需要明確設定 review_data_dir；不得寫入唯讀 runtime 目錄")
@@ -1986,12 +2078,28 @@ class TaigiConverter:
                 "action": "add_override",
                 "owner": profile.get("owner", "runtime"),
                 "reason": "auto_enqueued_by_runtime",
+                "priority": review_priority,
                 "evidence": {
                     "input": original_text,
+                    "normalized_input": normalized_text,
                     "output": output_text,
                     "warnings": warnings,
+                    "low_confidence_reasons": low_confidence_reasons,
+                    "confidence_score": confidence_score,
+                    "review_priority": review_priority,
+                    "matched_span_ratio": round(matched_span_ratio, 4),
+                    "identity_ratio": round(identity_ratio, 4),
+                    "protected_span_ratio": round(protected_span_ratio, 4),
+                    "residual_terms": residual_terms,
+                    "protected_terms": protected_values,
+                    "blocked_candidates": blocked_candidates,
+                    "ambiguous_candidate_count": ambiguous_candidate_count,
                     "match_count": len(matches),
-                    "match_entry_ids": [m.entry_id for m in matches],
+                    "match_entry_ids": [match.entry_id for match in matches],
+                    "matches": [match.to_dict() for match in matches],
+                    "rule_count": len(rules_applied),
+                    "rule_ids": [rule.rule_id for rule in rules_applied],
+                    "rules_applied": [rule.to_dict() for rule in rules_applied],
                 },
             },
         )
@@ -2039,14 +2147,18 @@ class TaigiConverter:
     ) -> str | ConversionResult:
         started = time.perf_counter() if trace else 0.0
         preserve_spacing = bool(profile and profile.get("preserve_spacing"))
-        collect_diagnostics = trace or bool(profile and profile.get("enqueue_review"))
+        enqueue_review = bool(profile and profile.get("enqueue_review"))
+        collect_diagnostics = trace or enqueue_review
         collect_matches = collect_diagnostics
         collect_warnings = collect_diagnostics
+        collect_rule_trace = trace or enqueue_review
+        review_diagnostics = _ReviewDiagnostics() if enqueue_review else None
         normalized = self._normalize_input(text, preserve_spacing=preserve_spacing)
         exact_sentence_output, exact_matches, exact_warnings = self._apply_exact_sentence_override(
             normalized,
             collect_matches=collect_matches,
             collect_warnings=collect_warnings,
+            review_diagnostics=review_diagnostics,
         )
         protected_input = self._protect_text(normalized)
         skip_passes = {"normalization"} if preserve_spacing else set()
@@ -2058,7 +2170,7 @@ class TaigiConverter:
             )
             rule_output, rules_applied = self._apply_rules_to_protected(
                 exact_protected_output,
-                collect_trace=trace,
+                collect_trace=collect_rule_trace,
                 skip_passes=skip_passes,
             )
             lexicon_output, post_matches, post_warnings = self._apply_lexicon_to_protected(
@@ -2069,6 +2181,7 @@ class TaigiConverter:
                 allow_sentence_override=False,
                 collect_matches=collect_matches,
                 collect_warnings=collect_warnings,
+                review_diagnostics=review_diagnostics,
             )
             matches = exact_matches + post_matches
             lexicon_warnings = exact_warnings + post_warnings
@@ -2080,10 +2193,11 @@ class TaigiConverter:
                 allow_sentence_override=True,
                 collect_matches=collect_matches,
                 collect_warnings=collect_warnings,
+                review_diagnostics=review_diagnostics,
             )
             rule_output, rules_applied = self._apply_rules_to_protected(
                 pre_rule_output,
-                collect_trace=trace,
+                collect_trace=collect_rule_trace,
                 skip_passes=skip_passes,
             )
             rule_output = self._protect_unprotected_segments(rule_output)
@@ -2095,6 +2209,7 @@ class TaigiConverter:
                 allow_sentence_override=False,
                 collect_matches=collect_matches,
                 collect_warnings=collect_warnings,
+                review_diagnostics=review_diagnostics,
             )
             matches = pre_matches + post_matches
             lexicon_warnings = pre_warnings + post_warnings
@@ -2103,10 +2218,11 @@ class TaigiConverter:
                 protected_input,
                 collect_matches=collect_matches,
                 collect_warnings=collect_warnings,
+                review_diagnostics=review_diagnostics,
             )
             lexicon_output, rules_applied = self._apply_rules_to_protected(
                 lexicon_output,
-                collect_trace=trace,
+                collect_trace=collect_rule_trace,
                 skip_passes=skip_passes,
             )
 
@@ -2121,9 +2237,13 @@ class TaigiConverter:
 
         self._enqueue_review_if_needed(
             original_text=text,
+            normalized_text=normalized,
             output_text=final_output,
+            protected_input=protected_input,
             matches=matches,
+            rules_applied=rules_applied,
             warnings=warnings,
+            review_diagnostics=review_diagnostics,
             profile=profile,
         )
 

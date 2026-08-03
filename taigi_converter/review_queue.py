@@ -624,14 +624,33 @@ def load_review_queue(data_dir: Path) -> list[dict[str, Any]]:
     return snapshot["files"][_queue_path(Path()).name]
 
 
+def _pending_review_sort_key(row: dict[str, Any]) -> tuple[float, float, int, str, str]:
+    priority = row.get("priority", 0)
+    if not isinstance(priority, int | float) or isinstance(priority, bool):
+        priority = 0
+    evidence = row.get("evidence", {})
+    confidence = evidence.get("confidence_score", 1.0) if isinstance(evidence, dict) else 1.0
+    if not isinstance(confidence, int | float) or isinstance(confidence, bool):
+        confidence = 1.0
+    return (
+        -float(priority),
+        float(confidence),
+        -_occurrence_count(row),
+        str(row.get("created_at", "")),
+        str(row.get("review_id", "")),
+    )
+
+
 def export_pending_reviews(
     data_dir: Path,
     output_path: Path,
     limit: int = 200,
 ) -> int:
     rows = load_review_queue(data_dir)
-    pending = [row for row in rows if row.get("status", "pending") == "pending"]
-    pending = pending[:limit]
+    pending = sorted(
+        (row for row in rows if row.get("status", "pending") == "pending"),
+        key=_pending_review_sort_key,
+    )[:limit]
 
     atomic_write_jsonl(output_path, pending)
     return len(pending)
