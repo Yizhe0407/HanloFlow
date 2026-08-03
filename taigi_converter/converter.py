@@ -119,8 +119,12 @@ class _RuntimeState:
     max_phrase_src_len: int
     layer_rank_by_index: tuple[int, ...]
     phrase_trie: Mapping[str, Any]
+    single_char_phrase_map: Mapping[str, tuple[int, ...]]
     char_map: Mapping[str, tuple[int, ...]]
     has_char_entries: bool
+    has_blocked_phrase_entries: bool
+    has_blocked_char_entries: bool
+    has_blocked_entries: bool
     rule_pass_order: tuple[str, ...]
     rules_by_pass: Mapping[str, tuple[RuntimeRuleEntry, ...]]
     compiled_rules_by_pass: Mapping[str, tuple[RuntimeRule, ...]]
@@ -287,8 +291,14 @@ class TaigiConverter:
             max_phrase_src_len=self.max_phrase_src_len,
             layer_rank_by_index=tuple(self.layer_rank_by_index),
             phrase_trie=self._freeze_tree(self.phrase_trie),
+            single_char_phrase_map=MappingProxyType(
+                {key: tuple(value) for key, value in self.single_char_phrase_map.items()}
+            ),
             char_map=MappingProxyType({key: tuple(value) for key, value in self.char_map.items()}),
             has_char_entries=self.has_char_entries,
+            has_blocked_phrase_entries=self.has_blocked_phrase_entries,
+            has_blocked_char_entries=self.has_blocked_char_entries,
+            has_blocked_entries=self.has_blocked_entries,
             rule_pass_order=tuple(self.rule_pass_order),
             rules_by_pass=MappingProxyType({key: tuple(value) for key, value in self.rules_by_pass.items()}),
             compiled_rules_by_pass=MappingProxyType(
@@ -490,6 +500,24 @@ class TaigiConverter:
             for entry_index, entry in enumerate(self.entries_by_index)
             if entry.status == "active" and entry.tier == "blocked" and entry.level == "sentence"
         ]
+        self.single_char_phrase_map: dict[str, list[int]] = {}
+        self.has_blocked_phrase_entries = False
+        self.has_blocked_char_entries = False
+        for entry_index, entry in enumerate(self.entries_by_index):
+            if entry.status != "active" or entry.context is not None:
+                continue
+            if entry.level in {"phrase", "sentence"} and not is_sentence_manual_override(entry):
+                if len(entry.src) == 1:
+                    self.single_char_phrase_map.setdefault(entry.src, []).append(entry_index)
+                if entry.tier == "blocked":
+                    self.has_blocked_phrase_entries = True
+            elif entry.level == "char" and entry.tier == "blocked":
+                self.has_blocked_char_entries = True
+        self.has_blocked_entries = bool(
+            self.has_blocked_phrase_entries
+            or self.has_blocked_char_entries
+            or self.blocked_sentence_entry_indexes
+        )
 
     @staticmethod
     def _decode_regex_replacement(replacement: str) -> str:
@@ -1015,6 +1043,23 @@ class TaigiConverter:
                     )
         return candidates
 
+    def _iter_single_char_phrase_candidates(self, text: str) -> list[Candidate]:
+        candidates: list[Candidate] = []
+        entries = self.entries_by_index
+        layer_rank_by_index = self.layer_rank_by_index
+        phrase_map = self.single_char_phrase_map
+        for start, char in enumerate(text):
+            for entry_index in phrase_map.get(char, ()):
+                candidates.append(
+                    Candidate(
+                        entry=entries[entry_index],
+                        start=start,
+                        end=start + 1,
+                        layer_rank=layer_rank_by_index[entry_index],
+                    )
+                )
+        return candidates
+
     @staticmethod
     def _context_match(text: str, start: int, end: int, context: dict[str, Any] | None) -> bool:
         if context is None:
@@ -1455,6 +1500,7 @@ class TaigiConverter:
         include_char_entries: bool,
         allow_sentence_override: bool,
         collect_matches: bool,
+        collect_warnings: bool,
     ) -> tuple[_ProtectedText, list[MatchTrace], list[str]]:
         segments: list[_TextSegment] = []
         matches: list[MatchTrace] = []
@@ -1471,6 +1517,7 @@ class TaigiConverter:
                     include_char_entries=include_char_entries,
                     allow_sentence_override=allow_sentence_override,
                     collect_matches=collect_matches,
+                    collect_warnings=collect_warnings,
                 )
                 segments.append(_TextSegment(output))
                 if collect_matches:
@@ -1488,6 +1535,7 @@ class TaigiConverter:
         include_char_entries: bool = True,
         allow_sentence_override: bool = True,
         collect_matches: bool,
+        collect_warnings: bool,
     ) -> tuple[_ProtectedText, list[MatchTrace], list[str]]:
         encoded = self._encode_protected(text)
         if encoded is not None:
@@ -1500,6 +1548,7 @@ class TaigiConverter:
                 include_char_entries=include_char_entries,
                 allow_sentence_override=allow_sentence_override,
                 collect_matches=collect_matches,
+                collect_warnings=collect_warnings,
             )
             decoded = self._decode_protected(output, layout)
             if decoded is not None:
@@ -1512,6 +1561,7 @@ class TaigiConverter:
                 include_char_entries=include_char_entries,
                 allow_sentence_override=allow_sentence_override,
                 collect_matches=collect_matches,
+                collect_warnings=collect_warnings,
             )
             return _ProtectedText.plain(output), matches, warnings
 
@@ -1522,6 +1572,7 @@ class TaigiConverter:
             include_char_entries=include_char_entries,
             allow_sentence_override=allow_sentence_override,
             collect_matches=collect_matches,
+            collect_warnings=collect_warnings,
         )
 
     def _apply_rules_by_segment(
@@ -1592,31 +1643,39 @@ class TaigiConverter:
             skip_passes=skip_passes,
         )
 
-    def _cleanup_by_segment(self, text: _ProtectedText) -> tuple[_ProtectedText, list[str]]:
+    def _cleanup_by_segment(
+        self, text: _ProtectedText, *, collect_warnings: bool
+    ) -> tuple[_ProtectedText, list[str]]:
         segments: list[_TextSegment] = []
         warnings: list[str] = []
         for segment in text.segments:
             if segment.protected:
                 segments.append(segment)
                 continue
-            output, segment_warnings = self._post_cleanup(segment.text)
+            output, segment_warnings = self._post_cleanup(
+                segment.text, collect_warnings=collect_warnings
+            )
             segments.append(_TextSegment(output))
             warnings.extend(segment_warnings)
         return self._merge_segments(segments), warnings
 
-    def _cleanup_protected(self, text: _ProtectedText) -> tuple[_ProtectedText, list[str]]:
+    def _cleanup_protected(
+        self, text: _ProtectedText, *, collect_warnings: bool
+    ) -> tuple[_ProtectedText, list[str]]:
         encoded = self._encode_protected(text)
         if encoded is not None:
             shadow, layout = encoded
-            output, warnings = self._post_cleanup(shadow)
+            output, warnings = self._post_cleanup(shadow, collect_warnings=collect_warnings)
             decoded = self._decode_protected(output, layout)
             if decoded is not None:
                 return decoded, warnings
         elif not any(segment.protected for segment in text.segments):
-            output, warnings = self._post_cleanup(text.render())
+            output, warnings = self._post_cleanup(
+                text.render(), collect_warnings=collect_warnings
+            )
             return _ProtectedText.plain(output), warnings
 
-        return self._cleanup_by_segment(text)
+        return self._cleanup_by_segment(text, collect_warnings=collect_warnings)
 
     def _select_leftmost_maximum(
         self,
@@ -1662,6 +1721,9 @@ class TaigiConverter:
         return selected
 
     def _collect_blocked_candidates(self, text: str, phrase_candidates: list[Candidate]) -> list[Candidate]:
+        if not self.has_blocked_entries:
+            return []
+
         blocked = [candidate for candidate in phrase_candidates if candidate.entry.tier == "blocked"]
 
         for entry_index in self.blocked_sentence_entry_indexes:
@@ -1676,7 +1738,7 @@ class TaigiConverter:
                     )
                 )
 
-        if self.has_char_entries:
+        if self.has_blocked_char_entries:
             for idx, ch in enumerate(text):
                 for entry_index in self.char_map.get(ch, []):
                     entry = self.entries_by_index[entry_index]
@@ -1700,6 +1762,7 @@ class TaigiConverter:
         text: str,
         *,
         collect_matches: bool,
+        collect_warnings: bool,
     ) -> tuple[str | None, list[MatchTrace], list[str]]:
         if not text:
             return None, [], []
@@ -1708,9 +1771,15 @@ class TaigiConverter:
         if not sentence_override_ids:
             return None, [], []
 
-        all_phrase_candidates = self._iter_phrase_candidates(text)
-        blocked_candidates = self._collect_blocked_candidates(text, all_phrase_candidates)
-        warnings = [f"blocked:{blocked.entry.entry_id}:{blocked.entry.src}" for blocked in blocked_candidates]
+        blocked_phrase_candidates = (
+            self._iter_phrase_candidates(text) if self.has_blocked_phrase_entries else []
+        )
+        blocked_candidates = self._collect_blocked_candidates(text, blocked_phrase_candidates)
+        warnings = (
+            [f"blocked:{blocked.entry.entry_id}:{blocked.entry.src}" for blocked in blocked_candidates]
+            if collect_warnings
+            else []
+        )
 
         sentence_candidates = [
             Candidate(entry=self.entries_by_index[entry_index], start=0, end=len(text), layer_rank=1)
@@ -1754,13 +1823,21 @@ class TaigiConverter:
         include_char_entries: bool = True,
         allow_sentence_override: bool = True,
         collect_matches: bool,
+        collect_warnings: bool,
     ) -> tuple[str, list[MatchTrace], list[str]]:
         warnings: list[str] = []
-        all_phrase_candidates = self._iter_phrase_candidates(text)
+        all_phrase_candidates = (
+            self._iter_single_char_phrase_candidates(text)
+            if max_src_len == 1 and not self.has_blocked_phrase_entries
+            else self._iter_phrase_candidates(text)
+        )
         blocked_candidates = self._collect_blocked_candidates(text, all_phrase_candidates)
 
-        for blocked in blocked_candidates:
-            warnings.append(f"blocked:{blocked.entry.entry_id}:{blocked.entry.src}")
+        if collect_warnings:
+            warnings.extend(
+                f"blocked:{blocked.entry.entry_id}:{blocked.entry.src}"
+                for blocked in blocked_candidates
+            )
 
         if allow_sentence_override and self._length_in_scope(len(text), min_src_len, max_src_len):
             sentence_override_ids = self.sentence_override_map.get(text, [])
@@ -1892,7 +1969,9 @@ class TaigiConverter:
                 text = replaced_text
         return text, traces
 
-    def _post_cleanup(self, text: str) -> tuple[str, list[str]]:
+    def _post_cleanup(
+        self, text: str, *, collect_warnings: bool
+    ) -> tuple[str, list[str]]:
         warnings: list[str] = []
 
         # L8: 後驗清理
@@ -1903,10 +1982,11 @@ class TaigiConverter:
         text = text.replace("懸雄", "高雄")
         text = text.replace("懸速公路", "高速公路")
 
-        for term in self.residual_terms:
-            if term in text:
-                warning_prefix = "核心漏轉" if term in self.residual_core_terms else "華語殘留"
-                warnings.append(f"{warning_prefix}:{term}")
+        if collect_warnings:
+            for term in self.residual_terms:
+                if term in text:
+                    warning_prefix = "核心漏轉" if term in self.residual_core_terms else "華語殘留"
+                    warnings.append(f"{warning_prefix}:{term}")
 
         return text, warnings
 
@@ -1996,11 +2076,14 @@ class TaigiConverter:
     ) -> str | ConversionResult:
         started = time.perf_counter() if trace else 0.0
         preserve_spacing = bool(profile and profile.get("preserve_spacing"))
-        collect_matches = trace or bool(profile and profile.get("enqueue_review"))
+        collect_diagnostics = trace or bool(profile and profile.get("enqueue_review"))
+        collect_matches = collect_diagnostics
+        collect_warnings = collect_diagnostics
         normalized = self._normalize_input(text, preserve_spacing=preserve_spacing)
         exact_sentence_output, exact_matches, exact_warnings = self._apply_exact_sentence_override(
             normalized,
             collect_matches=collect_matches,
+            collect_warnings=collect_warnings,
         )
         protected_input = self._protect_text(normalized)
         skip_passes = {"normalization"} if preserve_spacing else set()
@@ -2022,6 +2105,7 @@ class TaigiConverter:
                 include_char_entries=True,
                 allow_sentence_override=False,
                 collect_matches=collect_matches,
+                collect_warnings=collect_warnings,
             )
             matches = exact_matches + post_matches
             lexicon_warnings = exact_warnings + post_warnings
@@ -2032,6 +2116,7 @@ class TaigiConverter:
                 include_char_entries=False,
                 allow_sentence_override=True,
                 collect_matches=collect_matches,
+                collect_warnings=collect_warnings,
             )
             rule_output, rules_applied = self._apply_rules_to_protected(
                 pre_rule_output,
@@ -2046,6 +2131,7 @@ class TaigiConverter:
                 include_char_entries=True,
                 allow_sentence_override=False,
                 collect_matches=collect_matches,
+                collect_warnings=collect_warnings,
             )
             matches = pre_matches + post_matches
             lexicon_warnings = pre_warnings + post_warnings
@@ -2053,6 +2139,7 @@ class TaigiConverter:
             lexicon_output, matches, lexicon_warnings = self._apply_lexicon_to_protected(
                 protected_input,
                 collect_matches=collect_matches,
+                collect_warnings=collect_warnings,
             )
             lexicon_output, rules_applied = self._apply_rules_to_protected(
                 lexicon_output,
@@ -2060,7 +2147,9 @@ class TaigiConverter:
                 skip_passes=skip_passes,
             )
 
-        final_protected, cleanup_warnings = self._cleanup_protected(lexicon_output)
+        final_protected, cleanup_warnings = self._cleanup_protected(
+            lexicon_output, collect_warnings=collect_warnings
+        )
         final_output = self._post_unmask_time_cleanup(final_protected.render())
         if not preserve_spacing:
             final_output = normalize_cjk_spacing(final_output)

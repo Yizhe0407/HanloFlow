@@ -36,6 +36,26 @@ class ConverterTests(unittest.TestCase):
         self.assertEqual(self.converter.convert("我找他不到"), traced.output)
         self.assertEqual([match.entry_id for match in traced.matches], ["lx_5003f107f0e8"])
 
+    def test_non_trace_path_skips_warning_diagnostics(self) -> None:
+        source = "民眾說：「就列個東西告示牌，清楚告知使用規範。」"
+        with patch.object(
+            self.converter,
+            "_post_cleanup",
+            wraps=self.converter._post_cleanup,
+        ) as cleanup:
+            output = self.converter.convert(source)
+
+        self.assertTrue(cleanup.call_args_list)
+        self.assertTrue(
+            all(call.kwargs["collect_warnings"] is False for call in cleanup.call_args_list)
+        )
+
+        traced = self.converter.convert(source, trace=True)
+        self.assertIsInstance(traced, ConversionResult)
+        assert isinstance(traced, ConversionResult)
+        self.assertEqual(output, traced.output)
+        self.assertIn("核心漏轉:東西", traced.warnings)
+
     def test_regex_required_literal_extractor_is_conservative(self) -> None:
         cases = {
             "食飽了沒": "食飽了沒",

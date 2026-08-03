@@ -683,6 +683,34 @@ class RuntimeBehaviorTests(unittest.TestCase):
     def test_context_match_without_context_fails_closed(self) -> None:
         self.assertFalse(TaigiConverter._context_match("有空", 0, 2, None))
 
+    def test_blocked_phrase_reserves_span_during_single_char_pass(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            blocked = valid_entry(
+                entry_id="lx_blocked00001",
+                src="東西",
+                tgt="東西",
+                tier="blocked",
+                priority=1000,
+            )
+            single_char_phrase = valid_entry(
+                entry_id="lx_singlechar01",
+                src="東",
+                tgt="方",
+                tier="core",
+            )
+            source = make_source_data(
+                root / "source", entries=[blocked, single_char_phrase]
+            )
+            runtime = root / "runtime"
+            build_minimal_runtime(source, runtime)
+            converter = TaigiConverter(runtime)
+
+            self.assertEqual(converter.convert("東門"), "方門")
+            self.assertEqual(converter.convert("東西"), "東西")
+            traced = converter.convert("東西", trace=True)
+            self.assertIn("blocked:lx_blocked00001:東西", traced.warnings)
+
     def test_runtime_cache_reuses_immutable_loaded_state(self) -> None:
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)
@@ -697,6 +725,7 @@ class RuntimeBehaviorTests(unittest.TestCase):
             warm = time.perf_counter() - started
             self.assertIs(first.entries_by_index, second.entries_by_index)
             self.assertIs(first.phrase_trie, second.phrase_trie)
+            self.assertIs(first.single_char_phrase_map, second.single_char_phrase_map)
             self.assertIs(
                 first.contextual_entry_indexes_by_first_char,
                 second.contextual_entry_indexes_by_first_char,
@@ -743,6 +772,8 @@ class RuntimeBehaviorTests(unittest.TestCase):
                 runtime_entry.context["right_regex"] = ".*"  # type: ignore[index]
             with self.assertRaises(AttributeError):
                 first.phrase_trie["c"].clear()
+            with self.assertRaises(TypeError):
+                first.single_char_phrase_map["測"] = (entry_index,)  # type: ignore[index]
 
             first.entries = {}
             self.assertEqual(second.convert("測試詞。"), "試驗詞。")
@@ -874,6 +905,7 @@ class RuntimeBehaviorTests(unittest.TestCase):
             evidence = append.call_args.args[1]["evidence"]
             self.assertEqual(evidence["match_count"], 1)
             self.assertEqual(evidence["match_entry_ids"], ["lx_531000000012"])
+            self.assertEqual(evidence["warnings"], ["核心漏轉:東西"])
 
     def test_review_queue_uses_explicit_writable_state_directory(self) -> None:
         with tempfile.TemporaryDirectory() as temp:
