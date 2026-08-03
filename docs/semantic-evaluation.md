@@ -40,3 +40,15 @@ python3 scripts/run_semantic_evaluation.py --json-output build/semantic-eval.jso
 | proper_nouns_technical | 15 | 50 |
 
 此數值是 Phase 3 修正前的 reproducible baseline。Latency 不納入 snapshot，因為它會受執行環境影響。
+
+## Phase 3 post-remediation result
+
+Phase 3 只用 train/development failures 選擇 24 個有語境限制的 reusable phrase 修正；完成調整後才首次量測 holdout。
+
+- train + development：30 / 240 → 42 / 240（+12，12.5% → 17.5%）
+- holdout：7 / 60 → 7 / 60（維持 11.6667%，沒有用 holdout 調參）
+- overall：37 / 300 → 49 / 300（12.3333% → 16.3333%）
+- 新增 failure：0
+- leakage audit：0 findings
+
+這一階段刻意不以完整句 override 或廣域 char 規則追逐 exact-match；部分案例的目標片段已改善，但因句中仍有其他語義或文體差異，所以尚未計入整句通過。
