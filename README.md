@@ -121,7 +121,7 @@ python3 -m compileall -q taigi_converter scripts tests
 uv run ruff check taigi_converter scripts tests
 uv run pytest
 
-# 4,179 筆 exact-match regressions
+# 5,160 筆 exact-match regressions
 python3 scripts/run_all_regressions.py
 
 # 確認 artifacts 可重現

@@ -45,6 +45,9 @@ RUNTIME_ID_SUFFIX_LEN = 12
 RUNTIME_LEVELS = ("sentence", "phrase", "char")
 RUNTIME_TIERS = ("blocked", "manual_hotfix", "manual", "core", "domain", "base")
 RUNTIME_TRUSTS = ("human", "ai_reviewed", "machine", "seed")
+SHADOW_MARKER_CANDIDATES = tuple(chr(codepoint) for codepoint in range(0xFDD0, 0xFDF0)) + tuple(
+    chr((plane << 16) | suffix) for plane in range(17) for suffix in (0xFFFE, 0xFFFF)
+)
 
 
 @dataclass(frozen=True, slots=True)
@@ -110,6 +113,7 @@ class _RuntimeState:
     number_bearing_lexicon_trie: Mapping[str, Any]
     sentence_override_map: Mapping[str, tuple[int, ...]]
     contextual_override_entry_indexes: tuple[int, ...]
+    contextual_entry_indexes_by_first_char: Mapping[str, tuple[int, ...]]
     blocked_sentence_entry_indexes: tuple[int, ...]
     shadow_forbidden_chars: frozenset[str]
 
@@ -281,6 +285,9 @@ class TaigiConverter:
                 {key: tuple(value) for key, value in self.sentence_override_map.items()}
             ),
             contextual_override_entry_indexes=tuple(self.contextual_override_entry_indexes),
+            contextual_entry_indexes_by_first_char=MappingProxyType(
+                {key: tuple(value) for key, value in self.contextual_entry_indexes_by_first_char.items()}
+            ),
             blocked_sentence_entry_indexes=tuple(self.blocked_sentence_entry_indexes),
             shadow_forbidden_chars=frozenset(
                 char for entry in self.entries_by_index for value in (entry.src, entry.tgt) for char in value
@@ -450,17 +457,16 @@ class TaigiConverter:
 
         self.sentence_override_map, self.contextual_override_entry_indexes = self._load_override_index(override_index)
         self._validate_runtime_reference_contract()
+        self.contextual_entry_indexes_by_first_char: dict[str, list[int]] = {}
+        for entry_index in self.contextual_override_entry_indexes:
+            first_char = self.entries_by_index[entry_index].src[0]
+            self.contextual_entry_indexes_by_first_char.setdefault(first_char, []).append(entry_index)
 
         self.blocked_sentence_entry_indexes = [
             entry_index
             for entry_index, entry in enumerate(self.entries_by_index)
             if entry.status == "active" and entry.tier == "blocked" and entry.level == "sentence"
         ]
-
-    @staticmethod
-    def _read_json(path: Path) -> dict[str, Any]:
-        with path.open("r", encoding="utf-8") as f:
-            return json.load(f)
 
     @staticmethod
     def _decode_regex_replacement(replacement: str) -> str:
@@ -928,29 +934,22 @@ class TaigiConverter:
         candidates: list[Candidate] = []
         entries = self.entries_by_index
         layer_rank_by_index = self.layer_rank_by_index
-        for entry_index in self.contextual_override_entry_indexes:
-            entry = entries[entry_index]
-            if entry.status != "active":
-                continue
-            if not entry.src:
-                continue
-
-            start = 0
-            while True:
-                found = text.find(entry.src, start)
-                if found < 0:
-                    break
-                end = found + len(entry.src)
-                if self._context_match(context_source, found, end, entry.context):
+        entry_indexes_by_first_char = self.contextual_entry_indexes_by_first_char
+        for start, char in enumerate(text):
+            for entry_index in entry_indexes_by_first_char.get(char, ()):
+                entry = entries[entry_index]
+                end = start + len(entry.src)
+                if not text.startswith(entry.src, start):
+                    continue
+                if self._context_match(context_source, start, end, entry.context):
                     candidates.append(
                         Candidate(
                             entry=entry,
-                            start=found,
+                            start=start,
                             end=end,
                             layer_rank=layer_rank_by_index[entry_index],
                         )
                     )
-                start = found + 1
         return candidates
 
     def _iter_char_candidates(self, text: str) -> list[Candidate]:
@@ -1003,55 +1002,6 @@ class TaigiConverter:
                 node = node["children"].setdefault(ch, {"children": {}})
             node["term"] = term
         return root
-
-    def _has_longer_runtime_phrase(self, text: str, start: int, min_len_exclusive: int) -> bool:
-        """Return True when runtime trie has a longer phrase starting at `start`.
-
-        This prevents protected short terms (for example, identity terms like "身體")
-        from masking longer, intentional rewrites (for example, "身體不適" -> ...).
-        """
-        node = self.phrase_trie
-        idx = start
-        while idx < len(text):
-            edge = node["c"].get(text[idx])
-            if edge is None:
-                break
-            suffix, child = edge
-            if suffix and not text.startswith(suffix, idx + 1):
-                break
-            node = child
-            idx += 1 + len(suffix)
-            if idx - start > min_len_exclusive and node["e"]:
-                return True
-        return False
-
-    def _is_inside_longer_runtime_phrase(self, text: str, span_start: int, span_end: int) -> bool:
-        """Return True if span is covered by any longer runtime phrase match."""
-        if span_end <= span_start:
-            return False
-        if self.max_phrase_src_len <= 0:
-            return False
-
-        lookback = self.max_phrase_src_len - 1
-        start_min = max(0, span_start - lookback)
-
-        for start in range(start_min, span_start + 1):
-            node = self.phrase_trie
-            idx = start
-            while idx < len(text):
-                edge = node["c"].get(text[idx])
-                if edge is None:
-                    break
-                suffix, child = edge
-                if suffix and not text.startswith(suffix, idx + 1):
-                    break
-                node = child
-                idx += 1 + len(suffix)
-                if idx < span_end:
-                    continue
-                if node["e"] and (start < span_start or idx > span_end):
-                    return True
-        return False
 
     def _overlaps_runtime_phrase(self, text: str, span_start: int, span_end: int) -> bool:
         """Return True if a protected span intersects any multi-char runtime phrase.
@@ -1292,11 +1242,9 @@ class TaigiConverter:
     @staticmethod
     def _shadow_marker_candidates() -> tuple[str, ...]:
         # Unicode noncharacters are valid Python scalar values but cannot be
-        # assigned as text characters. One reusable marker is enough for any
-        # number of protected occurrences.
-        return tuple(chr(codepoint) for codepoint in range(0xFDD0, 0xFDF0)) + tuple(
-            chr((plane << 16) | suffix) for plane in range(17) for suffix in (0xFFFE, 0xFFFF)
-        )
+        # assigned as text characters. The immutable candidate pool is shared
+        # across conversions instead of being rebuilt for every protected span.
+        return SHADOW_MARKER_CANDIDATES
 
     def _encode_protected(self, text: _ProtectedText) -> tuple[str, _ShadowLayout] | None:
         protected_values = tuple(segment.text for segment in text.segments if segment.protected)
@@ -1524,29 +1472,6 @@ class TaigiConverter:
             return _ProtectedText.plain(output), warnings
 
         return self._cleanup_by_segment(text)
-
-    def _select_non_overlapping(
-        self,
-        candidates: list[Candidate],
-        *,
-        reserved: list[Candidate] | None = None,
-        text_length: int,
-    ) -> list[Candidate]:
-        occupied_mask = 0
-        for candidate in reserved or []:
-            occupied_mask |= self._span_mask(candidate.start, candidate.end)
-
-        selected: list[Candidate] = []
-        for candidate in sorted(candidates, key=self._candidate_key):
-            if candidate.start >= candidate.end:
-                continue
-            span_mask = self._span_mask(candidate.start, candidate.end)
-            if occupied_mask & span_mask:
-                continue
-            selected.append(candidate)
-            occupied_mask |= span_mask
-
-        return sorted(selected, key=lambda c: c.start)
 
     def _select_leftmost_maximum(
         self,

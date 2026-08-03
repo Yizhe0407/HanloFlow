@@ -697,6 +697,10 @@ class RuntimeBehaviorTests(unittest.TestCase):
             warm = time.perf_counter() - started
             self.assertIs(first.entries_by_index, second.entries_by_index)
             self.assertIs(first.phrase_trie, second.phrase_trie)
+            self.assertIs(
+                first.contextual_entry_indexes_by_first_char,
+                second.contextual_entry_indexes_by_first_char,
+            )
             self.assertEqual(len(TaigiConverter._runtime_cache), 1)
             self.assertLess(warm, cold)
             self.assertEqual(second.convert("測試詞"), "試驗詞")
@@ -730,6 +734,10 @@ class RuntimeBehaviorTests(unittest.TestCase):
                 runtime_entry.tgt = "[MUTATED]"  # type: ignore[misc]
             with self.assertRaises(TypeError):
                 first.entries["new"] = runtime_entry  # type: ignore[index]
+            entry_index = first.entry_index_by_id["lx_test00000001"]
+            self.assertEqual(first.contextual_entry_indexes_by_first_char["測"], (entry_index,))
+            with self.assertRaises(TypeError):
+                first.contextual_entry_indexes_by_first_char["新"] = (entry_index,)  # type: ignore[index]
             assert runtime_entry.context is not None
             with self.assertRaises(TypeError):
                 runtime_entry.context["right_regex"] = ".*"  # type: ignore[index]
