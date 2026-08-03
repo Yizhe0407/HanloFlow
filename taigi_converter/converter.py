@@ -124,7 +124,6 @@ class _RuntimeState:
     has_char_entries: bool
     has_blocked_phrase_entries: bool
     has_blocked_char_entries: bool
-    has_blocked_entries: bool
     rule_pass_order: tuple[str, ...]
     rules_by_pass: Mapping[str, tuple[RuntimeRuleEntry, ...]]
     compiled_rules_by_pass: Mapping[str, tuple[RuntimeRule, ...]]
@@ -141,7 +140,6 @@ class _RuntimeState:
     sentence_override_map: Mapping[str, tuple[int, ...]]
     contextual_override_entry_indexes: tuple[int, ...]
     contextual_entry_indexes_by_first_char: Mapping[str, tuple[int, ...]]
-    blocked_sentence_entry_indexes: tuple[int, ...]
     shadow_forbidden_chars: frozenset[str]
 
 
@@ -298,7 +296,6 @@ class TaigiConverter:
             has_char_entries=self.has_char_entries,
             has_blocked_phrase_entries=self.has_blocked_phrase_entries,
             has_blocked_char_entries=self.has_blocked_char_entries,
-            has_blocked_entries=self.has_blocked_entries,
             rule_pass_order=tuple(self.rule_pass_order),
             rules_by_pass=MappingProxyType({key: tuple(value) for key, value in self.rules_by_pass.items()}),
             compiled_rules_by_pass=MappingProxyType(
@@ -321,7 +318,6 @@ class TaigiConverter:
             contextual_entry_indexes_by_first_char=MappingProxyType(
                 {key: tuple(value) for key, value in self.contextual_entry_indexes_by_first_char.items()}
             ),
-            blocked_sentence_entry_indexes=tuple(self.blocked_sentence_entry_indexes),
             shadow_forbidden_chars=frozenset(
                 char for entry in self.entries_by_index for value in (entry.src, entry.tgt) for char in value
             )
@@ -495,11 +491,6 @@ class TaigiConverter:
             first_char = self.entries_by_index[entry_index].src[0]
             self.contextual_entry_indexes_by_first_char.setdefault(first_char, []).append(entry_index)
 
-        self.blocked_sentence_entry_indexes = [
-            entry_index
-            for entry_index, entry in enumerate(self.entries_by_index)
-            if entry.status == "active" and entry.tier == "blocked" and entry.level == "sentence"
-        ]
         self.single_char_phrase_map: dict[str, list[int]] = {}
         self.has_blocked_phrase_entries = False
         self.has_blocked_char_entries = False
@@ -513,11 +504,6 @@ class TaigiConverter:
                     self.has_blocked_phrase_entries = True
             elif entry.level == "char" and entry.tier == "blocked":
                 self.has_blocked_char_entries = True
-        self.has_blocked_entries = bool(
-            self.has_blocked_phrase_entries
-            or self.has_blocked_char_entries
-            or self.blocked_sentence_entry_indexes
-        )
 
     @staticmethod
     def _decode_regex_replacement(replacement: str) -> str:
@@ -977,17 +963,6 @@ class TaigiConverter:
     @staticmethod
     def _layer_rank(entry: RuntimeLexiconEntry) -> int:
         return runtime_layer_rank(entry)
-
-    def _candidate_key(self, candidate: Candidate) -> tuple[int, int, int, float, int, str]:
-        entry = candidate.entry
-        return (
-            candidate.layer_rank,
-            -entry.priority,
-            -(candidate.end - candidate.start),
-            -entry.score,
-            candidate.start,
-            entry.entry_id,
-        )
 
     def _phase_candidate_key(self, candidate: Candidate) -> tuple[int, int, int, int, float, str]:
         entry = candidate.entry
@@ -1721,22 +1696,10 @@ class TaigiConverter:
         return selected
 
     def _collect_blocked_candidates(self, text: str, phrase_candidates: list[Candidate]) -> list[Candidate]:
-        if not self.has_blocked_entries:
+        if not (self.has_blocked_phrase_entries or self.has_blocked_char_entries):
             return []
 
         blocked = [candidate for candidate in phrase_candidates if candidate.entry.tier == "blocked"]
-
-        for entry_index in self.blocked_sentence_entry_indexes:
-            entry = self.entries_by_index[entry_index]
-            if text == entry.src:
-                blocked.append(
-                    Candidate(
-                        entry=entry,
-                        start=0,
-                        end=len(text),
-                        layer_rank=0,
-                    )
-                )
 
         if self.has_blocked_char_entries:
             for idx, ch in enumerate(text):

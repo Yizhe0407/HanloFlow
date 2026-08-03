@@ -690,6 +690,7 @@ class RuntimeBehaviorTests(unittest.TestCase):
                 entry_id="lx_blocked00001",
                 src="東西",
                 tgt="東西",
+                level="sentence",
                 tier="blocked",
                 priority=1000,
             )
