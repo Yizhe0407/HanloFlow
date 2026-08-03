@@ -14,6 +14,7 @@ from taigi_converter.review_queue import (
     _prepare_state_dir,
     append_review_item,
     apply_review_decisions,
+    export_pending_reviews,
     load_review_queue,
     load_review_snapshot,
 )
@@ -124,6 +125,129 @@ class ReviewQueueTests(unittest.TestCase):
             self.assertNotEqual(third["review_id"], first["review_id"])
             self.assertEqual(third["fingerprint"], first["fingerprint"])
             self.assertEqual(len(load_review_queue(data_dir)), 2)
+
+    def test_pre_phase4_legacy_rows_use_neutral_export_priority(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            data_dir = Path(temp)
+            write_jsonl(
+                data_dir / "review_queue.jsonl",
+                [
+                    {
+                        "review_id": "rq_legacy",
+                        "kind": "legacy",
+                        "created_at": "2026-01-01T00:00:00+00:00",
+                        "status": "pending",
+                    },
+                    {
+                        "review_id": "rq_high",
+                        "kind": "high",
+                        "priority": 75,
+                        "created_at": "2026-01-02T00:00:00+00:00",
+                        "status": "pending",
+                    },
+                    {
+                        "review_id": "rq_low",
+                        "kind": "low",
+                        "priority": 25,
+                        "created_at": "2026-01-03T00:00:00+00:00",
+                        "status": "pending",
+                    },
+                ],
+            )
+            output_path = data_dir / "pending.jsonl"
+
+            self.assertEqual(export_pending_reviews(data_dir, output_path), 3)
+            exported = [json.loads(line) for line in output_path.read_text(encoding="utf-8").splitlines()]
+
+            self.assertEqual([row["kind"] for row in exported], ["high", "legacy", "low"])
+            self.assertNotIn("priority", next(row for row in exported if row["kind"] == "legacy"))
+
+    def test_pre_phase4_online_review_dedupes_after_diagnostics_upgrade(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            data_dir = Path(temp)
+            legacy = {
+                "review_id": "rq_legacy",
+                "fingerprint": "rfp_pre_phase4_schema",
+                "kind": "online_low_confidence",
+                "action": "add_override",
+                "owner": "runtime",
+                "reason": "auto_enqueued_by_runtime",
+                "status": "pending",
+                "evidence": {
+                    "input": "完全未知內容",
+                    "output": "完全未知內容",
+                    "warnings": [],
+                    "match_count": 0,
+                    "match_entry_ids": [],
+                },
+            }
+            write_jsonl(data_dir / "review_queue.jsonl", [legacy])
+
+            upgraded = append_review_item(
+                data_dir,
+                {
+                    "kind": "online_low_confidence",
+                    "action": "add_override",
+                    "owner": "runtime",
+                    "reason": "auto_enqueued_by_runtime",
+                    "priority": 78,
+                    "evidence": {
+                        "input": "完全未知內容",
+                        "normalized_input": "完全未知內容",
+                        "output": "完全未知內容",
+                        "warnings": [],
+                        "low_confidence_reasons": [
+                            "no_transform_evidence",
+                            "sparse_conversion_coverage",
+                        ],
+                        "confidence_score": 0.15,
+                        "review_priority": 78,
+                        "matched_span_ratio": 0.0,
+                        "identity_ratio": 1.0,
+                        "matches": [],
+                        "rules_applied": [],
+                    },
+                },
+            )
+
+            rows = load_review_queue(data_dir)
+            self.assertEqual(len(rows), 1)
+            self.assertEqual(upgraded["review_id"], "rq_legacy")
+            self.assertEqual(upgraded["occurrence_count"], 2)
+            self.assertEqual(rows[0]["occurrence_count"], 2)
+            self.assertEqual(rows[0]["fingerprint"], upgraded["fingerprint"])
+
+    def test_online_review_identity_keeps_distinct_outputs_and_actions_separate(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            data_dir = Path(temp)
+            base = {
+                "kind": "online_low_confidence",
+                "action": "add_override",
+                "owner": "runtime",
+                "reason": "auto_enqueued_by_runtime",
+                "evidence": {"input": "同一輸入", "output": "第一輸出"},
+            }
+            first = append_review_item(data_dir, base)
+            different_output = append_review_item(
+                data_dir,
+                {**base, "evidence": {"input": "同一輸入", "output": "第二輸出"}},
+            )
+            different_action = append_review_item(
+                data_dir,
+                {**base, "action": "reject"},
+            )
+
+            rows = load_review_queue(data_dir)
+            self.assertEqual(len(rows), 3)
+            self.assertEqual(len({row["fingerprint"] for row in rows}), 3)
+            self.assertEqual(
+                {row["review_id"] for row in rows},
+                {
+                    first["review_id"],
+                    different_output["review_id"],
+                    different_action["review_id"],
+                },
+            )
 
     def test_legacy_duplicate_ids_and_pending_fingerprints_are_recovered(self) -> None:
         with tempfile.TemporaryDirectory() as temp:

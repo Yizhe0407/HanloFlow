@@ -7,7 +7,8 @@
 - 300 cases：6 categories，各 50 cases。
 - splits：train 150、development 90、holdout 60。
 - 所有案例皆使用 `ai_semantic_review`，metadata 明確標示為 AI 語義審查，不宣稱人工翻譯認證。
-- source 不得和既有 regression source 重疊，也不得等於 active phrase/sentence runtime entry；例外必須在 case 中明確核准並說明原因。
+- source 會先套用與 runtime 第一階段一致的字形、水平空白與外圍空白 canonicalization；raw source 與 canonical source 都不得和既有 regression source 重疊，也不得等於 active phrase/sentence runtime entry。
+- `allow_sentence_override` 只可豁免 `sentence_override_entry_ids` 明列的 active sentence entries，且必須同時提供 `sentence_override_reason`；未列出的 sentence entry 與所有 active phrase entries 永遠不得豁免。
 - runner 預設只報告 baseline；只有指定 `--fail-on-mismatch` 才會因 exact-match mismatch 回傳非零狀態。
 
 ## Commands
@@ -17,6 +18,7 @@ python3 scripts/audit_semantic_eval_leakage.py --fail-on-findings
 python3 scripts/run_semantic_evaluation.py
 python3 scripts/run_semantic_evaluation.py --split holdout
 python3 scripts/run_semantic_evaluation.py --json-output build/semantic-eval.json
+python3 scripts/run_semantic_evaluation.py --include-latency
 ```
 
 ## Phase 2 baseline
@@ -39,11 +41,11 @@ python3 scripts/run_semantic_evaluation.py --json-output build/semantic-eval.jso
 | polysemy_adversarial | 2 | 50 |
 | proper_nouns_technical | 15 | 50 |
 
-此數值是 Phase 3 修正前的 reproducible baseline。Latency 不納入 snapshot，因為它會受執行環境影響。
+此數值是 Phase 3 修正前的 reproducible baseline。預設 JSON 與 snapshot 不含 latency，因此相同 corpus/runtime 可產生 deterministic 輸出；需要效能診斷時才使用 `--include-latency`。
 
 ## Phase 3 post-remediation result
 
-Phase 3 只用 train/development failures 選擇 24 個有語境限制的 reusable phrase 修正；完成調整後才首次量測 holdout。
+Phase 2 已量測包含 60 筆 holdout 的完整 baseline；Phase 3 選擇 24 個有語境限制的 reusable phrase 修正目標時，只使用 train/development failures，沒有使用 holdout 選擇或調整 entries。目前以 25 個 contextual phrase entries 實作，其中「最新／最新的」拆為兩筆以完整消耗結構助詞；完成後再重新量測 holdout。
 
 - train + development：30 / 240 → 42 / 240（+12，12.5% → 17.5%）
 - holdout：7 / 60 → 7 / 60（維持 11.6667%，沒有用 holdout 調參）

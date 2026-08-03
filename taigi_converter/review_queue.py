@@ -23,6 +23,9 @@ from .lexicon_policy import VALID_TRUSTS, normalize_trust
 
 ALLOWED_DECISIONS = {"add_override", "disable_base_entry", "reject"}
 DEFAULT_REVIEW_OWNER = "reviewer"
+# Runtime priorities use 1..100; the midpoint lets unscored legacy work
+# compete with new reviews without outranking explicitly urgent items.
+LEGACY_REVIEW_PRIORITY = 50
 PRIVATE_DIRECTORY_MODE = 0o700
 PRIVATE_FILE_MODE = 0o600
 IMMUTABLE_GENERATION_DIRECTORY_MODE = 0o500
@@ -105,9 +108,32 @@ def _review_content(item: dict[str, Any]) -> dict[str, Any]:
     return {key: value for key, value in item.items() if key not in _REVIEW_METADATA_FIELDS}
 
 
+def _review_identity(item: dict[str, Any]) -> dict[str, Any]:
+    content = _review_content(item)
+    content.pop("priority", None)
+
+    if content.get("kind") != "online_low_confidence":
+        return content
+
+    evidence = content.get("evidence")
+    if not isinstance(evidence, dict):
+        return content
+    input_text = evidence.get("input")
+    output_text = evidence.get("output")
+    if not isinstance(input_text, str) or not isinstance(output_text, str):
+        return content
+
+    # Runtime diagnostics and confidence scoring evolve independently from the
+    # reviewer's actual decision. Preserve every top-level discriminator while
+    # identifying an online review by the source/output pair that is reviewed.
+    identity = {key: value for key, value in content.items() if key != "evidence"}
+    identity["evidence"] = {"input": input_text, "output": output_text}
+    return identity
+
+
 def _review_fingerprint(item: dict[str, Any]) -> str:
     raw = json.dumps(
-        _review_content(item),
+        _review_identity(item),
         ensure_ascii=False,
         sort_keys=True,
         separators=(",", ":"),
@@ -625,9 +651,9 @@ def load_review_queue(data_dir: Path) -> list[dict[str, Any]]:
 
 
 def _pending_review_sort_key(row: dict[str, Any]) -> tuple[float, float, int, str, str]:
-    priority = row.get("priority", 0)
+    priority = row.get("priority", LEGACY_REVIEW_PRIORITY)
     if not isinstance(priority, int | float) or isinstance(priority, bool):
-        priority = 0
+        priority = LEGACY_REVIEW_PRIORITY
     evidence = row.get("evidence", {})
     confidence = evidence.get("confidence_score", 1.0) if isinstance(evidence, dict) else 1.0
     if not isinstance(confidence, int | float) or isinstance(confidence, bool):

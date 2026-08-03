@@ -221,6 +221,7 @@ class RuleTrace:
     pattern: str
     replacement: str
     hit_count: int
+    matched_chars: int = 0
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)

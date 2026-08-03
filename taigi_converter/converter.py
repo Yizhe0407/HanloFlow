@@ -6,10 +6,9 @@ import math
 import re
 import threading
 import time
-from collections import OrderedDict
+from collections import Counter, OrderedDict
 from collections.abc import Mapping
 from dataclasses import dataclass, fields
-from difflib import SequenceMatcher
 from pathlib import Path
 from types import MappingProxyType
 from typing import Any
@@ -115,6 +114,35 @@ class _ShadowLayout:
 @dataclass(slots=True)
 class _ReviewDiagnostics:
     ambiguous_candidate_count: int = 0
+
+
+def _linear_identity_ratio(source: str, target: str) -> float:
+    """Return a linear-time character-overlap ratio for review heuristics.
+
+    Review diagnostics only need a stable estimate of how much text survived the
+    conversion.  A full edit-distance alignment is unnecessary here and can be
+    quadratic for repeated user input.
+    """
+
+    total_length = len(source) + len(target)
+    if total_length == 0:
+        return 1.0
+    shared_characters = sum((Counter(source) & Counter(target)).values())
+    return 2.0 * shared_characters / total_length
+
+
+def _competing_target_count(chosen: Candidate, candidates: list[Candidate]) -> int:
+    """Count distinct outputs competing for exactly the chosen input span."""
+
+    return len(
+        {
+            candidate.entry.tgt
+            for candidate in candidates
+            if candidate.start == chosen.start
+            and candidate.end == chosen.end
+            and candidate.entry.tgt != chosen.entry.tgt
+        }
+    )
 
 
 @dataclass(frozen=True, slots=True)
@@ -1596,6 +1624,7 @@ class TaigiConverter:
                     trace_by_key[key] = trace
                 else:
                     existing.hit_count += trace.hit_count
+                    existing.matched_chars += trace.matched_chars
         return self._merge_segments(segments), [trace_by_key[key] for key in trace_order]
 
     def _apply_rules_to_protected(
@@ -1774,11 +1803,8 @@ class TaigiConverter:
 
         chosen = sentence_selected[0]
         if review_diagnostics is not None:
-            review_diagnostics.ambiguous_candidate_count += sum(
-                candidate.entry.entry_id != chosen.entry.entry_id
-                and candidate.start == chosen.start
-                and candidate.end == chosen.end
-                for candidate in sentence_candidates
+            review_diagnostics.ambiguous_candidate_count += _competing_target_count(
+                chosen, sentence_candidates
             )
         if not collect_matches:
             return chosen.entry.tgt, [], warnings
@@ -1838,11 +1864,8 @@ class TaigiConverter:
                 if sentence_selected:
                     chosen = sentence_selected[0]
                     if review_diagnostics is not None:
-                        review_diagnostics.ambiguous_candidate_count += sum(
-                            candidate.entry.entry_id != chosen.entry.entry_id
-                            and candidate.start == chosen.start
-                            and candidate.end == chosen.end
-                            for candidate in sentence_candidates
+                        review_diagnostics.ambiguous_candidate_count += (
+                            _competing_target_count(chosen, sentence_candidates)
                         )
                     if not collect_matches:
                         return chosen.entry.tgt, [], warnings
@@ -1888,11 +1911,8 @@ class TaigiConverter:
 
         if review_diagnostics is not None:
             for chosen in selected:
-                review_diagnostics.ambiguous_candidate_count += sum(
-                    candidate.entry.entry_id != chosen.entry.entry_id
-                    and candidate.start == chosen.start
-                    and candidate.end == chosen.end
-                    for candidate in all_candidates
+                review_diagnostics.ambiguous_candidate_count += _competing_target_count(
+                    chosen, all_candidates
                 )
 
         if not selected:
@@ -1940,17 +1960,28 @@ class TaigiConverter:
                 if runtime_rule.required_literal and runtime_rule.required_literal not in text:
                     continue
 
+                matched_chars = 0
                 if rule.type == "regex":
                     if compiled is None:
                         continue
                     if collect_trace:
-                        replaced_text, hit_count = compiled.subn(rule.replacement, text)
+                        replacement = rule.replacement
+
+                        def replace_with_trace(
+                            match: re.Match[str], replacement: str = replacement
+                        ) -> str:
+                            nonlocal matched_chars
+                            matched_chars += match.end() - match.start()
+                            return match.expand(replacement)
+
+                        replaced_text, hit_count = compiled.subn(replace_with_trace, text)
                     else:
                         replaced_text = compiled.sub(rule.replacement, text)
                         hit_count = 0
                 else:
                     if collect_trace:
                         hit_count = text.count(rule.pattern)
+                        matched_chars = hit_count * len(rule.pattern)
                     else:
                         hit_count = 0
                     replaced_text = text.replace(rule.pattern, rule.replacement)
@@ -1964,6 +1995,7 @@ class TaigiConverter:
                             pattern=rule.pattern,
                             replacement=rule.replacement,
                             hit_count=hit_count,
+                            matched_chars=matched_chars,
                         )
                     )
                 text = replaced_text
@@ -2018,10 +2050,15 @@ class TaigiConverter:
         protected_segments = [segment.text for segment in protected_input.segments if segment.protected]
         protected_values = list(dict.fromkeys(protected_segments))
         protected_chars = min(sum(len(value) for value in protected_segments), input_length)
+        rule_chars = min(sum(rule.matched_chars for rule in rules_applied), input_length)
         matched_span_ratio = matched_chars / input_length if input_length else 0.0
         protected_span_ratio = protected_chars / input_length if input_length else 0.0
-        evidence_span_ratio = min(matched_span_ratio + protected_span_ratio, 1.0)
-        identity_ratio = SequenceMatcher(None, normalized_text, output_text, autojunk=False).ratio()
+        rule_span_ratio = rule_chars / input_length if input_length else 0.0
+        evidence_span_ratio = min(
+            matched_span_ratio + protected_span_ratio + rule_span_ratio,
+            1.0,
+        )
+        identity_ratio = _linear_identity_ratio(normalized_text, output_text)
         residual_terms = list(
             dict.fromkeys(
                 warning.partition(":")[2]
@@ -2043,7 +2080,13 @@ class TaigiConverter:
             low_confidence_reasons.append("ambiguous_candidates")
         if not matches and not rules_applied and not protected_values and identity_ratio >= 0.98:
             low_confidence_reasons.append("no_transform_evidence")
-        if input_length >= 4 and evidence_span_ratio < 0.35 and identity_ratio >= 0.70:
+        rule_only_evidence = bool(rules_applied) and not matches
+        if (
+            input_length >= 4
+            and evidence_span_ratio < 0.35
+            and identity_ratio >= 0.70
+            and not rule_only_evidence
+        ):
             low_confidence_reasons.append("sparse_conversion_coverage")
         if not low_confidence_reasons:
             return
@@ -2090,6 +2133,8 @@ class TaigiConverter:
                     "matched_span_ratio": round(matched_span_ratio, 4),
                     "identity_ratio": round(identity_ratio, 4),
                     "protected_span_ratio": round(protected_span_ratio, 4),
+                    "rule_span_ratio": round(rule_span_ratio, 4),
+                    "evidence_span_ratio": round(evidence_span_ratio, 4),
                     "residual_terms": residual_terms,
                     "protected_terms": protected_values,
                     "blocked_candidates": blocked_candidates,

@@ -8,6 +8,7 @@ from collections import Counter
 from collections.abc import Iterable, Mapping, Sequence
 from dataclasses import asdict, dataclass
 from datetime import date
+from math import ceil
 from pathlib import Path
 from statistics import mean
 from typing import Any
@@ -17,6 +18,7 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 from taigi_converter import TaigiConverter
+from taigi_converter.normalize import normalize_text
 
 SEMANTIC_SPLITS = ("train", "development", "holdout")
 SEMANTIC_FAILURE_TYPES = (
@@ -52,8 +54,10 @@ _CASE_FIELDS = frozenset(
         "split",
         "allow_sentence_override",
         "sentence_override_reason",
+        "sentence_override_entry_ids",
     }
 )
+_OPTIONAL_CASE_FIELDS = frozenset({"sentence_override_entry_ids"})
 
 
 @dataclass(frozen=True, slots=True)
@@ -71,6 +75,7 @@ class SemanticEvaluationCase:
     split: str
     allow_sentence_override: bool = False
     sentence_override_reason: str = ""
+    sentence_override_entry_ids: tuple[str, ...] = ()
 
     def __post_init__(self) -> None:
         text_fields = (
@@ -118,14 +123,25 @@ class SemanticEvaluationCase:
             raise ValueError("reviewed_at 必須是 YYYY-MM-DD") from exc
         if not isinstance(self.allow_sentence_override, bool):
             raise ValueError("allow_sentence_override 必須是 boolean")
+        if not isinstance(self.sentence_override_entry_ids, tuple):
+            raise ValueError("sentence_override_entry_ids 必須是陣列")
+        for entry_id in self.sentence_override_entry_ids:
+            if not isinstance(entry_id, str) or not entry_id.startswith("lx_"):
+                raise ValueError("sentence_override_entry_ids 只能包含 lx_ entry ID")
+        if len(set(self.sentence_override_entry_ids)) != len(self.sentence_override_entry_ids):
+            raise ValueError("sentence_override_entry_ids 不可重複")
         has_reason = bool(self.sentence_override_reason.strip())
-        if self.allow_sentence_override != has_reason:
-            raise ValueError("allow_sentence_override 與 sentence_override_reason 必須同時設定")
+        has_entry_ids = bool(self.sentence_override_entry_ids)
+        if len({self.allow_sentence_override, has_reason, has_entry_ids}) != 1:
+            raise ValueError(
+                "allow_sentence_override、sentence_override_reason 與 "
+                "sentence_override_entry_ids 必須同時設定"
+            )
 
     @classmethod
     def from_dict(cls, payload: Mapping[str, Any]) -> SemanticEvaluationCase:
         unknown = sorted(set(payload) - _CASE_FIELDS)
-        missing = sorted(_CASE_FIELDS - set(payload))
+        missing = sorted((_CASE_FIELDS - _OPTIONAL_CASE_FIELDS) - set(payload))
         if unknown:
             raise ValueError(f"semantic case 含未知欄位: {unknown}")
         if missing:
@@ -133,6 +149,9 @@ class SemanticEvaluationCase:
         focus_terms = payload["focus_terms"]
         if not isinstance(focus_terms, list):
             raise ValueError("focus_terms 必須是 JSON array")
+        sentence_override_entry_ids = payload.get("sentence_override_entry_ids", [])
+        if not isinstance(sentence_override_entry_ids, list):
+            raise ValueError("sentence_override_entry_ids 必須是 JSON array")
         return cls(
             case_id=payload["case_id"],
             source=payload["source"],
@@ -147,11 +166,13 @@ class SemanticEvaluationCase:
             split=payload["split"],
             allow_sentence_override=payload["allow_sentence_override"],
             sentence_override_reason=payload["sentence_override_reason"],
+            sentence_override_entry_ids=tuple(sentence_override_entry_ids),
         )
 
     def to_dict(self) -> dict[str, Any]:
         payload = asdict(self)
         payload["focus_terms"] = list(self.focus_terms)
+        payload["sentence_override_entry_ids"] = list(self.sentence_override_entry_ids)
         return payload
 
 
@@ -162,25 +183,34 @@ class SemanticEvaluationResult:
     passed: bool
     latency_ms: float
 
-    def to_dict(self) -> dict[str, Any]:
-        return {
+    def to_dict(self, *, include_latency: bool = False) -> dict[str, Any]:
+        payload = {
             "case_id": self.case.case_id,
             "source": self.case.source,
             "expected": self.case.expected,
             "output": self.output,
             "passed": self.passed,
-            "latency_ms": round(self.latency_ms, 4),
             "split": self.case.split,
             "category": self.case.category,
             "failure_type": self.case.failure_type,
             "oracle_kind": self.case.oracle_kind,
         }
+        if include_latency:
+            payload["latency_ms"] = round(self.latency_ms, 4)
+        return payload
+
+
+def canonicalize_semantic_source(source: str) -> str:
+    """Apply the stable, lexicon-independent part of runtime input normalization."""
+
+    return normalize_text(source, convert_numbers=False)
 
 
 def load_semantic_cases(path: Path) -> list[SemanticEvaluationCase]:
     cases: list[SemanticEvaluationCase] = []
     seen_ids: dict[str, int] = {}
     seen_sources: dict[str, tuple[int, str]] = {}
+    seen_canonical_sources: dict[str, tuple[int, str, str]] = {}
     with path.open(encoding="utf-8") as handle:
         for line_number, raw_line in enumerate(handle, 1):
             line = raw_line.strip()
@@ -200,14 +230,25 @@ def load_semantic_cases(path: Path) -> list[SemanticEvaluationCase]:
                 raise ValueError(
                     f"{path}:{line_number}: duplicate case_id {case.case_id!r}；首次出現在第 {seen_ids[case.case_id]} 行"
                 )
+            canonical_source = canonicalize_semantic_source(case.source)
             if case.source in seen_sources:
                 previous_line, previous_split = seen_sources[case.source]
                 raise ValueError(
-                    f"{path}:{line_number}: duplicate source 跨 semantic cases/splits；"
-                    f"首次出現在第 {previous_line} 行 ({previous_split})"
+                    f"{path}:{line_number}: duplicate raw source 跨 semantic cases/splits；"
+                    f"首次出現在第 {previous_line} 行 ({previous_split})；"
+                    f"canonical source={canonical_source!r}"
+                )
+            if canonical_source in seen_canonical_sources:
+                previous_line, previous_split, previous_source = seen_canonical_sources[canonical_source]
+                raise ValueError(
+                    f"{path}:{line_number}: duplicate canonical source 跨 semantic cases/splits；"
+                    f"raw source={case.source!r}，canonical source={canonical_source!r}；"
+                    f"首次出現在第 {previous_line} 行 ({previous_split})，"
+                    f"raw source={previous_source!r}"
                 )
             seen_ids[case.case_id] = line_number
             seen_sources[case.source] = (line_number, case.split)
+            seen_canonical_sources[canonical_source] = (line_number, case.split, case.source)
             cases.append(case)
     return cases
 
@@ -242,7 +283,7 @@ def _latency_summary(results: Sequence[SemanticEvaluationResult]) -> dict[str, f
     values = sorted(result.latency_ms for result in results)
     if not values:
         return {"mean_ms": 0.0, "p95_ms": 0.0, "max_ms": 0.0}
-    p95_index = max(int(len(values) * 0.95) - 1, 0)
+    p95_index = max(ceil(len(values) * 0.95) - 1, 0)
     return {
         "mean_ms": round(mean(values), 4),
         "p95_ms": round(values[p95_index], 4),
@@ -255,13 +296,23 @@ def build_semantic_summary(
     results: Sequence[SemanticEvaluationResult],
     *,
     mismatch_limit: int = 20,
+    include_latency: bool = False,
 ) -> dict[str, Any]:
-    passed = sum(result.passed for result in results)
-    failed_results = [result for result in results if not result.passed]
     case_count = len(cases)
     if len(results) != case_count:
         raise ValueError("cases 與 results 數量不一致")
-    return {
+    if mismatch_limit < 0:
+        raise ValueError("mismatch_limit 不可小於 0")
+    for index, (case, result) in enumerate(zip(cases, results, strict=True)):
+        if result.case != case:
+            raise ValueError(
+                "cases 與 results identity/order 不一致："
+                f"index={index}，case_id={case.case_id!r}，result_case_id={result.case.case_id!r}"
+            )
+
+    passed = sum(result.passed for result in results)
+    failed_results = [result for result in results if not result.passed]
+    summary: dict[str, Any] = {
         "case_count": case_count,
         "passed": passed,
         "failed": len(failed_results),
@@ -273,10 +324,15 @@ def build_semantic_summary(
         "failures_by_split": _counter(result.case.split for result in failed_results),
         "failures_by_category": _counter(result.case.category for result in failed_results),
         "failures_by_failure_type": _counter(result.case.failure_type for result in failed_results),
-        "latency": _latency_summary(results),
-        "mismatches": [result.to_dict() for result in failed_results[:mismatch_limit]],
+        "mismatches": [
+            result.to_dict(include_latency=include_latency)
+            for result in failed_results[:mismatch_limit]
+        ],
         "mismatches_truncated": max(len(failed_results) - mismatch_limit, 0),
     }
+    if include_latency:
+        summary["latency"] = _latency_summary(results)
+    return summary
 
 
 def deterministic_json(payload: Any) -> str:

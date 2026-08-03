@@ -6,6 +6,7 @@ from tempfile import TemporaryDirectory
 from unittest.mock import patch
 
 from taigi_converter import TaigiConverter
+from taigi_converter.converter import _linear_identity_ratio
 from taigi_converter.review_queue import append_review_item, export_pending_reviews
 
 
@@ -103,6 +104,9 @@ def test_residual_review_contains_matches_rules_and_protected_terms() -> None:
     assert evidence["rule_count"] == 1
     assert evidence["rule_ids"] == ["rl_8e67ee3e3752"]
     assert evidence["rules_applied"][0]["hit_count"] == 1
+    assert evidence["rules_applied"][0]["matched_chars"] > 0
+    assert evidence["rule_span_ratio"] > 0.0
+    assert evidence["evidence_span_ratio"] >= evidence["matched_span_ratio"]
 
 
 def test_fully_protected_or_rule_only_input_is_not_low_confidence() -> None:
@@ -111,6 +115,19 @@ def test_fully_protected_or_rule_only_input_is_not_low_confidence() -> None:
         with patch("taigi_converter.converter.append_review_item") as append:
             assert converter.convert("周到", profile={"enqueue_review": True}) == "周到"
             assert converter.convert("食飽了沒", profile={"enqueue_review": True}) == "食飽未"
+            assert (
+                converter.convert("我的卡片到期了。", profile={"enqueue_review": True})
+                == "我的卡片到期矣。"
+            )
+
+    append.assert_not_called()
+
+
+def test_same_target_duplicate_entries_are_not_reported_as_ambiguous() -> None:
+    with TemporaryDirectory() as temp:
+        converter = TaigiConverter(review_data_dir=Path(temp))
+        with patch("taigi_converter.converter.append_review_item") as append:
+            assert converter.convert("今天", profile={"enqueue_review": True}) == "今仔日"
 
     append.assert_not_called()
 
@@ -149,3 +166,9 @@ def test_pending_review_export_orders_priority_then_confidence() -> None:
         rows = [json.loads(line) for line in output_path.read_text(encoding="utf-8").splitlines()]
 
     assert [row["kind"] for row in rows] == ["high-uncertain", "high-confident"]
+
+
+def test_identity_ratio_handles_long_repeated_input_without_alignment() -> None:
+    source = "甲乙" * 50_000
+    assert _linear_identity_ratio(source, source) == 1.0
+    assert _linear_identity_ratio(source, source[:-1] + "丙") > 0.99

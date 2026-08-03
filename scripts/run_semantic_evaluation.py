@@ -35,6 +35,11 @@ def main(
     parser.add_argument("--split", action="append", choices=SEMANTIC_SPLITS, default=[])
     parser.add_argument("--json-output", type=Path)
     parser.add_argument("--mismatch-limit", type=int, default=20)
+    parser.add_argument(
+        "--include-latency",
+        action="store_true",
+        help="在非 deterministic 的診斷輸出中包含 latency",
+    )
     parser.add_argument("--fail-on-mismatch", action="store_true")
     args = parser.parse_args(argv)
     if args.mismatch_limit < 0:
@@ -45,7 +50,12 @@ def main(
         requested = set(args.split)
         selected_cases = [case for case in selected_cases if case.split in requested]
     results = run_semantic_cases(selected_cases, converter=converter)
-    summary = build_semantic_summary(selected_cases, results, mismatch_limit=args.mismatch_limit)
+    summary = build_semantic_summary(
+        selected_cases,
+        results,
+        mismatch_limit=args.mismatch_limit,
+        include_latency=args.include_latency,
+    )
     rendered = deterministic_json(summary)
     stdout.write(rendered)
     if args.json_output is not None:

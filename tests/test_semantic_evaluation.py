@@ -12,8 +12,9 @@ from scripts.audit_semantic_eval_leakage import main as audit_main
 from scripts.run_semantic_evaluation import main as runner_main
 from scripts.semantic_evaluation import (
     SemanticEvaluationCase,
+    SemanticEvaluationResult,
+    _latency_summary,
     build_semantic_summary,
-    deterministic_json,
     load_semantic_cases,
     run_semantic_cases,
 )
@@ -42,6 +43,7 @@ def case_payload(**overrides: object) -> dict[str, object]:
         "split": "holdout",
         "allow_sentence_override": False,
         "sentence_override_reason": "",
+        "sentence_override_entry_ids": [],
     }
     payload.update(overrides)
     return payload
@@ -120,8 +122,33 @@ def test_loader_rejects_source_reuse_across_splits() -> None:
             case_payload(),
             case_payload(case_id="sem_conversation_0002", split="train"),
         )
-        with pytest.raises(ValueError, match="duplicate source"):
+        with pytest.raises(ValueError, match="duplicate raw source"):
             load_semantic_cases(path)
+
+
+def test_loader_rejects_runtime_canonical_source_reuse() -> None:
+    with TemporaryDirectory() as temp_dir:
+        path = Path(temp_dir) / "cases.jsonl"
+        write_cases(
+            path,
+            case_payload(
+                source="臺北車站。",
+                expected="臺北車站。",
+                focus_terms=["臺北車站"],
+            ),
+            case_payload(
+                case_id="sem_conversation_0002",
+                source="台北車站。 ",
+                expected="台北車站。",
+                focus_terms=["台北車站"],
+                split="train",
+            ),
+        )
+        with pytest.raises(ValueError, match="duplicate canonical source") as exc_info:
+            load_semantic_cases(path)
+
+    assert "raw source='台北車站。 '" in str(exc_info.value)
+    assert "canonical source='台北車站。'" in str(exc_info.value)
 
 
 def test_leakage_audit_reports_regression_and_exact_runtime_overlap() -> None:
@@ -137,13 +164,38 @@ def test_leakage_audit_reports_regression_and_exact_runtime_overlap() -> None:
         "finding_count": 2,
         "clean": False,
         "counts_by_kind": {"exact_runtime_entry_overlap": 1, "regression_source_overlap": 1},
+        "counts_by_match_type": {"raw": 2},
     }
+    assert {finding["canonical_source"] for finding in report["findings"]} == {case.source}
+    assert all(finding["matched_sources"] == [case.source] for finding in report["findings"])
 
 
-def test_leakage_audit_honors_documented_override_but_not_regression_overlap() -> None:
+def test_leakage_audit_reports_canonical_overlap_with_raw_sources() -> None:
+    case = make_case(
+        source="臺北車站。 ",
+        expected="臺北車站。",
+        focus_terms=["臺北車站"],
+    )
+    report = audit_semantic_leakage(
+        [case],
+        regression_sources={"台北車站。"},
+        active_exact_entries={
+            "台北車站。": [{"entry_id": "lx_exact", "level": "sentence", "line": 1}]
+        },
+    )
+
+    assert report["summary"]["counts_by_match_type"] == {"canonical": 2}
+    for finding in report["findings"]:
+        assert finding["source"] == "臺北車站。 "
+        assert finding["canonical_source"] == "台北車站。"
+        assert finding["matched_sources"] == ["台北車站。"]
+
+
+def test_leakage_audit_honors_documented_sentence_override() -> None:
     case = make_case(
         allow_sentence_override=True,
         sentence_override_reason="此案例專門驗證已核准的完整句 override",
+        sentence_override_entry_ids=["lx_exact"],
     )
     report = audit_semantic_leakage(
         [case],
@@ -151,6 +203,56 @@ def test_leakage_audit_honors_documented_override_but_not_regression_overlap() -
         active_exact_entries={case.source: [{"entry_id": "lx_exact", "level": "sentence", "line": 1}]},
     )
     assert report["summary"]["clean"] is True
+
+
+def test_sentence_override_never_exempts_phrase_overlap() -> None:
+    case = make_case(
+        allow_sentence_override=True,
+        sentence_override_reason="只核准指定的完整句 override，不核准 phrase",
+        sentence_override_entry_ids=["lx_sentence"],
+    )
+    report = audit_semantic_leakage(
+        [case],
+        regression_sources=set(),
+        active_exact_entries={
+            case.source: [
+                {"entry_id": "lx_sentence", "level": "sentence", "line": 1},
+                {"entry_id": "lx_phrase", "level": "phrase", "line": 2},
+            ]
+        },
+    )
+
+    assert report["summary"]["counts_by_kind"] == {"exact_runtime_entry_overlap": 1}
+    finding = report["findings"][0]
+    assert [entry["entry_id"] for entry in finding["entries"]] == ["lx_phrase"]
+    assert [entry["entry_id"] for entry in finding["overridden_sentence_entries"]] == [
+        "lx_sentence"
+    ]
+    assert finding["sentence_override_reason"] == case.sentence_override_reason
+
+
+def test_sentence_override_only_exempts_approved_entry_ids() -> None:
+    case = make_case(
+        allow_sentence_override=True,
+        sentence_override_reason="只核准 lx_approved",
+        sentence_override_entry_ids=["lx_approved"],
+    )
+    report = audit_semantic_leakage(
+        [case],
+        regression_sources=set(),
+        active_exact_entries={
+            case.source: [
+                {"entry_id": "lx_approved", "level": "sentence", "line": 1},
+                {"entry_id": "lx_unapproved", "level": "sentence", "line": 2},
+            ]
+        },
+    )
+
+    finding = report["findings"][0]
+    assert [entry["entry_id"] for entry in finding["entries"]] == ["lx_unapproved"]
+    assert [entry["entry_id"] for entry in finding["overridden_sentence_entries"]] == [
+        "lx_approved"
+    ]
 
 
 def test_audit_cli_fail_flag_and_deterministic_json() -> None:
@@ -223,14 +325,84 @@ def test_runner_fail_on_mismatch_is_opt_in_and_split_filter_works() -> None:
     assert summary["failed"] == 1
 
 
-def test_summary_json_is_deterministic_and_mismatch_limit_is_applied() -> None:
+def test_runner_json_is_deterministic_across_two_executions() -> None:
     cases = [make_case()]
-    results = run_semantic_cases(cases, converter=FakeConverter({}))
-    summary = build_semantic_summary(cases, results, mismatch_limit=0)
+    first = io.StringIO()
+    second = io.StringIO()
 
-    assert summary["mismatches"] == []
-    assert summary["mismatches_truncated"] == 1
-    assert deterministic_json(summary) == deterministic_json(summary)
+    assert runner_main([], stdout=first, cases=cases, converter=FakeConverter({})) == 0
+    assert runner_main([], stdout=second, cases=cases, converter=FakeConverter({})) == 0
+
+    assert first.getvalue() == second.getvalue()
+    summary = json.loads(first.getvalue())
+    assert "latency" not in summary
+    assert "latency_ms" not in summary["mismatches"][0]
+
+
+def test_runner_latency_is_opt_in_and_mismatch_limit_is_applied() -> None:
+    cases = [make_case()]
+    diagnostic_stdout = io.StringIO()
+    limited_stdout = io.StringIO()
+
+    assert (
+        runner_main(
+            ["--include-latency"],
+            stdout=diagnostic_stdout,
+            cases=cases,
+            converter=FakeConverter({}),
+        )
+        == 0
+    )
+    diagnostic_summary = json.loads(diagnostic_stdout.getvalue())
+    assert set(diagnostic_summary["latency"]) == {"mean_ms", "p95_ms", "max_ms"}
+    assert "latency_ms" in diagnostic_summary["mismatches"][0]
+
+    assert (
+        runner_main(
+            ["--include-latency", "--mismatch-limit", "0"],
+            stdout=limited_stdout,
+            cases=cases,
+            converter=FakeConverter({}),
+        )
+        == 0
+    )
+    limited_summary = json.loads(limited_stdout.getvalue())
+    assert limited_summary["mismatches"] == []
+    assert limited_summary["mismatches_truncated"] == 1
+
+
+
+def test_latency_summary_uses_nearest_rank_p95() -> None:
+    case = make_case()
+    results = [
+        SemanticEvaluationResult(
+            case=case,
+            output=case.expected,
+            passed=True,
+            latency_ms=float(index),
+        )
+        for index in range(1, 22)
+    ]
+
+    assert _latency_summary(results)["p95_ms"] == 20.0
+
+def test_build_semantic_summary_rejects_result_identity_or_order_mismatch() -> None:
+    cases = [
+        make_case(),
+        make_case(
+            case_id="sem_news_0001",
+            source="市府公布新的交通措施。",
+            expected="市府公布新的交通措施。",
+            category="news",
+            failure_type="acceptable_identity",
+            focus_terms=["市府", "交通措施"],
+            split="development",
+        ),
+    ]
+    results = run_semantic_cases(cases, converter=FakeConverter({}))
+
+    with pytest.raises(ValueError, match="identity/order"):
+        build_semantic_summary(list(reversed(cases)), results)
 
 
 def test_repository_semantic_corpus_distribution_and_zero_overlap() -> None:

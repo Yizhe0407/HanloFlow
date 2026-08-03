@@ -7,6 +7,7 @@ from pathlib import Path
 import pytest
 
 from taigi_converter import ConversionResult, TaigiConverter
+from taigi_converter.artifact_compiler import compile_runtime_artifacts
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 LEXICON_PATH = REPO_ROOT / "data" / "lexicon_entries.jsonl"
@@ -20,6 +21,14 @@ class Phase3Case:
     expected: str
     negative: str
     multiple: str
+
+
+@dataclass(frozen=True, slots=True)
+class Phase3OutputCase:
+    source: str
+    expected: str
+    matched_entry_ids: tuple[str, ...] = ()
+    excluded_entry_ids: tuple[str, ...] = ()
 
 
 CASES = (
@@ -106,6 +115,13 @@ CASES = (
         "最新資料，最新版本。",
     ),
     Phase3Case(
+        "lx_545000000025",
+        "最新的消息。",
+        "上新的消息。",
+        "最新的設計。",
+        "最新的消息，最新的資料。",
+    ),
+    Phase3Case(
         "lx_545000000017",
         "政策帶動產業發展。",
         "政策𤆬動產業發展。",
@@ -158,9 +174,80 @@ CASES = (
 )
 
 
+CONTEXT_OUTPUT_CASES = (
+    Phase3OutputCase(
+        "雨水從縫滲進來，海水也滲進來。",
+        "雨水對縫漏入來，海水也漏入來。",
+        matched_entry_ids=("lx_545000000004",),
+    ),
+    Phase3OutputCase(
+        "水果香氣從門外滲進來。",
+        "水果香氣對門外滲入來。",
+        excluded_entry_ids=("lx_545000000004",),
+    ),
+    Phase3OutputCase(
+        "水軍把假消息滲進來。",
+        "水軍把假消息滲入來。",
+        excluded_entry_ids=("lx_545000000004",),
+    ),
+    Phase3OutputCase(
+        "他嘴硬，但他還是嘴硬。",
+        "伊喙䫌，但伊猶是喙䫌。",
+        matched_entry_ids=("lx_545000000007",),
+    ),
+    Phase3OutputCase(
+        "這隻烏龜的嘴硬。",
+        "這隻烏龜的嘴硬。",
+        excluded_entry_ids=("lx_545000000007",),
+    ),
+    Phase3OutputCase(
+        "這隻螃蟹的嘴硬，但是腳很軟。",
+        "這隻蟳仔的嘴硬，毋過腳真軟。",
+        excluded_entry_ids=("lx_545000000007",),
+    ),
+    Phase3OutputCase(
+        "新鞋開口了，舊鞋仔開口矣。",
+        "新鞋裂喙矣，舊鞋仔裂喙矣。",
+        matched_entry_ids=("lx_545000000009",),
+    ),
+    Phase3OutputCase(
+        "鞋店老闆終於開口。",
+        "鞋店頭家終於開口。",
+        excluded_entry_ids=("lx_545000000009",),
+    ),
+    Phase3OutputCase(
+        "布袋鎮長終於開口。",
+        "布袋鎮長終於開口。",
+        excluded_entry_ids=("lx_545000000009",),
+    ),
+    Phase3OutputCase(
+        "最新資料，最新版本。",
+        "上新的資料，上新的版本。",
+        matched_entry_ids=("lx_545000000016",),
+    ),
+    Phase3OutputCase(
+        "最新的消息已經公布。",
+        "上新的消息已經公布。",
+        matched_entry_ids=("lx_545000000025",),
+    ),
+    Phase3OutputCase(
+        "這是最新的青年就業統計。",
+        "這是上新的青年就業統計。",
+        matched_entry_ids=("lx_545000000025",),
+    ),
+    Phase3OutputCase(
+        "這是最新穎的設計。",
+        "這是最新穎的設計。",
+        excluded_entry_ids=("lx_545000000016", "lx_545000000025"),
+    ),
+)
+
+
 @pytest.fixture(scope="module")
-def converter() -> TaigiConverter:
-    return TaigiConverter()
+def converter(tmp_path_factory: pytest.TempPathFactory) -> TaigiConverter:
+    runtime_dir = tmp_path_factory.mktemp("semantic-phase3-runtime")
+    compile_runtime_artifacts(REPO_ROOT / "data", output_data_dir=runtime_dir)
+    return TaigiConverter(runtime_dir)
 
 
 def traced(converter: TaigiConverter, source: str) -> ConversionResult:
@@ -208,11 +295,28 @@ def test_phase3_positive_output_is_fixed_point(
     assert converter.convert(case.expected) == case.expected
 
 
+@pytest.mark.parametrize(
+    "case",
+    CONTEXT_OUTPUT_CASES,
+    ids=lambda case: case.source,
+)
+def test_phase3_context_guard_complete_outputs(
+    converter: TaigiConverter,
+    case: Phase3OutputCase,
+) -> None:
+    result = traced(converter, case.source)
+    matched_entry_ids = {match.entry_id for match in result.matches}
+
+    assert result.output == case.expected
+    assert set(case.matched_entry_ids) <= matched_entry_ids
+    assert set(case.excluded_entry_ids).isdisjoint(matched_entry_ids)
+
+
 def test_phase3_entries_are_ai_reviewed_contextual_phrases() -> None:
     rows = [json.loads(line) for line in LEXICON_PATH.read_text(encoding="utf-8").splitlines() if line]
     phase3_rows = [row for row in rows if row["entry_id"].startswith(ENTRY_ID_PREFIX)]
 
-    assert len(phase3_rows) == len(CASES) == 24
+    assert len(phase3_rows) == len(CASES) == 25
     assert {row["entry_id"] for row in phase3_rows} == {case.entry_id for case in CASES}
     for row in phase3_rows:
         assert row["level"] == "phrase"
