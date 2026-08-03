@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import unittest
+from unittest.mock import patch
 
 from taigi_converter import ConversionResult, TaigiConverter
 
@@ -20,6 +21,20 @@ class ConverterTests(unittest.TestCase):
         self.assertEqual(result.output, "公車到站矣")
         self.assertGreaterEqual(result.latency_ms, 0)
         self.assertTrue(result.matches or result.rules_applied)
+
+    def test_non_trace_path_skips_match_trace_allocation(self) -> None:
+        with patch(
+            "taigi_converter.converter.MatchTrace",
+            side_effect=AssertionError("non-trace conversion should not allocate MatchTrace"),
+        ):
+            self.assertEqual(self.converter.convert("我找他不到"), "我揣無伊")
+
+    def test_trace_and_non_trace_outputs_match_for_exact_sentence_override(self) -> None:
+        traced = self.converter.convert("我找他不到", trace=True)
+        self.assertIsInstance(traced, ConversionResult)
+        assert isinstance(traced, ConversionResult)
+        self.assertEqual(self.converter.convert("我找他不到"), traced.output)
+        self.assertEqual([match.entry_id for match in traced.matches], ["lx_5003f107f0e8"])
 
     def test_preserve_spacing(self) -> None:
         normal = self.converter.convert("  你   好  ")

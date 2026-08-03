@@ -6,6 +6,13 @@ from .unicode_policy import HAN_IDEOGRAPH_CLASS
 
 _CJK_CHAR_CLASS = HAN_IDEOGRAPH_CLASS
 _CJK_PUNCT_CLASS = "，。！？；：、"
+_HORIZONTAL_SPACE_RUN_RE = re.compile(r"[ \t\u3000\xA0]+")
+_CJK_PUNCT_SPACING_RE = re.compile(
+    rf"[ \t\u3000\xA0]*([{_CJK_PUNCT_CLASS}])[ \t\u3000\xA0]*"
+)
+_CJK_BOUNDARY_SPACE_RE = re.compile(
+    rf"(?<=[{_CJK_CHAR_CLASS}])[ \t\u3000\xA0]+(?=[{_CJK_CHAR_CLASS}])"
+)
 _DIGITS = "零一二三四五六七八九"
 _BIG_UNITS = ["", "萬", "億", "兆", "京"]
 _MAX_UNIT_DIGITS = len(_BIG_UNITS) * 4
@@ -303,20 +310,12 @@ def normalize_cjk_spacing(
     if trim_outer:
         text = text.strip()
     # 只壓縮空白/Tab/全形空白/NBSP，保留換行供段落與 TTS 斷句使用。
-    text = re.sub(r"[ \t\u3000\xA0]+", " ", text)
+    text = _HORIZONTAL_SPACE_RUN_RE.sub(" ", text)
     # 中文標點前後只移除水平空白，避免吞掉換行。
-    text = re.sub(
-        rf"[ \t\u3000\xA0]*([{_CJK_PUNCT_CLASS}])[ \t\u3000\xA0]*",
-        r"\1",
-        text,
-    )
+    text = _CJK_PUNCT_SPACING_RE.sub(r"\1", text)
     # 兩側皆為 CJK 時移除水平空白。這一步也供 converter 在規則新增
     # CJK 邊界後做最終 canonicalization，避免第二輪才消失的空白。
-    return re.sub(
-        rf"(?<=[{_CJK_CHAR_CLASS}])[ \t\u3000\xA0]+(?=[{_CJK_CHAR_CLASS}])",
-        "",
-        text,
-    )
+    return _CJK_BOUNDARY_SPACE_RE.sub("", text)
 
 
 def normalize_text(

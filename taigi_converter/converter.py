@@ -48,6 +48,29 @@ RUNTIME_TRUSTS = ("human", "ai_reviewed", "machine", "seed")
 SHADOW_MARKER_CANDIDATES = tuple(chr(codepoint) for codepoint in range(0xFDD0, 0xFDF0)) + tuple(
     chr((plane << 16) | suffix) for plane in range(17) for suffix in (0xFFFE, 0xFFFF)
 )
+REPEATED_PUNCTUATION_RE = re.compile(r"([,，。！？!?])\1+")
+_TIME_AMOUNT_PATTERN = r"[0-9一二兩三四五六七八九十百千零〇半]+"
+_TIME_UNIT_PATTERN = r"(?:个點鐘|點半|點鐘|點|分鐘|刻鐘|工|天|日|个月|月|年|冬|禮拜|星期|週|周)"
+_TIME_EXPRESSION_PATTERN = rf"{_TIME_AMOUNT_PATTERN}{_TIME_UNIT_PATTERN}"
+_NAMED_TIME_PATTERN = (
+    r"(?:今仔日|明仔載|明仔|後日|大後日|昨昏|前日|大前日|"
+    r"這禮拜|下禮拜|頂禮拜|這个月|後個月|頂個月|"
+    r"月頭|月中|月尾|年頭|冬尾)"
+)
+POST_UNMASK_TIME_SUBSTITUTIONS = (
+    (
+        re.compile(
+            rf"({_TIME_AMOUNT_PATTERN})天(?=(?:以內|以前|之前|以後|之後|了後|內|前|後|到|至))"
+        ),
+        r"\1工",
+    ),
+    (re.compile(rf"({_TIME_EXPRESSION_PATTERN})(?:以前|之前)"), r"\1進前"),
+    (re.compile(rf"({_TIME_EXPRESSION_PATTERN})(?:以後|之後|了後)"), r"\1後"),
+    (re.compile(rf"({_TIME_EXPRESSION_PATTERN})以內"), r"\1內"),
+    (re.compile(rf"({_NAMED_TIME_PATTERN})(?:以前|之前)"), r"\1進前"),
+    (re.compile(rf"({_NAMED_TIME_PATTERN})(?:以後|之後|了後)"), r"\1後"),
+    (re.compile(rf"({_NAMED_TIME_PATTERN})以內"), r"\1內"),
+)
 
 
 @dataclass(frozen=True, slots=True)
@@ -1316,6 +1339,7 @@ class TaigiConverter:
         max_src_len: int | None,
         include_char_entries: bool,
         allow_sentence_override: bool,
+        collect_matches: bool,
     ) -> tuple[_ProtectedText, list[MatchTrace], list[str]]:
         segments: list[_TextSegment] = []
         matches: list[MatchTrace] = []
@@ -1331,9 +1355,11 @@ class TaigiConverter:
                     max_src_len=max_src_len,
                     include_char_entries=include_char_entries,
                     allow_sentence_override=allow_sentence_override,
+                    collect_matches=collect_matches,
                 )
                 segments.append(_TextSegment(output))
-                matches.extend(self._shift_matches(segment_matches, input_offset))
+                if collect_matches:
+                    matches.extend(self._shift_matches(segment_matches, input_offset))
                 warnings.extend(segment_warnings)
             input_offset += len(segment.text)
         return self._merge_segments(segments), matches, warnings
@@ -1346,6 +1372,7 @@ class TaigiConverter:
         max_src_len: int | None = None,
         include_char_entries: bool = True,
         allow_sentence_override: bool = True,
+        collect_matches: bool,
     ) -> tuple[_ProtectedText, list[MatchTrace], list[str]]:
         encoded = self._encode_protected(text)
         if encoded is not None:
@@ -1357,6 +1384,7 @@ class TaigiConverter:
                 max_src_len=max_src_len,
                 include_char_entries=include_char_entries,
                 allow_sentence_override=allow_sentence_override,
+                collect_matches=collect_matches,
             )
             decoded = self._decode_protected(output, layout)
             if decoded is not None:
@@ -1368,6 +1396,7 @@ class TaigiConverter:
                 max_src_len=max_src_len,
                 include_char_entries=include_char_entries,
                 allow_sentence_override=allow_sentence_override,
+                collect_matches=collect_matches,
             )
             return _ProtectedText.plain(output), matches, warnings
 
@@ -1377,6 +1406,7 @@ class TaigiConverter:
             max_src_len=max_src_len,
             include_char_entries=include_char_entries,
             allow_sentence_override=allow_sentence_override,
+            collect_matches=collect_matches,
         )
 
     def _apply_rules_by_segment(
@@ -1550,7 +1580,12 @@ class TaigiConverter:
 
         return self._select_leftmost_maximum(blocked, text_length=len(text))
 
-    def _apply_exact_sentence_override(self, text: str) -> tuple[str | None, list[MatchTrace], list[str]]:
+    def _apply_exact_sentence_override(
+        self,
+        text: str,
+        *,
+        collect_matches: bool,
+    ) -> tuple[str | None, list[MatchTrace], list[str]]:
         if not text:
             return None, [], []
 
@@ -1578,6 +1613,9 @@ class TaigiConverter:
             return None, [], warnings
 
         chosen = sentence_selected[0]
+        if not collect_matches:
+            return chosen.entry.tgt, [], warnings
+
         trace = MatchTrace(
             entry_id=chosen.entry.entry_id,
             src=chosen.entry.src,
@@ -1600,6 +1638,7 @@ class TaigiConverter:
         max_src_len: int | None = None,
         include_char_entries: bool = True,
         allow_sentence_override: bool = True,
+        collect_matches: bool,
     ) -> tuple[str, list[MatchTrace], list[str]]:
         warnings: list[str] = []
         all_phrase_candidates = self._iter_phrase_candidates(text)
@@ -1622,6 +1661,8 @@ class TaigiConverter:
                 )
                 if sentence_selected:
                     chosen = sentence_selected[0]
+                    if not collect_matches:
+                        return chosen.entry.tgt, [], warnings
                     trace = MatchTrace(
                         entry_id=chosen.entry.entry_id,
                         src=chosen.entry.src,
@@ -1672,19 +1713,20 @@ class TaigiConverter:
             output_parts.append(text[cursor : candidate.start])
             output_parts.append(candidate.entry.tgt)
             cursor = candidate.end
-            traces.append(
-                MatchTrace(
-                    entry_id=candidate.entry.entry_id,
-                    src=candidate.entry.src,
-                    tgt=candidate.entry.tgt,
-                    level=candidate.entry.level,
-                    tier=candidate.entry.tier,
-                    start=candidate.start,
-                    end=candidate.end,
-                    priority=candidate.entry.priority,
-                    score=candidate.entry.score,
+            if collect_matches:
+                traces.append(
+                    MatchTrace(
+                        entry_id=candidate.entry.entry_id,
+                        src=candidate.entry.src,
+                        tgt=candidate.entry.tgt,
+                        level=candidate.entry.level,
+                        tier=candidate.entry.tier,
+                        start=candidate.start,
+                        end=candidate.end,
+                        priority=candidate.entry.priority,
+                        score=candidate.entry.score,
+                    )
                 )
-            )
         output_parts.append(text[cursor:])
         return "".join(output_parts), traces, warnings
 
@@ -1741,7 +1783,7 @@ class TaigiConverter:
         # L8: 後驗清理
         text = text.replace("這馬咧咧", "這馬咧")
         text = text.replace("真正真", "真")
-        text = re.sub(r"([,，。！？!?])\1+", r"\1", text)
+        text = REPEATED_PUNCTUATION_RE.sub(r"\1", text)
         # 高雄、高速公路等地名/複合詞被 char 誤轉「高->懸」之後復原
         text = text.replace("懸雄", "高雄")
         text = text.replace("懸速公路", "高速公路")
@@ -1754,22 +1796,8 @@ class TaigiConverter:
         return text, warnings
 
     def _post_unmask_time_cleanup(self, text: str) -> str:
-        amount = r"[0-9一二兩三四五六七八九十百千零〇半]+"
-        unit = r"(?:个點鐘|點半|點鐘|點|分鐘|刻鐘|工|天|日|个月|月|年|冬|禮拜|星期|週|周)"
-        time_expr = rf"{amount}{unit}"
-        named_time = (
-            r"(?:今仔日|明仔載|明仔|後日|大後日|昨昏|前日|大前日|"
-            r"這禮拜|下禮拜|頂禮拜|這个月|後個月|頂個月|"
-            r"月頭|月中|月尾|年頭|冬尾)"
-        )
-
-        text = re.sub(rf"({amount})天(?=(?:以內|以前|之前|以後|之後|了後|內|前|後|到|至))", r"\1工", text)
-        text = re.sub(rf"({time_expr})(?:以前|之前)", r"\1進前", text)
-        text = re.sub(rf"({time_expr})(?:以後|之後|了後)", r"\1後", text)
-        text = re.sub(rf"({time_expr})以內", r"\1內", text)
-        text = re.sub(rf"({named_time})(?:以前|之前)", r"\1進前", text)
-        text = re.sub(rf"({named_time})(?:以後|之後|了後)", r"\1後", text)
-        text = re.sub(rf"({named_time})以內", r"\1內", text)
+        for pattern, replacement in POST_UNMASK_TIME_SUBSTITUTIONS:
+            text = pattern.sub(replacement, text)
         text = text.replace("進前要報到", "進前愛報到")
         text = text.replace("進前要到", "進前愛到")
         return text
@@ -1851,15 +1879,18 @@ class TaigiConverter:
         trace: bool = False,
         profile: dict[str, Any] | None = None,
     ) -> str | ConversionResult:
-        started = time.perf_counter()
+        started = time.perf_counter() if trace else 0.0
         preserve_spacing = bool(profile and profile.get("preserve_spacing"))
+        collect_matches = trace or bool(profile and profile.get("enqueue_review"))
         normalized = self._normalize_input(text, preserve_spacing=preserve_spacing)
-        exact_sentence_output, exact_matches, exact_warnings = self._apply_exact_sentence_override(normalized)
+        exact_sentence_output, exact_matches, exact_warnings = self._apply_exact_sentence_override(
+            normalized,
+            collect_matches=collect_matches,
+        )
         protected_input = self._protect_text(normalized)
         skip_passes = {"normalization"} if preserve_spacing else set()
 
-        if exact_matches:
-            assert exact_sentence_output is not None
+        if exact_sentence_output is not None:
             exact_protected_output = self._protect_text(
                 exact_sentence_output,
                 respect_runtime_phrase_overlap=False,
@@ -1875,6 +1906,7 @@ class TaigiConverter:
                 max_src_len=1,
                 include_char_entries=True,
                 allow_sentence_override=False,
+                collect_matches=collect_matches,
             )
             matches = exact_matches + post_matches
             lexicon_warnings = exact_warnings + post_warnings
@@ -1884,6 +1916,7 @@ class TaigiConverter:
                 min_src_len=2,
                 include_char_entries=False,
                 allow_sentence_override=True,
+                collect_matches=collect_matches,
             )
             rule_output, rules_applied = self._apply_rules_to_protected(
                 pre_rule_output,
@@ -1897,11 +1930,15 @@ class TaigiConverter:
                 max_src_len=1,
                 include_char_entries=True,
                 allow_sentence_override=False,
+                collect_matches=collect_matches,
             )
             matches = pre_matches + post_matches
             lexicon_warnings = pre_warnings + post_warnings
         else:
-            lexicon_output, matches, lexicon_warnings = self._apply_lexicon_to_protected(protected_input)
+            lexicon_output, matches, lexicon_warnings = self._apply_lexicon_to_protected(
+                protected_input,
+                collect_matches=collect_matches,
+            )
             lexicon_output, rules_applied = self._apply_rules_to_protected(
                 lexicon_output,
                 collect_trace=trace,
@@ -1923,11 +1960,10 @@ class TaigiConverter:
             profile=profile,
         )
 
-        latency_ms = (time.perf_counter() - started) * 1000
-
         if not trace:
             return final_output
 
+        latency_ms = (time.perf_counter() - started) * 1000
         return ConversionResult(
             output=final_output,
             matches=matches,

@@ -859,6 +859,22 @@ class RuntimeBehaviorTests(unittest.TestCase):
             finally:
                 worker.join()
 
+    def test_review_enqueue_collects_matches_without_trace_result(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            review = Path(temp)
+            converter = TaigiConverter(review_data_dir=review)
+            with patch("taigi_converter.converter.append_review_item") as append:
+                output = converter.convert(
+                    "民眾說：「就列個東西告示牌，清楚告知使用規範。」",
+                    profile={"enqueue_review": True, "owner": "test"},
+                )
+
+            self.assertIsInstance(output, str)
+            append.assert_called_once()
+            evidence = append.call_args.args[1]["evidence"]
+            self.assertEqual(evidence["match_count"], 1)
+            self.assertEqual(evidence["match_entry_ids"], ["lx_531000000012"])
+
     def test_review_queue_uses_explicit_writable_state_directory(self) -> None:
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)
