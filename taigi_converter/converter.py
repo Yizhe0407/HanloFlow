@@ -507,10 +507,125 @@ class TaigiConverter:
 
     @staticmethod
     def _regex_required_literal(pattern: str) -> str | None:
-        regex_meta = frozenset(".^$*+?{}[]\\|()")
-        if not pattern or any(ch in regex_meta for ch in pattern):
+        """Return a literal that every match must contain, when provable.
+
+        Only literal runs at the regex top level are considered. Character
+        classes and groups are treated as opaque atoms, and top-level
+        alternation disables the optimization entirely. This intentionally
+        leaves many optimizable patterns unguarded rather than risking a false
+        negative that would change rule semantics.
+        """
+        if not pattern:
             return None
-        return pattern
+
+        global_flags = re.match(r"\(\?([aiLmsux]+)\)", pattern)
+        if global_flags and {"i", "x"}.intersection(global_flags.group(1)):
+            # A plain case-sensitive substring check cannot model IGNORECASE;
+            # VERBOSE changes whether apparent spaces/comments are literals.
+            return None
+
+        literal_runs: list[str] = []
+        current_run: list[str] = []
+        cursor = 0
+        pattern_length = len(pattern)
+
+        def flush_run() -> None:
+            if current_run:
+                literal_runs.append("".join(current_run))
+                current_run.clear()
+
+        def skip_character_class(start: int) -> int:
+            index = start + 1
+            if index < pattern_length and pattern[index] == "^":
+                index += 1
+            if index < pattern_length and pattern[index] == "]":
+                index += 1
+            while index < pattern_length:
+                if pattern[index] == "\\":
+                    index += 2
+                elif pattern[index] == "]":
+                    return index + 1
+                else:
+                    index += 1
+            return index
+
+        def skip_group(start: int) -> int:
+            depth = 1
+            index = start + 1
+            while index < pattern_length and depth:
+                char = pattern[index]
+                if char == "\\":
+                    index += 2
+                elif char == "[":
+                    index = skip_character_class(index)
+                elif char == "(":
+                    depth += 1
+                    index += 1
+                elif char == ")":
+                    depth -= 1
+                    index += 1
+                else:
+                    index += 1
+            return index
+
+        while cursor < pattern_length:
+            char = pattern[cursor]
+            if char == "|":
+                return None
+            if char == "(":
+                flush_run()
+                cursor = skip_group(cursor)
+                continue
+            if char == "[":
+                flush_run()
+                cursor = skip_character_class(cursor)
+                continue
+            if char == "\\":
+                if cursor + 1 >= pattern_length:
+                    flush_run()
+                    break
+                escape_type = pattern[cursor + 1]
+                escape_width = {"u": 4, "U": 8, "x": 2}.get(escape_type)
+                if escape_width is not None:
+                    escape_end = cursor + 2 + escape_width
+                    codepoint = pattern[cursor + 2 : escape_end]
+                    if len(codepoint) == escape_width and all(
+                        digit in "0123456789abcdefABCDEF" for digit in codepoint
+                    ):
+                        current_run.append(chr(int(codepoint, 16)))
+                        cursor = escape_end
+                        continue
+                if not escape_type.isalnum():
+                    current_run.append(escape_type)
+                    cursor += 2
+                    continue
+                flush_run()
+                cursor += 2
+                continue
+            if char in "?*+{":
+                can_match_zero = char in "?*"
+                quantifier_end = cursor + 1
+                if char == "{":
+                    closing = pattern.find("}", cursor + 1)
+                    if closing >= 0:
+                        minimum = pattern[cursor + 1 : closing].split(",", 1)[0]
+                        can_match_zero = minimum == "0"
+                        quantifier_end = closing + 1
+                if current_run:
+                    if can_match_zero:
+                        current_run.pop()
+                    flush_run()
+                cursor = quantifier_end
+                continue
+            if char in ".^$}":
+                flush_run()
+                cursor += 1
+                continue
+            current_run.append(char)
+            cursor += 1
+
+        flush_run()
+        return max(literal_runs, key=len, default=None)
 
     @staticmethod
     def _decode_runtime_context(context: Any) -> dict[str, Any] | None:

@@ -36,6 +36,27 @@ class ConverterTests(unittest.TestCase):
         self.assertEqual(self.converter.convert("我找他不到"), traced.output)
         self.assertEqual([match.entry_id for match in traced.matches], ["lx_5003f107f0e8"])
 
+    def test_regex_required_literal_extractor_is_conservative(self) -> None:
+        cases = {
+            "食飽了沒": "食飽了沒",
+            r"\u6b32\u83ab(去|來)": "欲莫",
+            "(如果|要是)([^，。]{1,40})的話": "的話",
+            "(?<!顯)現在": "現在",
+            "ab?cd": "cd",
+            "ab{0,2}cd": "cd",
+            "(?:foo|bar){0,2}baz": "baz",
+            r"版本\.號": "版本.號",
+            "foo|bar": None,
+            "[abc]+": None,
+            "[]]suffix": "suffix",
+            "[^]]suffix": "suffix",
+            "(?i)CaseSensitive": None,
+            "(?x) spaces are syntax": None,
+        }
+        for pattern, expected in cases.items():
+            with self.subTest(pattern=pattern):
+                self.assertEqual(self.converter._regex_required_literal(pattern), expected)
+
     def test_preserve_spacing(self) -> None:
         normal = self.converter.convert("  你   好  ")
         preserved = self.converter.convert(
