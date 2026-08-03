@@ -231,3 +231,37 @@ def test_summary_json_is_deterministic_and_mismatch_limit_is_applied() -> None:
     assert summary["mismatches"] == []
     assert summary["mismatches_truncated"] == 1
     assert deterministic_json(summary) == deterministic_json(summary)
+
+
+def test_repository_semantic_corpus_distribution_and_zero_overlap() -> None:
+    from collections import Counter
+
+    from scripts.audit_semantic_eval_leakage import load_active_exact_entries
+    from scripts.regression_runner import load_all_regression_cases
+
+    repo_root = Path(__file__).resolve().parents[1]
+    cases = load_semantic_cases(repo_root / "data" / "semantic_eval_cases.jsonl")
+    report = audit_semantic_leakage(
+        cases,
+        regression_sources={
+            located.case.source for located in load_all_regression_cases(repo_root / "scripts")
+        },
+        active_exact_entries=load_active_exact_entries(repo_root / "data" / "lexicon_entries.jsonl"),
+    )
+
+    assert len(cases) == 300
+    assert Counter(case.category for case in cases) == {
+        "conversation": 50,
+        "news": 50,
+        "transport_travel": 50,
+        "medical_public_service": 50,
+        "polysemy_adversarial": 50,
+        "proper_nouns_technical": 50,
+    }
+    assert Counter(case.split for case in cases) == {
+        "train": 150,
+        "development": 90,
+        "holdout": 60,
+    }
+    assert {case.oracle_kind for case in cases} == {"ai_semantic_review"}
+    assert report["summary"]["clean"] is True
